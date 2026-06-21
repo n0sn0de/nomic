@@ -1,0 +1,6 @@
+error: no matching package named `keccak` found
+location searched: registry `crates-io`
+required by package `sha3 v0.10.8`
+    ... which satisfies dependency `sha3 = "^0.10.6"` of package `orga v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a)`
+    ... which satisfies path dependency `orga` of package `phase3_orga_persistence_harness v0.1.0 (/home/nitro/repos/nomic/audit/run-20260621T1626CDT-phase3-c5486a4/harnesses/orga_persistence)`
+As a reminder, you're using offline mode (--offline) which can sometimes cause surprising resolution failures, if this error is too confusing you may wish to retry without the offline flag.

@@ -1,0 +1,383 @@
+     Locking 3 packages to latest compatible versions
+      Adding orga v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a)
+      Adding orga-macros v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/macros)
+      Adding phase3_header_queue_probe v0.1.0 (/home/nitro/repos/nomic/audit/run-20260621T1626CDT-phase3-c5486a4/harnesses/header_queue_probe)
+    Blocking waiting for file lock on build directory
+   Compiling either v1.13.0
+   Compiling toml_datetime v0.6.8
+   Compiling serde_spanned v0.6.8
+   Compiling serde_json v1.0.132
+   Compiling futures v0.3.31
+   Compiling secp256k1-sys v0.9.2
+   Compiling rand v0.8.5
+   Compiling wasm-bindgen v0.2.95
+   Compiling secp256k1 v0.24.3
+   Compiling combine v4.6.7
+   Compiling kstring v1.0.6
+   Compiling csv-core v0.1.11
+   Compiling ecdsa v0.16.9
+   Compiling ed25519-dalek v2.1.1
+   Compiling serde-big-array v0.4.1
+   Compiling serde-hex v0.1.0
+   Compiling toml_edit v0.22.22
+   Compiling toml_edit v0.19.15
+   Compiling itertools v0.13.0
+   Compiling itertools v0.10.5
+   Compiling secp256k1 v0.28.2
+   Compiling csv v1.3.0
+   Compiling bitcoin v0.29.2
+   Compiling k256 v0.13.4
+   Compiling js-sys v0.3.72
+   Compiling fixed-hash v0.8.0
+   Compiling primitive-types v0.12.2
+   Compiling schemars v0.8.21
+   Compiling bip32 v0.5.2
+   Compiling prost-derive v0.11.9
+   Compiling orga-macros v0.3.1 (https://github.com/nomic-io/orga.git?rev=3b3d25ade40d81cb64f19335535e3a47bb47778f#3b3d25ad)
+   Compiling orga-macros v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/macros)
+   Compiling proc-macro-crate v3.2.0
+   Compiling toml v0.7.8
+   Compiling prost-derive v0.13.3
+   Compiling parity-scale-codec-derive v3.6.12
+   Compiling scale-info-derive v2.11.5
+   Compiling borsh-derive v1.5.1
+   Compiling nomic v9.2.0 (/home/nitro/repos/nomic)
+   Compiling prost v0.11.9
+   Compiling prost v0.13.3
+   Compiling prost-types v0.11.9
+   Compiling borsh v1.5.1
+   Compiling parity-scale-codec v3.6.12
+   Compiling prost-types v0.13.3
+   Compiling ics23 v0.12.0
+   Compiling bitcoin-script v0.1.3
+   Compiling serde-wasm-bindgen v0.6.5
+   Compiling scale-info v2.11.5
+   Compiling tendermint-proto v0.32.2
+   Compiling tendermint-proto v0.38.1
+   Compiling toml_edit v0.13.4
+   Compiling cosmos-sdk-proto v0.19.0
+   Compiling tendermint v0.32.2
+   Compiling cosmrs v0.14.0
+   Compiling tendermint v0.38.1
+   Compiling ibc-proto v0.47.1
+   Compiling cosmos-sdk-proto v0.23.0
+   Compiling tendermint-light-client-verifier v0.38.1
+   Compiling cosmrs v0.18.0
+   Compiling ibc-primitives v0.54.0
+   Compiling ibc-core-host-types v0.54.0
+   Compiling ibc-core-commitment-types v0.54.0
+   Compiling ibc-core-router-types v0.54.0
+   Compiling ibc-core-client-types v0.54.0
+   Compiling ibc-core-connection-types v0.54.0
+   Compiling ibc-client-tendermint-types v0.54.0
+   Compiling ibc-core-channel-types v0.54.0
+   Compiling ibc-core-handler-types v0.54.0
+   Compiling ibc-core-router v0.54.0
+   Compiling ibc-core-client-context v0.54.0
+   Compiling ibc-core-host v0.54.0
+   Compiling ibc-core-client v0.54.0
+   Compiling ibc-client-wasm-types v0.54.0
+   Compiling ibc-client-tendermint v0.54.0
+   Compiling ibc-core-connection v0.54.0
+   Compiling ibc-clients v0.54.0
+   Compiling ibc-core-channel v0.54.0
+   Compiling ibc-core-handler v0.54.0
+   Compiling ibc-core v0.54.0
+   Compiling ibc-app-transfer-types v0.54.0
+   Compiling ibc-app-nft-transfer-types v0.54.0
+   Compiling ibc-app-transfer v0.54.0
+   Compiling ibc-core-host-cosmos v0.54.0
+   Compiling ibc-app-nft-transfer v0.54.0
+   Compiling ibc-apps v0.54.0
+   Compiling ibc v0.54.0
+   Compiling orga v0.3.1 (https://github.com/nomic-io/orga.git?rev=3b3d25ade40d81cb64f19335535e3a47bb47778f#3b3d25ad)
+   Compiling orga v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a)
+warning: unexpected `cfg` condition name: `fuzzing`
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/plugins/signer.rs:202:27
+    |
+202 |                 #[cfg(not(fuzzing))]
+    |                           ^^^^^^^
+    |
+    = help: expected names are: `clippy`, `debug_assertions`, `doc`, `docsrs`, `doctest`, `feature`, `miri`, `overflow_checks`, `panic`, `proc_macro`, `relocation_model`, `rustfmt`, `sanitize`, `sanitizer_cfi_generalize_pointers`, `sanitizer_cfi_normalize_integers`, `target_abi`, `target_arch`, `target_endian`, `target_env`, `target_family`, `target_feature`, `target_has_atomic`, `target_has_atomic_equal_alignment`, `target_has_atomic_load_store`, `target_os`, `target_pointer_width`, `target_thread_local`, `target_vendor`, `test`, `ub_checks`, `unix`, and `windows`
+    = help: consider using a Cargo feature instead
+    = help: or consider adding in `Cargo.toml` the `check-cfg` lint config for the lint:
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+    = help: or consider adding `println!("cargo::rustc-check-cfg=cfg(fuzzing)");` to the top of the `build.rs`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unused import: `ibc::core::host::types::path::Path`
+ --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:4:5
+  |
+4 | use ibc::core::host::types::path::Path;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `ics23::LeafOp`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:10:5
+   |
+10 | use ics23::LeafOp;
+   |     ^^^^^^^^^^^^^
+
+warning: unused imports: `ProofOp` and `ProofOps`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:13:39
+   |
+13 | use tendermint_proto::v0_34::crypto::{ProofOp, ProofOps};
+   |                                       ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `IBC_QUERY_PATH`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:16:80
+   |
+16 |     ClientIdKey, ConnectionEnd, ConnectionIdKey, Ibc, IbcContext, PortChannel, IBC_QUERY_PATH,
+   |                                                                                ^^^^^^^^^^^^^^
+
+warning: the feature `lazy_cell` has been stable since 1.80.0 and no longer requires an attribute to enable
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:12:12
+   |
+12 | #![feature(lazy_cell)]
+   |            ^^^^^^^^^
+   |
+   = note: `#[warn(stable_features)]` on by default
+
+warning: unused import: `crate::store::Read`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:20:5
+   |
+20 | use crate::store::Read;
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `ValidatorEntry`
+  --> /home/nitro/repos/nomic/src/bitcoin/mod.rs:27:27
+   |
+27 | use orga::plugins::{Paid, ValidatorEntry};
+   |                           ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unreachable statement
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1502:9
+     |
+1364 |         unimplemented!();
+     |         ---------------- any code following this expression is unreachable
+...
+1502 |         self.deduct_emergency_disbursal_fees(fee_rate)?;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
+     |
+     = note: `#[warn(unreachable_code)]` on by default
+
+warning: unused variable: `nbtc_accounts`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1352:9
+     |
+1352 |         nbtc_accounts: &Accounts<Nbtc>,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_nbtc_accounts`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `recovery_scripts`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1353:9
+     |
+1353 |         recovery_scripts: &Map<orga::coins::Address, Adapter<bitcoin::Script>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_recovery_scripts`
+
+warning: unused variable: `reserve_outpoint`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1354:9
+     |
+1354 |         reserve_outpoint: bitcoin::OutPoint,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_outpoint`
+
+warning: unused variable: `external_outputs`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1355:9
+     |
+1355 |         external_outputs: impl Iterator<Item = Result<bitcoin::TxOut>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_external_outputs`
+
+warning: unused variable: `fee_rate`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1356:9
+     |
+1356 |         fee_rate: u64,
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_fee_rate`
+
+warning: unused variable: `reserve_value`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1357:9
+     |
+1357 |         reserve_value: u64,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_value`
+
+warning: unused variable: `config`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1358:9
+     |
+1358 |         config: &Config,
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_config`
+
+warning: `orga` (lib) generated 7 warnings (run `cargo fix --lib -p orga` to apply 4 suggestions)
+warning: unused variable: `signatory_script`
+   --> /home/nitro/repos/nomic/src/bitcoin/mod.rs:442:43
+    |
+442 |     pub fn set_recovery_script(&mut self, signatory_script: Adapter<Script>) -> Result<()> {
+    |                                           ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_signatory_script`
+
+warning: type alias `Recipients` is never used
+  --> /home/nitro/repos/nomic/src/airdrop.rs:36:6
+   |
+36 | type Recipients = Vec<(Address, Vec<(u64, u64)>, u64)>;
+   |      ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: methods `try_credit_dest` and `credit_dest` are never used
+   --> /home/nitro/repos/nomic/src/app.rs:481:8
+    |
+200 | impl InnerApp {
+    | ------------- methods in this implementation
+...
+481 |     fn try_credit_dest(
+    |        ^^^^^^^^^^^^^^^
+...
+542 |     fn credit_dest(&mut self, dest: Dest, nbtc: Coin<Nbtc>, sender: Identity) -> Result<()> {
+    |        ^^^^^^^^^^^
+
+warning: method `link_intermediate_tx` is never used
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1203:8
+     |
+1198 | impl<'a> BuildingCheckpointMut<'a> {
+     | ---------------------------------- method in this implementation
+...
+1203 |     fn link_intermediate_tx(&mut self, tx: &mut BitcoinTx, threshold: (u64, u64)) -> Result<()> {
+     |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: method `fee_adjustment` is never used
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:2392:8
+     |
+1694 | impl CheckpointQueue {
+     | -------------------- method in this implementation
+...
+2392 |     fn fee_adjustment(&self, fee_rate: u64, config: &Config) -> Result<u64> {
+     |        ^^^^^^^^^^^^^^
+
+   Compiling phase3_header_queue_probe v0.1.0 (/home/nitro/repos/nomic/audit/run-20260621T1626CDT-phase3-c5486a4/harnesses/header_queue_probe)
+warning: unused import: `HeaderQueue`
+  --> src/lib.rs:13:44
+   |
+13 | use nomic::bitcoin::header_queue::{Config, HeaderQueue, WrappedHeader};
+   |                                            ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `orga::context::Context`
+  --> src/lib.rs:14:5
+   |
+14 | use orga::context::Context;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `orga::plugins::Paid`
+  --> src/lib.rs:15:5
+   |
+15 | use orga::plugins::Paid;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+error[E0038]: the trait `bitcoin::bitcoin_hashes::Hash` cannot be made into an object
+   --> src/lib.rs:45:13
+    |
+45  |             Hash::from_hex("00000000314e90489514c787d615cea50003af2023796ccdd085b6bcc1fa28f5")
+    |             ^^^^ `bitcoin::bitcoin_hashes::Hash` cannot be made into an object
+    |
+note: for a trait to be "object safe" it needs to allow building a vtable to allow the call to be resolvable dynamically; for more information visit <https://doc.rust-lang.org/reference/items/traits.html#object-safety>
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin_hashes-0.11.0/src/lib.rs:101:32
+    |
+101 | pub trait Hash: Copy + Clone + PartialEq + Eq + PartialOrd + Ord +
+    |                                ^^^^^^^^^        ^^^^^^^^^^ the trait cannot be made into an object because it uses `Self` as a type parameter
+    |                                |
+    |                                the trait cannot be made into an object because it uses `Self` as a type parameter
+   --> /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/core/src/cmp.rs:328:15
+    |
+    = note: the trait cannot be made into an object because it uses `Self` as a type parameter
+   ::: /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/core/src/cmp.rs:821:21
+    |
+    = note: the trait cannot be made into an object because it uses `Self` as a type parameter
+
+error[E0782]: trait objects must include the `dyn` keyword
+  --> src/lib.rs:45:13
+   |
+45 |             Hash::from_hex("00000000314e90489514c787d615cea50003af2023796ccdd085b6bcc1fa28f5")
+   |             ^^^^
+   |
+help: add `dyn` keyword before this trait
+   |
+45 |             <dyn Hash>::from_hex("00000000314e90489514c787d615cea50003af2023796ccdd085b6bcc1fa28f5")
+   |             ++++     +
+
+error[E0038]: the trait `bitcoin::bitcoin_hashes::Hash` cannot be made into an object
+   --> src/lib.rs:49:13
+    |
+49  |             Hash::from_hex("2f5c03ce19e9a855ac93087a1b68fe6592bcf4bd7cbb9c1ef264d886a785894e")
+    |             ^^^^ `bitcoin::bitcoin_hashes::Hash` cannot be made into an object
+    |
+note: for a trait to be "object safe" it needs to allow building a vtable to allow the call to be resolvable dynamically; for more information visit <https://doc.rust-lang.org/reference/items/traits.html#object-safety>
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin_hashes-0.11.0/src/lib.rs:101:32
+    |
+101 | pub trait Hash: Copy + Clone + PartialEq + Eq + PartialOrd + Ord +
+    |                                ^^^^^^^^^        ^^^^^^^^^^ the trait cannot be made into an object because it uses `Self` as a type parameter
+    |                                |
+    |                                the trait cannot be made into an object because it uses `Self` as a type parameter
+   --> /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/core/src/cmp.rs:328:15
+    |
+    = note: the trait cannot be made into an object because it uses `Self` as a type parameter
+   ::: /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/core/src/cmp.rs:821:21
+    |
+    = note: the trait cannot be made into an object because it uses `Self` as a type parameter
+
+error[E0782]: trait objects must include the `dyn` keyword
+  --> src/lib.rs:49:13
+   |
+49 |             Hash::from_hex("2f5c03ce19e9a855ac93087a1b68fe6592bcf4bd7cbb9c1ef264d886a785894e")
+   |             ^^^^
+   |
+help: add `dyn` keyword before this trait
+   |
+49 |             <dyn Hash>::from_hex("2f5c03ce19e9a855ac93087a1b68fe6592bcf4bd7cbb9c1ef264d886a785894e")
+   |             ++++     +
+
+error[E0038]: the trait `bitcoin::bitcoin_hashes::Hash` cannot be made into an object
+   --> src/lib.rs:65:13
+    |
+65  |             Hash::from_hex("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    |             ^^^^ `bitcoin::bitcoin_hashes::Hash` cannot be made into an object
+    |
+note: for a trait to be "object safe" it needs to allow building a vtable to allow the call to be resolvable dynamically; for more information visit <https://doc.rust-lang.org/reference/items/traits.html#object-safety>
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin_hashes-0.11.0/src/lib.rs:101:32
+    |
+101 | pub trait Hash: Copy + Clone + PartialEq + Eq + PartialOrd + Ord +
+    |                                ^^^^^^^^^        ^^^^^^^^^^ the trait cannot be made into an object because it uses `Self` as a type parameter
+    |                                |
+    |                                the trait cannot be made into an object because it uses `Self` as a type parameter
+   --> /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/core/src/cmp.rs:328:15
+    |
+    = note: the trait cannot be made into an object because it uses `Self` as a type parameter
+   ::: /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/core/src/cmp.rs:821:21
+    |
+    = note: the trait cannot be made into an object because it uses `Self` as a type parameter
+
+error[E0782]: trait objects must include the `dyn` keyword
+  --> src/lib.rs:65:13
+   |
+65 |             Hash::from_hex("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+   |             ^^^^
+   |
+help: add `dyn` keyword before this trait
+   |
+65 |             <dyn Hash>::from_hex("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+   |             ++++     +
+
+warning: unused import: `bitcoin::hashes::hex::FromHex`
+ --> src/lib.rs:8:5
+  |
+8 | use bitcoin::hashes::hex::FromHex;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0038, E0782.
+For more information about an error, try `rustc --explain E0038`.
+warning: `phase3_header_queue_probe` (lib) generated 4 warnings
+error: could not compile `phase3_header_queue_probe` (lib) due to 6 previous errors; 4 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+warning: `nomic` (lib) generated 14 warnings (run `cargo fix --lib -p nomic` to apply 1 suggestion)

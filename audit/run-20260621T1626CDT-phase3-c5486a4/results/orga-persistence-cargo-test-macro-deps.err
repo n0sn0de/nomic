@@ -1,0 +1,217 @@
+warning: unexpected `cfg` condition name: `fuzzing`
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/plugins/signer.rs:202:27
+    |
+202 |                 #[cfg(not(fuzzing))]
+    |                           ^^^^^^^
+    |
+    = help: expected names are: `clippy`, `debug_assertions`, `doc`, `docsrs`, `doctest`, `feature`, `miri`, `overflow_checks`, `panic`, `proc_macro`, `relocation_model`, `rustfmt`, `sanitize`, `sanitizer_cfi_generalize_pointers`, `sanitizer_cfi_normalize_integers`, `target_abi`, `target_arch`, `target_endian`, `target_env`, `target_family`, `target_feature`, `target_has_atomic`, `target_has_atomic_equal_alignment`, `target_has_atomic_load_store`, `target_os`, `target_pointer_width`, `target_thread_local`, `target_vendor`, `test`, `ub_checks`, `unix`, and `windows`
+    = help: consider using a Cargo feature instead
+    = help: or consider adding in `Cargo.toml` the `check-cfg` lint config for the lint:
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+    = help: or consider adding `println!("cargo::rustc-check-cfg=cfg(fuzzing)");` to the top of the `build.rs`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unused import: `ibc::core::host::types::path::Path`
+ --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:4:5
+  |
+4 | use ibc::core::host::types::path::Path;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `ics23::LeafOp`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:10:5
+   |
+10 | use ics23::LeafOp;
+   |     ^^^^^^^^^^^^^
+
+warning: unused imports: `ProofOp` and `ProofOps`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:13:39
+   |
+13 | use tendermint_proto::v0_34::crypto::{ProofOp, ProofOps};
+   |                                       ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `IBC_QUERY_PATH`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:16:80
+   |
+16 |     ClientIdKey, ConnectionEnd, ConnectionIdKey, Ibc, IbcContext, PortChannel, IBC_QUERY_PATH,
+   |                                                                                ^^^^^^^^^^^^^^
+
+warning: the feature `lazy_cell` has been stable since 1.80.0 and no longer requires an attribute to enable
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:12:12
+   |
+12 | #![feature(lazy_cell)]
+   |            ^^^^^^^^^
+   |
+   = note: `#[warn(stable_features)]` on by default
+
+warning: unused import: `crate::store::Read`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:20:5
+   |
+20 | use crate::store::Read;
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: `orga` (lib) generated 7 warnings (run `cargo fix --lib -p orga` to apply 4 suggestions)
+   Compiling phase3_orga_persistence_harness v0.1.0 (/home/nitro/repos/nomic/audit/run-20260621T1626CDT-phase3-c5486a4/harnesses/orga_persistence)
+warning: the feature `specialization` is incomplete and may not be safe to use and/or cause compiler crashes
+ --> src/lib.rs:1:12
+  |
+1 | #![feature(specialization)]
+  |            ^^^^^^^^^^^^^^
+  |
+  = note: see issue #31844 <https://github.com/rust-lang/rust/issues/31844> for more information
+  = help: consider using `min_specialization` instead, which is more stable and complete
+  = note: `#[warn(incomplete_features)]` on by default
+
+warning: unused import: `build_call`
+ --> src/lib.rs:4:18
+  |
+4 | use orga::call::{build_call, Call};
+  |                  ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+error[E0282]: type annotations needed for `std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error>`
+  --> src/lib.rs:82:13
+   |
+82 |         let run_res = self.run(store, move |state| -> Result<_> {
+   |             ^^^^^^^
+...
+89 |             Ok((res, vec![], vec![]))
+   |                --------------------- type must be known at this point
+   |
+help: consider giving `run_res` an explicit type, where the placeholders `_` are specified
+   |
+82 |         let run_res: std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error> = self.run(store, move |state| -> Result<_> {
+   |                    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0283]: type annotations needed for `std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error>`
+  --> src/lib.rs:82:13
+   |
+82 |         let run_res = self.run(store, move |state| -> Result<_> {
+   |             ^^^^^^^
+...
+97 |                     deliver_tx_res.log = logs.join("\n");
+   |                                               ---- type must be known at this point
+   |
+   = note: multiple `impl`s satisfying `_: Borrow<str>` found in the following crates: `alloc`, `http`, `ibc_core_router_types`:
+           - impl Borrow<str> for ModuleId;
+           - impl Borrow<str> for http::header::name::HeaderName;
+           - impl Borrow<str> for std::string::String;
+   = note: required for `[_]` to implement `Join<&str>`
+help: consider giving `run_res` an explicit type, where the type for type parameter `S` is specified
+   |
+82 |         let run_res: std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error> = self.run(store, move |state| -> Result<_> {
+   |                    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0283]: type annotations needed for `std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error>`
+  --> src/lib.rs:82:13
+   |
+82 |         let run_res = self.run(store, move |state| -> Result<_> {
+   |             ^^^^^^^
+...
+97 |                     deliver_tx_res.log = logs.join("\n");
+   |                                          ---- ---- required by a bound introduced by this call
+   |                                          |
+   |                                          type must be known at this point
+   |
+   = note: multiple `impl`s satisfying `_: Borrow<str>` found in the following crates: `alloc`, `http`, `ibc_core_router_types`:
+           - impl Borrow<str> for ModuleId;
+           - impl Borrow<str> for http::header::name::HeaderName;
+           - impl Borrow<str> for std::string::String;
+   = note: required for `[_]` to implement `Join<&str>`
+note: required by a bound in `std::slice::<impl [T]>::join`
+  --> /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/alloc/src/slice.rs:597:5
+help: consider giving `run_res` an explicit type, where the type for type parameter `S` is specified
+   |
+82 |         let run_res: std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error> = self.run(store, move |state| -> Result<_> {
+   |                    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0283]: type annotations needed for `std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error>`
+   --> src/lib.rs:82:13
+    |
+82  |         let run_res = self.run(store, move |state| -> Result<_> {
+    |             ^^^^^^^
+...
+104 |                         deliver_tx_res.log = logs.join("\n");
+    |                                                   ---- type must be known at this point
+    |
+    = note: multiple `impl`s satisfying `_: Borrow<str>` found in the following crates: `alloc`, `http`, `ibc_core_router_types`:
+            - impl Borrow<str> for ModuleId;
+            - impl Borrow<str> for http::header::name::HeaderName;
+            - impl Borrow<str> for std::string::String;
+    = note: required for `[_]` to implement `Join<&str>`
+help: consider giving `run_res` an explicit type, where the type for type parameter `S` is specified
+    |
+82  |         let run_res: std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error> = self.run(store, move |state| -> Result<_> {
+    |                    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0283]: type annotations needed for `std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error>`
+   --> src/lib.rs:82:13
+    |
+82  |         let run_res = self.run(store, move |state| -> Result<_> {
+    |             ^^^^^^^
+...
+104 |                         deliver_tx_res.log = logs.join("\n");
+    |                                              ---- ---- required by a bound introduced by this call
+    |                                              |
+    |                                              type must be known at this point
+    |
+    = note: multiple `impl`s satisfying `_: Borrow<str>` found in the following crates: `alloc`, `http`, `ibc_core_router_types`:
+            - impl Borrow<str> for ModuleId;
+            - impl Borrow<str> for http::header::name::HeaderName;
+            - impl Borrow<str> for std::string::String;
+    = note: required for `[_]` to implement `Join<&str>`
+note: required by a bound in `std::slice::<impl [T]>::join`
+   --> /rustc/5069856495870486134dd2ca0b0e2516308c5c2a/library/alloc/src/slice.rs:597:5
+help: consider giving `run_res` an explicit type, where the type for type parameter `S` is specified
+    |
+82  |         let run_res: std::result::Result<(std::result::Result<std::result::Result<(), orga::Error>, orga::Error>, Vec<_>, Vec<_>), orga::Error> = self.run(store, move |state| -> Result<_> {
+    |                    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+warning: unused import: `Encode`
+ --> src/lib.rs:5:30
+  |
+5 | use orga::encoding::{Decode, Encode};
+  |                              ^^^^^^
+
+error[E0277]: the trait bound `AuditInternalApp<ABCIPlugin<ToyApp>>: Deref` is not satisfied
+   --> src/lib.rs:134:28
+    |
+134 |     let call = build_call!(app.mutate_then_error());
+    |                ------------^^^---------------------
+    |                |           |
+    |                |           the trait `Deref` is not implemented for `AuditInternalApp<ABCIPlugin<ToyApp>>`
+    |                required by a bound introduced by this call
+    |
+note: required by a bound in `CallBuilder::<T>::make`
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/call.rs:418:20
+    |
+418 |     pub fn make<U: std::ops::Deref<Target = T>>(_value: U) -> Self {
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `CallBuilder::<T>::make`
+help: consider borrowing here
+    |
+134 |     let call = build_call!(&app.mutate_then_error());
+    |                            +
+134 |     let call = build_call!(&mut app.mutate_then_error());
+    |                            ++++
+
+warning: unused import: `Encode`
+ --> src/lib.rs:5:30
+  |
+5 | use orga::encoding::{Decode, Encode};
+  |                              ^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+Some errors have detailed explanations: E0282, E0283.
+For more information about an error, try `rustc --explain E0282`.
+Some errors have detailed explanations: E0277, E0282, E0283.
+For more information about an error, try `rustc --explain E0277`.
+warning: `phase3_orga_persistence_harness` (lib) generated 3 warnings
+error: could not compile `phase3_orga_persistence_harness` (lib) due to 5 previous errors; 3 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+warning: `phase3_orga_persistence_harness` (lib test) generated 2 warnings (1 duplicate)
+error: could not compile `phase3_orga_persistence_harness` (lib test) due to 6 previous errors; 2 warnings emitted

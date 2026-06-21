@@ -1,0 +1,63 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling merk v2.0.0 (https://github.com/nomic-io/merk?rev=d6f0490993bcf88f786c5271091aa9a84ff2fe69#d6f04909)
+   Compiling orga v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a)
+error[E0432]: unresolved import `crate::abci::ABCIStore`
+ --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/merk/store.rs:3:5
+  |
+3 | use crate::abci::ABCIStore;
+  |     ^^^^^^^^^^^^^^^^^^^^^^ no `ABCIStore` in `abci`
+
+warning: unexpected `cfg` condition name: `fuzzing`
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/plugins/signer.rs:202:27
+    |
+202 |                 #[cfg(not(fuzzing))]
+    |                           ^^^^^^^
+    |
+    = help: expected names are: `clippy`, `debug_assertions`, `doc`, `docsrs`, `doctest`, `feature`, `miri`, `overflow_checks`, `panic`, `proc_macro`, `relocation_model`, `rustfmt`, `sanitize`, `sanitizer_cfi_generalize_pointers`, `sanitizer_cfi_normalize_integers`, `target_abi`, `target_arch`, `target_endian`, `target_env`, `target_family`, `target_feature`, `target_has_atomic`, `target_has_atomic_equal_alignment`, `target_has_atomic_load_store`, `target_os`, `target_pointer_width`, `target_thread_local`, `target_vendor`, `test`, `ub_checks`, `unix`, and `windows`
+    = help: consider using a Cargo feature instead
+    = help: or consider adding in `Cargo.toml` the `check-cfg` lint config for the lint:
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+    = help: or consider adding `println!("cargo::rustc-check-cfg=cfg(fuzzing)");` to the top of the `build.rs`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unused import: `ibc::core::host::types::path::Path`
+ --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:4:5
+  |
+4 | use ibc::core::host::types::path::Path;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `ics23::LeafOp`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:10:5
+   |
+10 | use ics23::LeafOp;
+   |     ^^^^^^^^^^^^^
+
+warning: unused imports: `ProofOp` and `ProofOps`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:13:39
+   |
+13 | use tendermint_proto::v0_34::crypto::{ProofOp, ProofOps};
+   |                                       ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `IBC_QUERY_PATH`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:16:80
+   |
+16 |     ClientIdKey, ConnectionEnd, ConnectionIdKey, Ibc, IbcContext, PortChannel, IBC_QUERY_PATH,
+   |                                                                                ^^^^^^^^^^^^^^
+
+warning: the feature `lazy_cell` has been stable since 1.80.0 and no longer requires an attribute to enable
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:12:12
+   |
+12 | #![feature(lazy_cell)]
+   |            ^^^^^^^^^
+   |
+   = note: `#[warn(stable_features)]` on by default
+
+For more information about this error, try `rustc --explain E0432`.
+warning: `orga` (lib) generated 6 warnings
+error: could not compile `orga` (lib) due to 1 previous error; 6 warnings emitted

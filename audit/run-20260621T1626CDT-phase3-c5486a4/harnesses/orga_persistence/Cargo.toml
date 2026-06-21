@@ -1,0 +1,10 @@
+[package]
+name = "phase3_orga_persistence_harness"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ed = { git = "https://github.com/nomic-io/ed", rev = "a657be856792039ff60c2f67e7920e38cd3acffc" }
+orga = { path = "/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a", features = ["merk-verify", "feat-ibc"] }
+serde = { version = "1.0.208", features = ["derive"] }
+tendermint-proto = "0.38.0"

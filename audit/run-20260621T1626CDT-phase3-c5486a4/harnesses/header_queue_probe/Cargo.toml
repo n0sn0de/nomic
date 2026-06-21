@@ -1,0 +1,11 @@
+[package]
+name = "phase3_header_queue_probe"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bitcoin = { version = "0.29.2", features = ["serde", "rand"] }
+bitcoin_hashes = "0.11.0"
+chrono = "0.4.19"
+nomic = { path = "/home/nitro/repos/nomic", default-features = false, features = ["csv"] }
+orga = { path = "/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a", features = ["merk-verify", "feat-ibc"] }

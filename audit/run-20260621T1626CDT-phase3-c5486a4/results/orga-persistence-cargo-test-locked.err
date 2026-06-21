@@ -1,0 +1,2 @@
+error: the lock file /home/nitro/repos/nomic/audit/run-20260621T1626CDT-phase3-c5486a4/harnesses/orga_persistence/Cargo.lock needs to be updated but --locked was passed to prevent this
+If you want to try to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.

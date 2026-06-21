@@ -1,0 +1,181 @@
+   Compiling bindgen v0.69.5
+   Compiling cosmos-sdk-proto v0.23.0
+   Compiling ibc-proto v0.47.1
+   Compiling tendermint v0.38.1
+   Compiling librocksdb-sys v0.16.0+8.10.0
+   Compiling tendermint-light-client-verifier v0.38.1
+   Compiling cosmrs v0.18.0
+   Compiling ibc-primitives v0.54.0
+   Compiling ibc-core-host-types v0.54.0
+   Compiling ibc-core-commitment-types v0.54.0
+   Compiling ibc-core-router-types v0.54.0
+   Compiling ibc-core-client-types v0.54.0
+   Compiling ibc-core-connection-types v0.54.0
+   Compiling ibc-client-tendermint-types v0.54.0
+   Compiling ibc-core-channel-types v0.54.0
+   Compiling ibc-core-handler-types v0.54.0
+   Compiling ibc-core-router v0.54.0
+   Compiling ibc-core-client-context v0.54.0
+   Compiling ibc-core-host v0.54.0
+   Compiling ibc-core-client v0.54.0
+   Compiling ibc-client-wasm-types v0.54.0
+   Compiling ibc-client-tendermint v0.54.0
+   Compiling ibc-core-connection v0.54.0
+   Compiling ibc-clients v0.54.0
+   Compiling ibc-core-channel v0.54.0
+   Compiling ibc-core-handler v0.54.0
+   Compiling ibc-core v0.54.0
+   Compiling ibc-app-transfer-types v0.54.0
+   Compiling ibc-app-nft-transfer-types v0.54.0
+   Compiling ibc-app-transfer v0.54.0
+   Compiling ibc-core-host-cosmos v0.54.0
+   Compiling ibc-app-nft-transfer v0.54.0
+   Compiling ibc-apps v0.54.0
+   Compiling ibc v0.54.0
+   Compiling rocksdb v0.22.0
+   Compiling merk v2.0.0 (https://github.com/nomic-io/merk?rev=d6f0490993bcf88f786c5271091aa9a84ff2fe69#d6f04909)
+   Compiling orga v0.3.1 (/home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a)
+error[E0433]: failed to resolve: could not find `merk` in the crate root
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/store/backingstore.rs:3:12
+   |
+3  | use crate::merk::memsnapshot::MemSnapshot;
+   |            ^^^^ could not find `merk` in the crate root
+   |
+note: found an item that was configured out
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:41:9
+   |
+41 | pub mod merk;
+   |         ^^^^
+note: the item is gated behind the `merk-verify` feature
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:40:7
+   |
+40 | #[cfg(feature = "merk-verify")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `merk` in the crate root
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/store/backingstore.rs:5:12
+   |
+5  | use crate::merk::snapshot::Snapshot;
+   |            ^^^^ could not find `merk` in the crate root
+   |
+note: found an item that was configured out
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:41:9
+   |
+41 | pub mod merk;
+   |         ^^^^
+note: the item is gated behind the `merk-verify` feature
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:40:7
+   |
+40 | #[cfg(feature = "merk-verify")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `merk` in the crate root
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/store/backingstore.rs:9:12
+   |
+9  | use crate::merk::{merk::HASH_LENGTH, MerkStore, ProofBuilder};
+   |            ^^^^ could not find `merk` in the crate root
+   |
+note: found an item that was configured out
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:41:9
+   |
+41 | pub mod merk;
+   |         ^^^^
+note: the item is gated behind the `merk-verify` feature
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:40:7
+   |
+40 | #[cfg(feature = "merk-verify")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `crate::merk`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/store/backingstore.rs:9:12
+   |
+9  | use crate::merk::{merk::HASH_LENGTH, MerkStore, ProofBuilder};
+   |            ^^^^ could not find `merk` in the crate root
+   |
+note: found an item that was configured out
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:41:9
+   |
+41 | pub mod merk;
+   |         ^^^^
+note: the item is gated behind the `merk-verify` feature
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:40:7
+   |
+40 | #[cfg(feature = "merk-verify")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `merk` in the crate root
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/store/backingstore.rs:349:45
+    |
+349 |                 ss.walk(|maybe_root| crate::merk::ics23::create_ics23_proof(maybe_root, key))
+    |                                             ^^^^ could not find `merk` in the crate root
+    |
+note: found an item that was configured out
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:41:9
+    |
+41  | pub mod merk;
+    |         ^^^^
+note: the item is gated behind the `merk-verify` feature
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:40:7
+    |
+40  | #[cfg(feature = "merk-verify")]
+    |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unexpected `cfg` condition name: `fuzzing`
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/plugins/signer.rs:202:27
+    |
+202 |                 #[cfg(not(fuzzing))]
+    |                           ^^^^^^^
+    |
+    = help: expected names are: `clippy`, `debug_assertions`, `doc`, `docsrs`, `doctest`, `feature`, `miri`, `overflow_checks`, `panic`, `proc_macro`, `relocation_model`, `rustfmt`, `sanitize`, `sanitizer_cfi_generalize_pointers`, `sanitizer_cfi_normalize_integers`, `target_abi`, `target_arch`, `target_endian`, `target_env`, `target_family`, `target_feature`, `target_has_atomic`, `target_has_atomic_equal_alignment`, `target_has_atomic_load_store`, `target_os`, `target_pointer_width`, `target_thread_local`, `target_vendor`, `test`, `ub_checks`, `unix`, and `windows`
+    = help: consider using a Cargo feature instead
+    = help: or consider adding in `Cargo.toml` the `check-cfg` lint config for the lint:
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+    = help: or consider adding `println!("cargo::rustc-check-cfg=cfg(fuzzing)");` to the top of the `build.rs`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unused import: `ibc::core::host::types::path::Path`
+ --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:4:5
+  |
+4 | use ibc::core::host::types::path::Path;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `ics23::LeafOp`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:10:5
+   |
+10 | use ics23::LeafOp;
+   |     ^^^^^^^^^^^^^
+
+warning: unused imports: `ProofOp` and `ProofOps`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:13:39
+   |
+13 | use tendermint_proto::v0_34::crypto::{ProofOp, ProofOps};
+   |                                       ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `IBC_QUERY_PATH`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:16:80
+   |
+16 |     ClientIdKey, ConnectionEnd, ConnectionIdKey, Ibc, IbcContext, PortChannel, IBC_QUERY_PATH,
+   |                                                                                ^^^^^^^^^^^^^^
+
+warning: the feature `lazy_cell` has been stable since 1.80.0 and no longer requires an attribute to enable
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:12:12
+   |
+12 | #![feature(lazy_cell)]
+   |            ^^^^^^^^^
+   |
+   = note: `#[warn(stable_features)]` on by default
+
+warning: unused import: `crate::store::Read`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:20:5
+   |
+20 | use crate::store::Read;
+   |     ^^^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0432, E0433.
+For more information about an error, try `rustc --explain E0432`.
+warning: `orga` (lib) generated 7 warnings
+error: could not compile `orga` (lib) due to 5 previous errors; 7 warnings emitted

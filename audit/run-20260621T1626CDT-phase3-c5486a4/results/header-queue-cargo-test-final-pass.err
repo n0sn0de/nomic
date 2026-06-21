@@ -1,0 +1,210 @@
+   Compiling nomic v9.2.0 (/home/nitro/repos/nomic)
+warning: unexpected `cfg` condition name: `fuzzing`
+   --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/plugins/signer.rs:202:27
+    |
+202 |                 #[cfg(not(fuzzing))]
+    |                           ^^^^^^^
+    |
+    = help: expected names are: `clippy`, `debug_assertions`, `doc`, `docsrs`, `doctest`, `feature`, `miri`, `overflow_checks`, `panic`, `proc_macro`, `relocation_model`, `rustfmt`, `sanitize`, `sanitizer_cfi_generalize_pointers`, `sanitizer_cfi_normalize_integers`, `target_abi`, `target_arch`, `target_endian`, `target_env`, `target_family`, `target_feature`, `target_has_atomic`, `target_has_atomic_equal_alignment`, `target_has_atomic_load_store`, `target_os`, `target_pointer_width`, `target_thread_local`, `target_vendor`, `test`, `ub_checks`, `unix`, and `windows`
+    = help: consider using a Cargo feature instead
+    = help: or consider adding in `Cargo.toml` the `check-cfg` lint config for the lint:
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+    = help: or consider adding `println!("cargo::rustc-check-cfg=cfg(fuzzing)");` to the top of the `build.rs`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unused import: `ibc::core::host::types::path::Path`
+ --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:4:5
+  |
+4 | use ibc::core::host::types::path::Path;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `ics23::LeafOp`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:10:5
+   |
+10 | use ics23::LeafOp;
+   |     ^^^^^^^^^^^^^
+
+warning: unused imports: `ProofOp` and `ProofOps`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:13:39
+   |
+13 | use tendermint_proto::v0_34::crypto::{ProofOp, ProofOps};
+   |                                       ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `IBC_QUERY_PATH`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:16:80
+   |
+16 |     ClientIdKey, ConnectionEnd, ConnectionIdKey, Ibc, IbcContext, PortChannel, IBC_QUERY_PATH,
+   |                                                                                ^^^^^^^^^^^^^^
+
+warning: the feature `lazy_cell` has been stable since 1.80.0 and no longer requires an attribute to enable
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/lib.rs:12:12
+   |
+12 | #![feature(lazy_cell)]
+   |            ^^^^^^^^^
+   |
+   = note: `#[warn(stable_features)]` on by default
+
+warning: unused import: `crate::store::Read`
+  --> /home/nitro/.cargo/git/checkouts/orga-93bd515e30e7ca9a/3b3d25a/src/ibc/query.rs:20:5
+   |
+20 | use crate::store::Read;
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: `orga` (lib) generated 7 warnings (run `cargo fix --lib -p orga` to apply 4 suggestions)
+warning: unused import: `ValidatorEntry`
+  --> /home/nitro/repos/nomic/src/bitcoin/mod.rs:27:27
+   |
+27 | use orga::plugins::{Paid, ValidatorEntry};
+   |                           ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unreachable statement
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1502:9
+     |
+1364 |         unimplemented!();
+     |         ---------------- any code following this expression is unreachable
+...
+1502 |         self.deduct_emergency_disbursal_fees(fee_rate)?;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
+     |
+     = note: `#[warn(unreachable_code)]` on by default
+
+warning: unused variable: `nbtc_accounts`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1352:9
+     |
+1352 |         nbtc_accounts: &Accounts<Nbtc>,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_nbtc_accounts`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `recovery_scripts`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1353:9
+     |
+1353 |         recovery_scripts: &Map<orga::coins::Address, Adapter<bitcoin::Script>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_recovery_scripts`
+
+warning: unused variable: `reserve_outpoint`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1354:9
+     |
+1354 |         reserve_outpoint: bitcoin::OutPoint,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_outpoint`
+
+warning: unused variable: `external_outputs`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1355:9
+     |
+1355 |         external_outputs: impl Iterator<Item = Result<bitcoin::TxOut>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_external_outputs`
+
+warning: unused variable: `fee_rate`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1356:9
+     |
+1356 |         fee_rate: u64,
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_fee_rate`
+
+warning: unused variable: `reserve_value`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1357:9
+     |
+1357 |         reserve_value: u64,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_value`
+
+warning: unused variable: `config`
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1358:9
+     |
+1358 |         config: &Config,
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_config`
+
+warning: unused variable: `signatory_script`
+   --> /home/nitro/repos/nomic/src/bitcoin/mod.rs:442:43
+    |
+442 |     pub fn set_recovery_script(&mut self, signatory_script: Adapter<Script>) -> Result<()> {
+    |                                           ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_signatory_script`
+
+warning: type alias `Recipients` is never used
+  --> /home/nitro/repos/nomic/src/airdrop.rs:36:6
+   |
+36 | type Recipients = Vec<(Address, Vec<(u64, u64)>, u64)>;
+   |      ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: methods `try_credit_dest` and `credit_dest` are never used
+   --> /home/nitro/repos/nomic/src/app.rs:481:8
+    |
+200 | impl InnerApp {
+    | ------------- methods in this implementation
+...
+481 |     fn try_credit_dest(
+    |        ^^^^^^^^^^^^^^^
+...
+542 |     fn credit_dest(&mut self, dest: Dest, nbtc: Coin<Nbtc>, sender: Identity) -> Result<()> {
+    |        ^^^^^^^^^^^
+
+warning: method `link_intermediate_tx` is never used
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:1203:8
+     |
+1198 | impl<'a> BuildingCheckpointMut<'a> {
+     | ---------------------------------- method in this implementation
+...
+1203 |     fn link_intermediate_tx(&mut self, tx: &mut BitcoinTx, threshold: (u64, u64)) -> Result<()> {
+     |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: method `fee_adjustment` is never used
+    --> /home/nitro/repos/nomic/src/bitcoin/checkpoint.rs:2392:8
+     |
+1694 | impl CheckpointQueue {
+     | -------------------- method in this implementation
+...
+2392 |     fn fee_adjustment(&self, fee_rate: u64, config: &Config) -> Result<u64> {
+     |        ^^^^^^^^^^^^^^
+
+   Compiling phase3_header_queue_probe v0.1.0 (/home/nitro/repos/nomic/audit/run-20260621T1626CDT-phase3-c5486a4/harnesses/header_queue_probe)
+warning: unused import: `HeaderQueue`
+  --> src/lib.rs:13:44
+   |
+13 | use nomic::bitcoin::header_queue::{Config, HeaderQueue, WrappedHeader};
+   |                                            ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `orga::context::Context`
+  --> src/lib.rs:14:5
+   |
+14 | use orga::context::Context;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `orga::plugins::Paid`
+  --> src/lib.rs:15:5
+   |
+15 | use orga::plugins::Paid;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: function `trusted_config` is never used
+  --> src/lib.rs:17:4
+   |
+17 | fn trusted_config() -> Config {
+   |    ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `valid_header_43` is never used
+  --> src/lib.rs:40:4
+   |
+40 | fn valid_header_43() -> WrappedHeader {
+   |    ^^^^^^^^^^^^^^^
+
+warning: function `invalid_replacement_header_43` is never used
+  --> src/lib.rs:59:4
+   |
+59 | fn invalid_replacement_header_43() -> WrappedHeader {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `phase3_header_queue_probe` (lib) generated 6 warnings (run `cargo fix --lib -p phase3_header_queue_probe` to apply 3 suggestions)
+warning: `nomic` (lib) generated 14 warnings (run `cargo fix --lib -p nomic` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.25s
+     Running unittests src/lib.rs (target/debug/deps/phase3_header_queue_probe-18a334b28613d0a5)
+   Doc-tests phase3_header_queue_probe
