@@ -1,0 +1,7 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+ibc v0.54.0
+└── orga v0.3.1 (https://github.com/turbofish-org/orga.git?rev=e539a53e1eed9c3363062d419ea84d8d0d56e1c7#e539a53e)
+    └── nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+
+[exit-status] 0

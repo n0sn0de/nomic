@@ -1,0 +1,85 @@
+   132	    pub fn relay_op_key(
+   133	        &mut self,
+   134	        ibc: &Ibc,
+   135	        client_id: ClientId,
+   136	        height: (u64, u64),
+   137	        cons_key: LengthVec<u8, u8>,
+   138	        op_addr: Proof,
+   139	        acc: Proof,
+   140	    ) -> Result<()> {
+   141	        let client = ibc
+   142	            .ctx
+   143	            .clients
+   144	            .get(client_id.clone())?
+   145	            .ok_or_else(|| OrgaError::Ibc("Client not found".to_string()))?;
+   146	
+   147	        if client.client_type()? != tendermint::types::client_type() {
+   148	            return Err(OrgaError::Ibc("Only supported for Tendermint clients".to_string()).into());
+   149	        }
+   150	
+   151	        let epoch_height = Height::new(height.0, height.1)
+   152	            .map_err(|_| OrgaError::Ibc("Invalid height".to_string()))?;
+   153	        let cons_state = client
+   154	            .consensus_states
+   155	            .get(epoch_height.into())?
+   156	            .ok_or_else(|| OrgaError::Ibc("No consensus state for given height".to_string()))?;
+   157	        let root = cons_state.root();
+   158	
+   159	        let cons_addr = tmhash(cons_key.as_slice());
+   160	
+   161	        let header = client.last_header()?;
+   162	        let val = header.validator_set.validator(
+   163	            cons_addr
+   164	                .to_vec()
+   165	                .try_into()
+   166	                .map_err(|_| OrgaError::App("Could not convert consensus address".to_string()))?,
+   167	        );
+   168	        if val.is_none() {
+   169	            return Err(OrgaError::App(
+   170	                "Consensus key is not in most recent validator set".to_string(),
+   171	            )
+   172	            .into());
+   173	        }
+   174	
+   175	        op_addr.verify(root, "staking")?;
+   176	        acc.verify(root, "acc")?;
+   177	
+   178	        if op_addr.key()? != &[&[0x22, 0x14], cons_addr.as_slice()].concat() {
+   179	            return Err(OrgaError::App(
+   180	                "Operator address proof does not match consensus address".to_string(),
+   181	            )
+   182	            .into());
+   183	        }
+   184	
+   185	        if acc.key()? != &[&[0x01], op_addr.value()?.as_slice()].concat() {
+   186	            return Err(OrgaError::App(
+   187	                "Account proof does not match operator address".to_string(),
+   188	            )
+   189	            .into());
+   190	        }
+   191	
+   192	        let acc = proto::cosmos::auth::v1beta1::BaseAccount::decode(acc.value()?.as_slice())
+   193	            .map_err(|_| OrgaError::App("Invalid account".to_string()))?;
+   194	
+   195	        let op_key_any = acc
+   196	            .pub_key
+   197	            .ok_or_else(|| OrgaError::App("Expected public key".to_string()))?;
+   198	        let op_key = Pubkey::try_from_slice(
+   199	            proto::cosmos::crypto::secp256k1::PubKey::decode(op_key_any.value.as_slice())
+   200	                .map_err(|_| OrgaError::App("Invalid public key".to_string()))?
+   201	                .key
+   202	                .as_slice(),
+   203	        )?;
+   204	
+   205	        let mut chain = self.chains.entry(client_id)?.or_default()?;
+   206	        if let Some(existing_key) = chain.op_keys_by_cons.get(cons_key.clone())? {
+   207	            if *existing_key == op_key {
+   208	                return Err(OrgaError::App("Operator key already relayed".to_string()).into());
+   209	            }
+   210	        }
+   211	        chain.op_keys_by_cons.insert(cons_key, op_key)?;
+   212	
+   213	        Ok(())
+   214	    }
+
+[exit-status] 0

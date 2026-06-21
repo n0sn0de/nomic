@@ -1,0 +1,34 @@
+    Checking tendermint-proto v0.38.1
+   Compiling alloy-json-abi v0.8.15
+    Checking parity-scale-codec v3.6.12
+    Checking borsh v1.5.1
+    Checking h2 v0.4.6
+    Checking tokio-stream v0.1.16
+    Checking tower v0.4.13
+    Checking axum v0.7.7
+    Checking h2 v0.3.26
+    Checking ethereum_ssz v0.5.4
+    Checking toml v0.8.19
+   Compiling alloy-sol-macro v0.7.7
+   Compiling librocksdb-sys v0.16.0+8.10.0
+    Checking tendermint-proto v0.32.2
+    Checking tendermint v0.40.0
+    Checking bitcoin v0.29.2
+   Compiling nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+    Checking frost-rerandomized v1.0.0 (https://github.com/ZcashFoundation/frost?rev=51fa7d09f3742563a35d065afcff6ad486430dac#51fa7d09)
+    Checking tokio-tungstenite v0.21.0
+    Checking toml v0.7.8
+    Checking frost-secp256k1-tr v1.0.0 (https://github.com/ZcashFoundation/frost?rev=51fa7d09f3742563a35d065afcff6ad486430dac#51fa7d09)
+    Checking ruint v1.12.3
+error: failed to run custom build command for `librocksdb-sys v0.16.0+8.10.0`
+
+Caused by:
+  process didn't exit successfully: `/home/nitro/repos/nomic-v13-audit-7278e9b/target/debug/build/librocksdb-sys-fb9d07b91edfcf87/build-script-build` (exit status: 101)
+  --- stderr
+  rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found
+  thread 'main' panicked at /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/librocksdb-sys-0.16.0+8.10.0/build.rs:40:10:
+  unable to generate rocksdb bindings: ClangDiagnostic("rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found\n")
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...
+
+[exit-status] 101

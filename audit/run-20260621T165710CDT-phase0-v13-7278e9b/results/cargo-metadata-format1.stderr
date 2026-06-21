@@ -1,0 +1,11 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+ Downloading crates ...
+  Downloaded atomic-polyfill v1.0.3
+  Downloaded windows-registry v0.2.0
+  Downloaded windows-strings v0.1.0
+  Downloaded windows-result v0.2.0
+  Downloaded wasmtimer v0.4.1
+
+[exit-status] 0

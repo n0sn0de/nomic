@@ -1,0 +1,201 @@
+   434	    pub fn add_into_iter<T>(&mut self, headers: T) -> Result<()>
+   435	    where
+   436	        T: IntoIterator<Item = WrappedHeader>,
+   437	    {
+   438	        let headers: Vec<WrappedHeader> = headers.into_iter().collect();
+   439	        let current_height = self.height()?;
+   440	
+   441	        let first = headers
+   442	            .first()
+   443	            .ok_or_else(|| Error::Header("Passed header list empty".into()))?;
+   444	
+   445	        let mut removed_work = Uint256::default();
+   446	        if first.height <= current_height {
+   447	            let first_replaced = self
+   448	                .get_by_height(first.height)?
+   449	                .ok_or_else(|| Error::Header("Header not found".into()))?;
+   450	
+   451	            if first_replaced.block_hash() == first.block_hash() {
+   452	                return Err(Error::Header("Provided redundant header.".into()));
+   453	            }
+   454	
+   455	            removed_work = self.pop_back_to(first.height)?;
+   456	        }
+   457	
+   458	        let added_work = self.verify_and_add_headers(&headers)?;
+   459	        if added_work <= removed_work {
+   460	            return Err(Error::Header(
+   461	                "New best chain must include more work than old best chain.".into(),
+   462	            ));
+   463	        }
+   464	
+   465	        // Prune the header queue if it has grown too large.
+   466	        while self.len() > self.config.max_length {
+   467	            let header = match self.deque.pop_front()? {
+   468	                Some(inner) => inner,
+   469	                None => {
+   470	                    break;
+   471	                }
+   472	            };
+   473	            // TODO: do we really want to subtract work when pruning?
+   474	            let current_work = *self.current_work - header.work();
+   475	            self.current_work = Adapter::new(current_work);
+   476	        }
+   477	
+   478	        Ok(())
+   479	    }
+   480	
+   481	    /// Verify and add a list of headers to the header queue, returning the
+   482	    /// amount of additional estimated work added to the header queue.
+   483	    fn verify_and_add_headers(&mut self, headers: &[WrappedHeader]) -> Result<Uint256> {
+   484	        let first_height = headers
+   485	            .first()
+   486	            .ok_or_else(|| Error::Header("Passed header list is empty".into()))?
+   487	            .height;
+   488	        if first_height == 0 {
+   489	            return Err(Error::Header("Headers must start after height 0".into()));
+   490	        }
+   491	
+   492	        let prev_header = [self
+   493	            .get_by_height(first_height - 1)?
+   494	            .ok_or_else(|| Error::Header("Headers not connect to chain".into()))?
+   495	            .header];
+   496	
+   497	        let headers = prev_header.iter().chain(headers.iter()).zip(headers.iter());
+   498	
+   499	        let mut work = Uint256::default();
+   500	
+   501	        for (prev_header, header) in headers {
+   502	            if header.height() != prev_header.height() + 1 {
+   503	                return Err(Error::Header("Non-consecutive headers passed".into()));
+   504	            }
+   505	
+   506	            if header.prev_blockhash() != prev_header.block_hash() {
+   507	                return Err(Error::Header(
+   508	                    "Passed header references incorrect previous block hash".into(),
+   509	                ));
+   510	            }
+   511	
+   512	            if self.deque.len() >= 11 {
+   513	                self.validate_time(header)?;
+   514	            }
+   515	
+   516	            let target = self.get_next_target(header, prev_header)?;
+   517	            header.validate_pow(&target)?;
+   518	
+   519	            let header_work = header.work();
+   520	            work = work + header_work;
+   521	
+   522	            let chain_work = *self.current_work + header_work;
+   523	            let work_header = WorkHeader::new(header.clone(), chain_work);
+   524	            self.deque.push_back(work_header)?;
+   525	            self.current_work = Adapter::new(chain_work);
+   526	        }
+   527	
+   528	        Ok(work)
+   529	    }
+   530	
+   531	    /// Calculate the expected next target based on the passed header and the
+   532	    /// previous header.
+   533	    fn get_next_target(
+   534	        &self,
+   535	        header: &WrappedHeader,
+   536	        previous_header: &WrappedHeader,
+   537	    ) -> Result<Uint256> {
+   538	        if header.height() % self.config.retarget_interval == 0 {
+   539	            let first_reorg_height = header.height() - self.config.retarget_interval;
+   540	            return self.calculate_next_target(previous_header, first_reorg_height);
+   541	        }
+   542	
+   543	        if !self.config.min_difficulty_blocks {
+   544	            return Ok(previous_header.target());
+   545	        }
+   546	
+   547	        if header.time() > previous_header.time() + self.config.target_spacing * 2 {
+   548	            return Ok(WrappedHeader::u256_from_compact(self.config.max_target));
+   549	        }
+   550	
+   551	        let mut current_header_index = previous_header.height();
+   552	        let mut current_header = previous_header.to_owned();
+   553	
+   554	        while current_header_index > 0
+   555	            && current_header_index % self.config.retarget_interval != 0
+   556	            && current_header.bits() == self.config.max_target
+   557	        {
+   558	            current_header_index -= 1;
+   559	
+   560	            current_header = match self.get_by_height(current_header_index)? {
+   561	                Some(inner) => inner.header.clone(),
+   562	                None => {
+   563	                    return Err(Error::Header("No previous header exists".into()));
+   564	                }
+   565	            };
+   566	        }
+   567	        Ok(WrappedHeader::u256_from_compact(current_header.bits()))
+   568	    }
+   569	
+   570	    /// Calculate the expected next target based on the passed header and the
+   571	    /// height of the previous retargeting header.
+   572	    fn calculate_next_target(
+   573	        &self,
+   574	        header: &WrappedHeader,
+   575	        first_reorg_height: u32,
+   576	    ) -> Result<Uint256> {
+   577	        if !self.config.retargeting {
+   578	            return Ok(WrappedHeader::u256_from_compact(header.bits()));
+   579	        }
+   580	
+   581	        if header.height() < self.config.retarget_interval {
+   582	            return Err(Error::Header("Invalid trusted header. Trusted header have height which is a multiple of the retarget interval".into()));
+   583	        }
+   584	
+   585	        let prev_retarget = match self.get_by_height(first_reorg_height)? {
+   586	            Some(inner) => inner.time(),
+   587	            None => {
+   588	                return Err(Error::Header(
+   589	                    "No previous retargeting header exists".into(),
+   590	                ));
+   591	            }
+   592	        };
+   593	
+   594	        let mut timespan = header.time() - prev_retarget;
+   595	
+   596	        if timespan < self.config.target_timespan / 4 {
+   597	            timespan = self.config.target_timespan / 4;
+   598	        }
+   599	
+   600	        if timespan > self.config.target_timespan * 4 {
+   601	            timespan = self.config.target_timespan * 4;
+   602	        }
+   603	
+   604	        let target_timespan = WrappedHeader::u32_to_u256(self.config.target_timespan);
+   605	        let timespan = WrappedHeader::u32_to_u256(timespan);
+   606	
+   607	        let target = header.target() * timespan / target_timespan;
+   608	        let target_u32 = BlockHeader::compact_target_from_u256(&target);
+   609	        let target = WrappedHeader::u256_from_compact(target_u32);
+   610	
+   611	        if target > WrappedHeader::u256_from_compact(self.config.max_target) {
+   612	            Ok(WrappedHeader::u256_from_compact(self.config.max_target))
+   613	        } else {
+   614	            Ok(target)
+   615	        }
+   616	    }
+   617	
+   618	    /// Remove headers from the header queue until the height of the last header
+   619	    /// in the queue is equal to the passed height.
+   620	    fn pop_back_to(&mut self, height: u32) -> Result<Uint256> {
+   621	        let mut work = Uint256::default();
+   622	
+   623	        while self.height()? >= height {
+   624	            let header = self
+   625	                .deque
+   626	                .pop_back()?
+   627	                .ok_or_else(|| Error::Header("Removed all headers".into()))?;
+   628	
+   629	            work = work + header.work();
+   630	        }
+   631	
+   632	        Ok(work)
+
+[exit-status] 0

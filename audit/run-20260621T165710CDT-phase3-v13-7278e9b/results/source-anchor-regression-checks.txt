@@ -1,0 +1,3 @@
+source anchor regression checks passed
+
+[exit-status] 0

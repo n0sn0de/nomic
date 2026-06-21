@@ -1,0 +1,61 @@
+   526	    fn try_credit_dest(
+   527	        &mut self,
+   528	        dest: Dest,
+   529	        mut coins: Coin<Nbtc>,
+   530	        sender: Identity,
+   531	    ) -> Result<()> {
+   532	        let mut succeeded = false;
+   533	        let amount = coins.amount;
+   534	        if let Err(e) = self.validate_dest(&dest, amount, sender) {
+   535	            log::debug!("Error validating transfer: {}", e);
+   536	        } else if let Err(e) = self.credit_dest(dest.clone(), coins.take(amount)?, sender) {
+   537	            log::debug!("Error crediting transfer: {:?}", e);
+   538	            // TODO: ensure no errors can happen after mutating
+   539	            // state in credit_dest since state won't be reverted
+   540	
+   541	            // Assume coins passed into credit_dest are burnt,
+   542	            // replace them in `coins`
+   543	            coins.give(Coin::mint(amount))?;
+   544	        } else {
+   545	            succeeded = true;
+   546	        }
+   547	
+   548	        // Handle failures
+   549	        if !succeeded {
+   550	            log::debug!(
+   551	                "Failed to credit transfer to {} (amount: {}, sender: {})",
+   552	                dest,
+   553	                amount,
+   554	                sender,
+   555	            );
+   556	
+   557	            match sender {
+   558	                Identity::NativeAccount { address } => {
+   559	                    log::debug!("Returning funds to NativeAccount sender");
+   560	                    self.bitcoin.accounts.deposit(address, coins)?;
+   561	                }
+   562	                #[cfg(feature = "ethereum")]
+   563	                Identity::EthAccount {
+   564	                    network,
+   565	                    connection,
+   566	                    address,
+   567	                } => {
+   568	                    let res = self
+   569	                        .ethereum
+   570	                        .network_mut(network)?
+   571	                        .connection_mut(connection.into())?
+   572	                        .transfer(address.into(), coins);
+   573	                    if let Err(e) = res {
+   574	                        log::debug!("Error returning funds to EthAccount sender: {:?}", e);
+   575	                        // TODO: place funds in rewards pool?
+   576	                    } else {
+   577	                        log::debug!("Returning funds to EthAccount sender");
+   578	                    }
+   579	                }
+   580	                _ => {}
+   581	            }
+   582	        }
+   583	
+   584	        Ok(())
+
+[exit-status] 0

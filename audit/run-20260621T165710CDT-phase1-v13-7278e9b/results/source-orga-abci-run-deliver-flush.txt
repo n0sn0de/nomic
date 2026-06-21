@@ -1,0 +1,141 @@
+   465	impl<A: App> InternalApp<ABCIPlugin<A>> {
+   466	    fn run<T, F: FnOnce(&Mutex<ABCIPlugin<A>>) -> T>(
+   467	        &self,
+   468	        store: WrappedMerk,
+   469	        op: F,
+   470	    ) -> Result<T> {
+   471	        let mut store = Store::new(store.into());
+   472	        let state_bytes = match store.get(&[])? {
+   473	            Some(inner) => inner,
+   474	            None => {
+   475	                let mut default: ABCIPlugin<A> = Default::default();
+   476	                // TODO: should the real store actually be passed in here?
+   477	                default.attach(store.clone())?;
+   478	                let mut encoded_bytes = vec![];
+   479	                default.flush(&mut encoded_bytes)?;
+   480	
+   481	                store.put(vec![], encoded_bytes.clone())?;
+   482	                encoded_bytes
+   483	            }
+   484	        };
+   485	        let state: Mutex<ABCIPlugin<A>> = Mutex::new(ABCIPlugin::<A>::load(
+   486	            store.clone(),
+   487	            &mut state_bytes.as_slice(),
+   488	        )?);
+   489	        let res = op(&state);
+   490	        if let Ok(state) = state.into_inner() {
+   491	            let mut bytes = vec![];
+   492	            state.flush(&mut bytes)?;
+   493	            store.put(vec![], bytes)?;
+   494	        }
+   495	        Ok(res)
+   496	    }
+   497	}
+   498	
+   499	impl<A: App> Application for InternalApp<ABCIPlugin<A>> {
+   500	    fn init_chain(&self, store: WrappedMerk, req: RequestInitChain) -> Result<ResponseInitChain> {
+   501	        let mut updates = self.run(store, move |state| -> Result<_> {
+   502	            let mut state = state.lock().unwrap();
+   503	            state.call(req.into())?;
+   504	            Ok(state
+   505	                .validator_updates
+   506	                .take()
+   507	                .expect("ABCI plugin did not create initial validator updates"))
+   508	        })??;
+   509	        let mut res: ResponseInitChain = Default::default();
+   510	        updates.drain().for_each(|(_key, update)| {
+   511	            res.validators.push(update);
+   512	        });
+   513	
+   514	        Ok(res)
+   515	    }
+   516	
+   517	    fn begin_block(
+   518	        &self,
+   519	        store: WrappedMerk,
+   520	        req: RequestBeginBlock,
+   521	    ) -> Result<ResponseBeginBlock> {
+   522	        let (events, _logs) = self.run(store, move |state| -> Result<_> {
+   523	            let mut state = state.lock().unwrap();
+   524	            state.call(req.into())?;
+   525	            Ok((
+   526	                state.events.take().unwrap_or_default(),
+   527	                state.logs.take().unwrap_or_default(),
+   528	            ))
+   529	        })??;
+   530	
+   531	        Ok(ResponseBeginBlock { events })
+   532	    }
+   533	
+   534	    fn end_block(&self, store: WrappedMerk, req: RequestEndBlock) -> Result<ResponseEndBlock> {
+   535	        let (mut updates, events, _logs) = self.run(store, move |state| -> Result<_> {
+   536	            let mut state = state.lock().unwrap();
+   537	            state.call(req.into())?;
+   538	            Ok((
+   539	                state
+   540	                    .validator_updates
+   541	                    .take()
+   542	                    .expect("ABCI plugin did not create validator update map"),
+   543	                state.events.take().unwrap_or_default(),
+   544	                state.logs.take().unwrap_or_default(),
+   545	            ))
+   546	        })??;
+   547	
+   548	        // Write back validator updates
+   549	        let mut res = ResponseEndBlock {
+   550	            events,
+   551	            ..Default::default()
+   552	        };
+   553	        updates.drain().for_each(|(_key, update)| {
+   554	            if let Ok(flag) = std::env::var("ORGA_STATIC_VALSET") {
+   555	                if flag != "0" && flag != "false" {
+   556	                    return;
+   557	                }
+   558	            }
+   559	            res.validator_updates.push(update);
+   560	        });
+   561	
+   562	        Ok(res)
+   563	    }
+   564	
+   565	    fn deliver_tx(&self, store: WrappedMerk, req: RequestDeliverTx) -> Result<ResponseDeliverTx> {
+   566	        let run_res = self.run(store, move |state| -> Result<_> {
+   567	            let res = catch_unwind(|| {
+   568	                let inner_call = Decode::decode(req.tx.to_vec().as_slice())?;
+   569	                state.lock().unwrap().call(ABCICall::DeliverTx(inner_call))
+   570	            })
+   571	            .map_err(|_| crate::Error::Call("Panicked".to_string()));
+   572	
+   573	            let mut state = state.lock().unwrap();
+   574	            Ok((
+   575	                res,
+   576	                state.events.take().unwrap_or_default(),
+   577	                state.logs.take().unwrap_or_default(),
+   578	            ))
+   579	        })?;
+   580	
+   581	        let mut deliver_tx_res = ResponseDeliverTx::default();
+   582	        match run_res {
+   583	            Ok((res, events, logs)) => match res {
+   584	                Ok(Ok(())) => {
+   585	                    deliver_tx_res.code = 0;
+   586	                    deliver_tx_res.log = logs.join("\n");
+   587	                    deliver_tx_res.events = events;
+   588	                }
+   589	                Err(err) | Ok(Err(err)) => {
+   590	                    deliver_tx_res.code = 1;
+   591	                    if logs.is_empty() {
+   592	                        deliver_tx_res.log = err.to_string();
+   593	                    } else {
+   594	                        deliver_tx_res.log = logs.join("\n");
+   595	                    }
+   596	                }
+   597	            },
+   598	            Err(err) => {
+   599	                deliver_tx_res.code = 1;
+   600	                deliver_tx_res.log = err.to_string();
+   601	            }
+   602	        }
+   603	
+   604	        Ok(deliver_tx_res)
+   605	    }

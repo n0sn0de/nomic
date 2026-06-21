@@ -1,0 +1,47 @@
+    Checking schemars v0.8.21
+    Checking http-body v1.0.1
+    Checking prost-types v0.13.3
+   Compiling proc-macro-crate v3.2.0
+   Compiling alloy-primitives v0.8.15
+    Checking tokio-util v0.7.12
+    Checking ics23 v0.12.0
+    Checking http-body v0.4.6
+    Checking ethereum-types v0.14.1
+    Checking toml_edit v0.22.22
+   Compiling alloy-sol-macro-expander v0.7.7
+    Checking tokio-native-tls v0.3.1
+    Checking tokio-rustls v0.24.1
+   Compiling librocksdb-sys v0.16.0+8.10.0
+    Checking prost-types v0.11.9
+    Checking http-body-util v0.1.2
+    Checking postcard v1.0.10
+    Checking secp256k1 v0.24.3
+    Checking tendermint-proto v0.40.0
+    Checking tungstenite v0.21.0
+   Compiling toml v0.7.8
+    Checking headers-core v0.2.0
+    Checking jsonrpc-async v2.0.2
+    Checking toml_edit v0.19.15
+    Checking multer v2.1.0
+    Checking toml_edit v0.13.4
+    Checking ecies v0.2.7
+    Checking serde_with v3.11.0
+    Checking prometheus_exporter v0.8.5
+    Checking headers v0.3.9
+   Compiling parity-scale-codec-derive v3.6.12
+   Compiling borsh-derive v1.5.1
+   Compiling scale-info-derive v2.11.5
+    Checking axum-core v0.4.5
+    Checking frost-core v1.0.0 (https://github.com/ZcashFoundation/frost?rev=51fa7d09f3742563a35d065afcff6ad486430dac#51fa7d09)
+error: failed to run custom build command for `librocksdb-sys v0.16.0+8.10.0`
+
+Caused by:
+  process didn't exit successfully: `/home/nitro/repos/nomic-v13-audit-7278e9b/target/debug/build/librocksdb-sys-fb9d07b91edfcf87/build-script-build` (exit status: 101)
+  --- stderr
+  rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found
+  thread 'main' panicked at /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/librocksdb-sys-0.16.0+8.10.0/build.rs:40:10:
+  unable to generate rocksdb bindings: ClangDiagnostic("rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found\n")
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...
+
+[exit-status] 101

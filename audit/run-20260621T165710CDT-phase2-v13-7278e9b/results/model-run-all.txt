@@ -1,0 +1,25 @@
+outcome: new best chain must include more work
+before_height: 103
+after_height: 103
+before_current_work: 130
+after_current_work: 132
+queue_work_sum: 112
+work_invariant_holds: False
+first_error: Deposits are disabled for the given checkpoint
+processed_after_first_error: [('txid', 0)]
+second_error: Output has already been relayed
+credited: 0
+outcome: logged and swallowed: channel not found
+sender_ibc_balance: 100
+packet_sent: False
+possible=100 present=50 accepted=True required_present_to_spend=34 required_possible_pct=34.00%
+possible=100 present=51 accepted=True required_present_to_spend=35 required_possible_pct=35.00%
+possible=100 present=67 accepted=True required_present_to_spend=45 required_possible_pct=45.00%
+possible=3 present=3 accepted=True required_present_to_spend=3 required_possible_pct=100.00%
+possible=4 present=2 accepted=True required_present_to_spend=2 required_possible_pct=50.00%
+== header_queue_reorg_model.py ==
+== deposit_outpoint_order_model.py ==
+== ibc_transfer_failure_model.py ==
+== threshold_effective_power_model.py ==
+
+[exit-status] 0

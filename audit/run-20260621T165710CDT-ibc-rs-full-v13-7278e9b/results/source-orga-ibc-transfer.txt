@@ -1,0 +1,282 @@
+   103	impl TokenTransferValidationContext for Transfer {
+   104	    type AccountId = Address;
+   105	
+   106	    fn get_port(&self) -> Result<ibc::core::host::types::identifiers::PortId, TokenTransferError> {
+   107	        Ok(PortId::transfer())
+   108	    }
+   109	
+   110	    fn can_send_coins(&self) -> Result<(), TokenTransferError> {
+   111	        Ok(())
+   112	    }
+   113	
+   114	    fn can_receive_coins(&self) -> Result<(), TokenTransferError> {
+   115	        Ok(())
+   116	    }
+   117	
+   118	    fn mint_coins_validate(
+   119	        &self,
+   120	        _account: &Self::AccountId,
+   121	        _coin: &PrefixedCoin,
+   122	    ) -> Result<(), TokenTransferError> {
+   123	        Ok(())
+   124	    }
+   125	
+   126	    fn burn_coins_validate(
+   127	        &self,
+   128	        _account: &Self::AccountId,
+   129	        _coin: &PrefixedCoin,
+   130	        _memo: &Memo,
+   131	    ) -> Result<(), TokenTransferError> {
+   132	        Ok(())
+   133	    }
+   134	
+   135	    fn escrow_coins_validate(
+   136	        &self,
+   137	        _from_account: &Self::AccountId,
+   138	        _port_id: &PortId,
+   139	        _channel_id: &ChannelId,
+   140	        _coin: &PrefixedCoin,
+   141	        _memo: &ibc::apps::transfer::types::Memo,
+   142	    ) -> Result<(), TokenTransferError> {
+   143	        Ok(())
+   144	    }
+   145	
+   146	    fn unescrow_coins_validate(
+   147	        &self,
+   148	        _to_account: &Self::AccountId,
+   149	        _port_id: &PortId,
+   150	        _channel_id: &ChannelId,
+   151	        _coin: &PrefixedCoin,
+   152	    ) -> Result<(), TokenTransferError> {
+   153	        Ok(())
+   154	    }
+   155	}
+   156	
+   157	type Denom = LengthVec<u8, u8>;
+   158	
+   159	impl TryFrom<PrefixedDenom> for Denom {
+   160	    type Error = crate::Error;
+   161	
+   162	    fn try_from(value: PrefixedDenom) -> crate::Result<Self> {
+   163	        value.to_string().try_into()
+   164	    }
+   165	}
+   166	
+   167	impl TryFrom<ibc::apps::transfer::types::Amount> for Amount {
+   168	    type Error = crate::Error;
+   169	
+   170	    fn try_from(value: ibc::apps::transfer::types::Amount) -> crate::Result<Self> {
+   171	        // TODO: either take dependency on `primitive_types` to get U256, or get
+   172	        // try_into<u64> from ibc-rs `amount` type. should not need to use
+   173	        // string parsing here.
+   174	        let amount = value.to_string();
+   175	        let amount = amount.parse::<u64>()?;
+   176	
+   177	        Ok(amount.into())
+   178	    }
+   179	}
+   180	
+   181	impl From<crate::Error> for TokenTransferError {
+   182	    fn from(_err: crate::Error) -> Self {
+   183	        TokenTransferError::InvalidToken
+   184	    }
+   185	}
+   186	
+   187	impl TokenTransferExecutionContext for Transfer {
+   188	    fn burn_coins_execute(
+   189	        &mut self,
+   190	        account: &Self::AccountId,
+   191	        coin: &PrefixedCoin,
+   192	        _memo: &Memo,
+   193	    ) -> Result<(), TokenTransferError> {
+   194	        let denom: Denom = coin.denom.clone().try_into()?;
+   195	        let amount: Amount = coin.amount.try_into()?;
+   196	
+   197	        let mut denom_balances = self.accounts.entry(denom)?.or_default()?;
+   198	
+   199	        let mut account_balance = denom_balances.entry(*account)?.or_default()?;
+   200	        *account_balance = (*account_balance - amount).result()?;
+   201	
+   202	        Ok(())
+   203	    }
+   204	
+   205	    fn mint_coins_execute(
+   206	        &mut self,
+   207	        account: &Self::AccountId,
+   208	        coin: &PrefixedCoin,
+   209	    ) -> Result<(), TokenTransferError> {
+   210	        let denom: Denom = coin.denom.clone().try_into()?;
+   211	        let amount: Amount = coin.amount.try_into()?;
+   212	
+   213	        let mut denom_balances = self.accounts.entry(denom)?.or_default()?;
+   214	
+   215	        let mut receiver_balance = denom_balances.entry(*account)?.or_default()?;
+   216	        *receiver_balance = (*receiver_balance + amount).result()?;
+   217	
+   218	        Ok(())
+   219	    }
+   220	
+   221	    fn escrow_coins_execute(
+   222	        &mut self,
+   223	        from_account: &Self::AccountId,
+   224	        port_id: &PortId,
+   225	        channel_id: &ChannelId,
+   226	        coin: &PrefixedCoin,
+   227	        _memo: &ibc::apps::transfer::types::Memo,
+   228	    ) -> Result<(), TokenTransferError> {
+   229	        let escrow_address = self.get_escrow_account(port_id, channel_id)?;
+   230	
+   231	        let denom: Denom = coin.denom.clone().try_into()?;
+   232	        let mut denom_balances = self.accounts.entry(denom)?.or_default()?;
+   233	
+   234	        let amount: Amount = coin.amount.try_into()?;
+   235	
+   236	        let mut from_balance = denom_balances.entry(*from_account)?.or_default()?;
+   237	        *from_balance = (*from_balance - amount).result()?;
+   238	
+   239	        let mut escrow_balance = denom_balances.entry(escrow_address)?.or_default()?;
+   240	        *escrow_balance = (*escrow_balance + amount).result()?;
+   241	
+   242	        Ok(())
+   243	    }
+   244	
+   245	    fn unescrow_coins_execute(
+   246	        &mut self,
+   247	        to_account: &Self::AccountId,
+   248	        port_id: &PortId,
+   249	        channel_id: &ChannelId,
+   250	        coin: &PrefixedCoin,
+   251	    ) -> Result<(), TokenTransferError> {
+   252	        let escrow_address = self.get_escrow_account(port_id, channel_id)?;
+   253	        let amount: Amount = coin.amount.try_into()?;
+   254	
+   255	        let denom: Denom = coin.denom.clone().try_into()?;
+   256	        let mut denom_balances = self.accounts.entry(denom)?.or_default()?;
+   257	
+   258	        let mut escrow_balance = denom_balances.entry(escrow_address)?.or_default()?;
+   259	        *escrow_balance = (*escrow_balance - amount).result()?;
+   260	
+   261	        let mut to_balance = denom_balances.entry(*to_account)?.or_default()?;
+   262	        *to_balance = (*to_balance + amount).result()?;
+   263	
+   264	        Ok(())
+   265	    }
+   372	    fn on_recv_packet_execute(
+   373	        &mut self,
+   374	        packet: &Packet,
+   375	        _relayer: &Signer,
+   376	    ) -> (ModuleExtras, Acknowledgement) {
+   377	        let (extras, ack) = on_recv_packet_execute(self, packet);
+   378	
+   379	        if let Ok(data) = serde_json::from_slice::<PacketData>(&packet.data) {
+   380	            if is_receiver_chain_source(
+   381	                packet.port_id_on_a.clone(),
+   382	                packet.chan_id_on_a.clone(),
+   383	                &data.token.denom,
+   384	            ) {
+   385	                let incoming_transfer = extras
+   386	                    .events
+   387	                    .iter()
+   388	                    .find(|event| {
+   389	                        event.kind == "fungible_token_packet"
+   390	                            && event
+   391	                                .attributes
+   392	                                .contains(&("success".to_string(), "true".to_string()).into())
+   393	                    })
+   394	                    .map(|event| -> crate::Result<TransferInfo> {
+   395	                        let mut denom = data.token.denom.clone();
+   396	
+   397	                        denom.remove_trace_prefix(&TracePrefix::new(
+   398	                            packet.port_id_on_a.clone(),
+   399	                            packet.chan_id_on_a.clone(),
+   400	                        ));
+   401	
+   402	                        let get_attr = |ev: &ModuleEvent, key: &str| {
+   403	                            ev.attributes
+   404	                                .iter()
+   405	                                .find(|attr| attr.key == key)
+   406	                                .map(|attr| attr.value.clone())
+   407	                                .ok_or_else(|| {
+   408	                                    crate::Error::Ibc(format!(
+   409	                                        "Missing transfer event attribute {}",
+   410	                                        key
+   411	                                    ))
+   412	                                })
+   413	                        };
+   414	                        Ok(TransferInfo {
+   415	                            denom,
+   416	                            amount: get_attr(event, "amount")?.parse()?,
+   417	                            memo: get_attr(event, "memo")?,
+   418	                            receiver: get_attr(event, "receiver")?,
+   419	                            sender: get_attr(event, "sender")?,
+   420	                        })
+   421	                    })
+   422	                    .transpose()
+   423	                    .unwrap_or_default();
+   424	
+   425	                if let Some(incoming_transfer) = incoming_transfer {
+   426	                    self.incoming_transfer.replace(incoming_transfer);
+   427	                }
+   428	            }
+   429	        };
+   430	        (extras, ack)
+   431	    }
+   432	
+   433	    fn on_acknowledgement_packet_validate(
+   434	        &self,
+   435	        packet: &Packet,
+   436	        acknowledgement: &Acknowledgement,
+   437	        relayer: &Signer,
+   438	    ) -> Result<(), PacketError> {
+   439	        on_acknowledgement_packet_validate(self, packet, acknowledgement, relayer).map_err(
+   440	            |e: TokenTransferError| PacketError::AppModule {
+   441	                description: e.to_string(),
+   442	            },
+   443	        )
+   444	    }
+   445	
+   446	    fn on_acknowledgement_packet_execute(
+   447	        &mut self,
+   448	        packet: &Packet,
+   449	        acknowledgement: &Acknowledgement,
+   450	        relayer: &Signer,
+   451	    ) -> (ModuleExtras, Result<(), PacketError>) {
+   452	        let (extras, res) =
+   453	            on_acknowledgement_packet_execute(self, packet, acknowledgement, relayer);
+   454	
+   455	        (
+   456	            extras,
+   457	            res.map_err(|e| PacketError::AppModule {
+   458	                description: e.to_string(),
+   459	            }),
+   460	        )
+   461	    }
+   462	
+   463	    fn on_timeout_packet_validate(
+   464	        &self,
+   465	        packet: &Packet,
+   466	        relayer: &Signer,
+   467	    ) -> Result<(), PacketError> {
+   468	        on_timeout_packet_validate(self, packet, relayer).map_err(|e: TokenTransferError| {
+   469	            PacketError::AppModule {
+   470	                description: e.to_string(),
+   471	            }
+   472	        })
+   473	    }
+   474	
+   475	    fn on_timeout_packet_execute(
+   476	        &mut self,
+   477	        packet: &Packet,
+   478	        relayer: &Signer,
+   479	    ) -> (ModuleExtras, Result<(), PacketError>) {
+   480	        let res = on_timeout_packet_execute(self, packet, relayer);
+   481	        (
+   482	            res.0,
+   483	            res.1
+   484	                .map_err(|e: TokenTransferError| PacketError::AppModule {
+   485	                    description: e.to_string(),
+   486	                }),
+   487	        )
+   488	    }
+
+[exit-status] 0

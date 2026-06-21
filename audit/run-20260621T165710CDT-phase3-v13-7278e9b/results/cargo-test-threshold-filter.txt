@@ -1,0 +1,39 @@
+   Compiling hyper-util v0.1.9
+   Compiling hyper-tls v0.5.0
+   Compiling tendermint-light-client-verifier v0.38.1
+   Compiling hyper-rustls v0.24.2
+   Compiling librocksdb-sys v0.16.0+8.10.0
+   Compiling alloy-transport v0.8.0
+   Compiling tendermint-config v0.38.1
+   Compiling alloy-rpc-types-any v0.8.0
+   Compiling alloy-rpc-types v0.8.0
+   Compiling alloy-rpc-types-anvil v0.8.0
+   Compiling tendermint-config v0.40.0
+   Compiling nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+   Compiling warp v0.3.7
+   Compiling alloy-core v0.8.15
+   Compiling bitcoin_hashes v0.14.0
+   Compiling minreq v2.13.0
+   Compiling curl-sys v0.4.77+curl-8.10.1
+   Compiling bitcoin v0.32.5
+   Compiling zip v0.6.6
+   Compiling crossbeam-channel v0.5.13
+   Compiling urlencoding v2.1.3
+   Compiling alloy-network v0.8.0
+   Compiling jsonrpc v0.18.0
+   Compiling alloy-genesis v0.3.6
+   Compiling serial_test v2.0.0
+   Compiling reqwest v0.11.27
+   Compiling mutagen v0.1.2
+error: failed to run custom build command for `librocksdb-sys v0.16.0+8.10.0`
+
+Caused by:
+  process didn't exit successfully: `/home/nitro/repos/nomic-v13-audit-7278e9b/target/debug/build/librocksdb-sys-0b91dc0e80a11f1c/build-script-build` (exit status: 101)
+  --- stderr
+  rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found
+  thread 'main' panicked at /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/librocksdb-sys-0.16.0+8.10.0/build.rs:40:10:
+  unable to generate rocksdb bindings: ClangDiagnostic("rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found\n")
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...
+
+[exit-status] 101

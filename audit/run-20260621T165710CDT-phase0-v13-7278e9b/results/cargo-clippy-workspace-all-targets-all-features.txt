@@ -1,0 +1,145 @@
+    Checking either v1.13.0
+   Compiling anyhow v1.0.91
+   Compiling generic-array v0.14.7
+   Compiling bitflags v2.6.0
+    Checking hyper-util v0.1.9
+   Compiling alloy-sol-macro v0.8.15
+    Checking hyper-tls v0.5.0
+    Checking bitcoin_hashes v0.11.0
+   Compiling zstd-sys v2.0.13+zstd.1.5.6
+    Checking hyper-rustls v0.24.2
+   Compiling getrandom v0.2.14
+   Compiling untrusted v0.9.0
+    Checking bitcoin-io v0.1.3
+    Checking hex-conservative v0.2.1
+   Compiling bzip2-sys v0.1.11+1.0.8
+   Compiling secp256k1-sys v0.10.1
+   Compiling nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+    Checking bitcoin-internals v0.3.0
+   Compiling libz-sys v1.1.20
+   Compiling adler2 v2.0.0
+   Compiling linux-raw-sys v0.4.14
+   Compiling bindgen v0.69.5
+   Compiling powerfmt v0.2.0
+    Checking warp v0.3.7
+    Checking itertools v0.10.5
+    Checking itertools v0.13.0
+    Checking itertools v0.12.1
+   Compiling ring v0.17.8
+   Compiling rustls v0.21.12
+    Checking reqwest v0.11.27
+   Compiling crc32fast v1.4.2
+   Compiling minreq v2.13.0
+   Compiling bitcoin v0.32.5
+    Checking hex_lit v0.1.1
+   Compiling miniz_oxide v0.8.0
+   Compiling curl-sys v0.4.77+curl-8.10.1
+   Compiling deranged v0.3.11
+    Checking bitcoin-units v0.1.2
+    Checking bitcoin_hashes v0.14.0
+   Compiling filetime v0.2.15
+   Compiling byteorder v1.5.0
+   Compiling constant_time_eq v0.1.5
+   Compiling prost-derive v0.13.4
+   Compiling prost-derive v0.11.9
+   Compiling webpki-roots v0.25.4
+    Checking bech32 v0.11.0
+   Compiling mutagen v0.1.2
+   Compiling curl v0.4.47
+    Checking which v4.4.2
+   Compiling digest v0.9.0
+   Compiling crypto-common v0.1.6
+   Compiling block-buffer v0.10.4
+   Compiling inout v0.1.3
+   Compiling rustix v0.38.42
+   Compiling libsecp256k1-core v0.3.0
+    Checking dashmap v5.5.3
+   Compiling serial_test_derive v2.0.0
+    Checking crossbeam-channel v0.5.13
+   Compiling digest v0.10.7
+   Compiling cipher v0.4.4
+   Compiling flate2 v1.0.35
+    Checking jsonrpc v0.18.0
+    Checking urlencoding v2.1.3
+   Compiling hmac v0.12.1
+   Compiling sha2 v0.10.8
+   Compiling sha1 v0.10.6
+   Compiling aes v0.8.4
+    Checking secp256k1 v0.24.3
+    Checking serial_test v2.0.0
+   Compiling time v0.3.36
+   Compiling pbkdf2 v0.11.0
+    Checking hyper-timeout v0.5.1
+    Checking hyper-tls v0.6.0
+    Checking reqwest v0.12.8
+    Checking bitcoin v0.29.2
+   Compiling libsecp256k1-gen-genmult v0.3.0
+   Compiling libsecp256k1-gen-ecmult v0.3.0
+   Compiling sct v0.7.1
+   Compiling rustls-webpki v0.101.7
+    Checking ethereum_ssz v0.5.4
+    Checking toml_edit v0.13.4
+    Checking base58ck v0.1.0
+    Checking frost-core v1.0.0 (https://github.com/ZcashFoundation/frost?rev=51fa7d09f3742563a35d065afcff6ad486430dac#51fa7d09)
+   Compiling libsecp256k1 v0.7.1
+    Checking prost v0.11.9
+   Compiling bzip2 v0.4.4
+    Checking prost v0.13.4
+    Checking ruint v1.12.3
+    Checking prost-types v0.11.9
+    Checking prost-types v0.13.3
+    Checking tonic v0.12.3
+    Checking ics23 v0.12.0
+    Checking tendermint-proto v0.40.0
+    Checking alloy-primitives v0.8.15
+    Checking alloy-primitives v0.7.7
+    Checking frost-rerandomized v1.0.0 (https://github.com/ZcashFoundation/frost?rev=51fa7d09f3742563a35d065afcff6ad486430dac#51fa7d09)
+   Compiling xattr v1.3.1
+    Checking frost-secp256k1-tr v1.0.0 (https://github.com/ZcashFoundation/frost?rev=51fa7d09f3742563a35d065afcff6ad486430dac#51fa7d09)
+   Compiling tar v0.4.42
+    Checking tendermint-proto v0.32.2
+    Checking tendermint-proto v0.38.1
+    Checking alloy-serde v0.2.1
+    Checking alloy-sol-types v0.7.7
+    Checking alloy-core v0.7.7
+    Checking tree_hash v0.7.0
+    Checking ethereum_serde_utils v0.6.0
+    Checking ethereum_ssz v0.6.0
+    Checking secp256k1 v0.29.1
+    Checking alloy-json-abi v0.8.15
+    Checking alloy-serde v0.8.0
+    Checking alloy-trie v0.7.6
+    Checking alloy-eip7702 v0.4.2
+    Checking alloy-eip2930 v0.1.0
+    Checking alloy-signer v0.8.0
+    Checking alloy-chains v0.1.42
+    Checking alloy-trie v0.6.0
+    Checking alloy-serde v0.3.6
+    Checking alloy-eips v0.2.1
+    Checking alloy-network-primitives v0.2.1
+    Checking alloy-eips v0.8.0
+    Checking alloy-genesis v0.3.6
+    Checking ssz_types v0.7.0
+    Checking alloy-genesis v0.8.0
+    Checking alloy-sol-types v0.8.15
+    Checking alloy-node-bindings v0.3.6
+   Compiling librocksdb-sys v0.16.0+8.10.0
+    Checking alloy-consensus v0.2.1
+    Checking alloy-consensus v0.8.0
+    Checking alloy-node-bindings v0.8.0
+   Compiling zstd-safe v5.0.2+zstd.1.5.2
+    Checking bitcoincore-rpc-json v0.16.0
+   Compiling zstd v0.11.2+zstd.1.5.2
+   Compiling zip v0.6.6
+error: failed to run custom build command for `librocksdb-sys v0.16.0+8.10.0`
+
+Caused by:
+  process didn't exit successfully: `/home/nitro/repos/nomic-v13-audit-7278e9b/target/debug/build/librocksdb-sys-9893caea59f46473/build-script-build` (exit status: 101)
+  --- stderr
+  rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found
+  thread 'main' panicked at /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/librocksdb-sys-0.16.0+8.10.0/build.rs:40:10:
+  unable to generate rocksdb bindings: ClangDiagnostic("rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found\n")
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...
+
+[exit-status] 101

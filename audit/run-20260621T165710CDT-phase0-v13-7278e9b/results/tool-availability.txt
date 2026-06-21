@@ -1,0 +1,4 @@
+/usr/bin/jq
+/home/nitro/.openclaw/npm/node_modules/@openclaw/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path/rg
+
+[exit-status] 0

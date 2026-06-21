@@ -1,0 +1,25 @@
+   216	                        self_store_shared.clone(),
+   217	                        self.consensus_state.take().unwrap(),
+   218	                    )));
+   219	
+   220	                    let res_deliver_tx = {
+   221	                        let owned_store = store.take().unwrap();
+   222	                        let flush_store = Shared::new(BufStore::wrap(owned_store.clone()));
+   223	                        let res = app.deliver_tx(flush_store.clone(), req)?;
+   224	                        {
+   225	                            let mut unwrapped_fs = flush_store.into_inner();
+   226	                            unwrapped_fs.flush()?;
+   227	                        }
+   228	                        let mut owned_store_inner = owned_store.into_inner();
+   229	                        let owned_store = Shared::new(owned_store_inner);
+   230	                        store.replace(owned_store);
+   231	                        res
+   232	                    };
+   233	
+   234	                    self.app.replace(app);
+   235	                    self.consensus_state
+   236	                        .replace(store.unwrap().into_inner().into_map());
+   237	                    let self_store = self_store_shared.into_inner();
+   238	                    self.store = Some(Shared::new(self_store));
+   239	                    Ok(Res::DeliverTx(res_deliver_tx))
+   240	                }

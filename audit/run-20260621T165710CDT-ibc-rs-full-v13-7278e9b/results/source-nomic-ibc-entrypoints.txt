@@ -1,0 +1,69 @@
+   698	    #[call]
+   699	    pub fn ibc_deliver(&mut self, messages: RawIbcTx) -> Result<()> {
+   700	        self.deduct_nbtc_fee(IBC_FEE_USATS.into())?;
+   701	        let incoming_transfers = self.ibc.deliver(messages)?;
+   702	
+   703	        for transfer in incoming_transfers {
+   704	            if transfer.denom.to_string() != "usat" || transfer.memo.is_empty() {
+   705	                continue;
+   706	            }
+   707	
+   708	            let receiver: Address = transfer
+   709	                .receiver
+   710	                .parse()
+   711	                .map_err(|_| Error::Coins("Invalid address".to_string()))?;
+   712	            let amount = transfer.amount;
+   713	
+   714	            let Ok(dest) = transfer.memo.parse::<Dest>() else {
+   715	                continue;
+   716	            };
+   717	
+   718	            let coins = Coin::<Nbtc>::mint(amount);
+   719	            self.ibc.transfer_mut().burn_coins_execute(
+   720	                &receiver,
+   721	                &coins.into(),
+   722	                &"".parse().unwrap(),
+   723	            )?;
+   724	
+   725	            let coins = Coin::<Nbtc>::mint(amount);
+   726	            let sender = Identity::None; // TODO
+   727	            self.bitcoin.insert_pending(dest, coins, sender)?;
+   728	        }
+  1838	impl IbcDest {
+  1839	    pub fn transfer(
+  1840	        &self,
+  1841	        mut coins: Coin<Nbtc>,
+  1842	        bitcoin: &mut Bitcoin,
+  1843	        ibc: &mut Ibc,
+  1844	    ) -> Result<()> {
+  1845	        use orga::ibc::ibc_rs::apps::transfer::types::msgs::transfer::MsgTransfer;
+  1846	
+  1847	        if !self.is_fee_exempt() {
+  1848	            let fee_amount = ibc_fee(coins.amount)?;
+  1849	            let fee = coins.take(fee_amount)?;
+  1850	            bitcoin.give_rewards(fee)?;
+  1851	        }
+  1852	        let nbtc_amount = coins.amount;
+  1853	
+  1854	        ibc.transfer_mut()
+  1855	            .mint_coins_execute(&self.sender_address()?, &coins.into())?;
+  1856	
+  1857	        let msg_transfer = MsgTransfer {
+  1858	            port_id_on_a: self.source_port()?,
+  1859	            chan_id_on_a: self.source_channel()?,
+  1860	            packet_data: PacketData {
+  1861	                token: Nbtc::mint(nbtc_amount).into(),
+  1862	                receiver: self.receiver_signer()?,
+  1863	                sender: self.sender_signer()?,
+  1864	                memo: self.memo()?,
+  1865	            },
+  1866	            timeout_height_on_b: TimeoutHeight::Never,
+  1867	            timeout_timestamp_on_b: TimeoutTimestamp::from_nanoseconds(self.timeout_timestamp),
+  1868	        };
+  1869	        if let Err(err) = ibc.deliver_message(IbcMessage::Ics20(msg_transfer)) {
+  1870	            log::debug!("Failed IBC transfer: {}", err);
+  1871	        }
+  1872	
+  1873	        Ok(())
+
+[exit-status] 0

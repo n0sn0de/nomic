@@ -1,0 +1,152 @@
+   522	    pub fn relay_deposit(
+   523	        &mut self,
+   524	        btc_tx: Adapter<Transaction>,
+   525	        btc_height: u32,
+   526	        btc_proof: Adapter<PartialMerkleTree>,
+   527	        btc_vout: u32,
+   528	        sigset_index: u32,
+   529	        dest: super::app::Dest,
+   530	    ) -> Result<()> {
+   531	        exempt_from_fee()?;
+   532	
+   533	        let now = self
+   534	            .context::<Time>()
+   535	            .ok_or_else(|| Error::Orga(OrgaError::App("No time context available".to_string())))?
+   536	            .seconds as u64;
+   537	
+   538	        let btc_header = self
+   539	            .headers
+   540	            .get_by_height(btc_height)?
+   541	            .ok_or_else(|| OrgaError::App("Invalid bitcoin block height".to_string()))?;
+   542	
+   543	        if self.headers.height()? - btc_height < self.config.min_confirmations {
+   544	            return Err(OrgaError::App("Block is not sufficiently confirmed".to_string()).into());
+   545	        }
+   546	
+   547	        let mut txids = vec![];
+   548	        let mut block_indexes = vec![];
+   549	        let proof_merkle_root = btc_proof
+   550	            .extract_matches(&mut txids, &mut block_indexes)
+   551	            .map_err(|_| Error::BitcoinMerkleBlockError)?;
+   552	        if proof_merkle_root != btc_header.merkle_root() {
+   553	            return Err(OrgaError::App(
+   554	                "Bitcoin merkle proof does not match header".to_string(),
+   555	            ))?;
+   556	        }
+   557	        if txids.len() != 1 {
+   558	            return Err(OrgaError::App(
+   559	                "Bitcoin merkle proof contains an invalid number of txids".to_string(),
+   560	            ))?;
+   561	        }
+   562	        if txids[0] != btc_tx.txid() {
+   563	            return Err(OrgaError::App(
+   564	                "Bitcoin merkle proof does not match transaction".to_string(),
+   565	            ))?;
+   566	        }
+   567	
+   568	        if btc_vout as usize >= btc_tx.output.len() {
+   569	            return Err(OrgaError::App("Output index is out of bounds".to_string()))?;
+   570	        }
+   571	        let output = &btc_tx.output[btc_vout as usize];
+   572	
+   573	        if output.value < self.config.min_deposit_amount {
+   574	            return Err(OrgaError::App(
+   575	                "Deposit amount is below minimum".to_string(),
+   576	            ))?;
+   577	        }
+   578	
+   579	        let checkpoint = self.checkpoints.get(sigset_index)?;
+   580	        let sigset = checkpoint.sigset.clone();
+   581	        let mut dest_bytes = dest.commitment_bytes()?;
+   582	        let expected_script =
+   583	            sigset.output_script(&dest_bytes, self.checkpoints.config.sigset_threshold)?;
+   584	        if output.script_pubkey != expected_script {
+   585	            let legacy_commitments = dest.legacy_commitment_bytes()?;
+   586	            let mut matched = false;
+   587	            for bytes in legacy_commitments {
+   588	                let expected_script =
+   589	                    sigset.output_script(&dest_bytes, self.checkpoints.config.sigset_threshold)?;
+   590	                if output.script_pubkey == expected_script {
+   591	                    matched = true;
+   592	                    dest_bytes = bytes;
+   593	                    break;
+   594	                }
+   595	            }
+   596	            if !matched {
+   597	                return Err(OrgaError::App(
+   598	                    "Output script does not match signer set".to_string(),
+   599	                ))?;
+   600	            }
+   601	        }
+   602	
+   603	        let outpoint = (btc_tx.txid().into_inner(), btc_vout);
+   604	        if self.processed_outpoints.contains(outpoint)? {
+   605	            return Err(OrgaError::App(
+   606	                "Output has already been relayed".to_string(),
+   607	            ))?;
+   608	        }
+   609	        let deposit_timeout = sigset.create_time() + self.config.max_deposit_age;
+   610	        self.processed_outpoints.insert(outpoint, deposit_timeout)?;
+   611	
+   612	        if !checkpoint.deposits_enabled {
+   613	            return Err(OrgaError::App(
+   614	                "Deposits are disabled for the given checkpoint".to_string(),
+   615	            ))?;
+   616	        }
+   617	
+   618	        if now > deposit_timeout {
+   619	            self.recovery_txs.create_recovery_tx(RecoveryTxInput {
+   620	                expired_tx: btc_tx.into_inner(),
+   621	                vout: btc_vout,
+   622	                old_sigset: &sigset,
+   623	                new_sigset: &self.checkpoints.building()?.sigset,
+   624	                dest,
+   625	                fee_rate: self.checkpoints.building()?.fee_rate,
+   626	                //TODO: Hold checkpoint config on state
+   627	                threshold: self.checkpoints.config.sigset_threshold,
+   628	            })?;
+   629	
+   630	            return Ok(());
+   631	        }
+   632	
+   633	        let prevout = bitcoin::OutPoint {
+   634	            txid: btc_tx.txid(),
+   635	            vout: btc_vout,
+   636	        };
+   637	        let input = Input::new(
+   638	            prevout,
+   639	            &sigset,
+   640	            &dest_bytes,
+   641	            output.value,
+   642	            self.checkpoints.config.sigset_threshold,
+   643	        )?;
+   644	        let input_size = input.est_vsize();
+   645	        let mut nbtc = Nbtc::mint(output.value * self.config.units_per_sat);
+   646	        let fee_amount = input_size * checkpoint.fee_rate * self.checkpoints.config.user_fee_factor
+   647	            / 10_000
+   648	            * self.config.units_per_sat;
+   649	        let fee = nbtc.take(fee_amount).map_err(|_| {
+   650	            OrgaError::App("Deposit amount is too small to pay its spending fee".to_string())
+   651	        })?;
+   652	        self.give_miner_fee(fee)?;
+   653	        // TODO: record as excess collected if inputs are full
+   654	
+   655	        let mut building_mut = self.checkpoints.building_mut()?;
+   656	        let mut building_checkpoint_batch = building_mut
+   657	            .batches
+   658	            .get_mut(BatchType::Checkpoint as u64)?
+   659	            .unwrap();
+   660	        let mut checkpoint_tx = building_checkpoint_batch.get_mut(0)?.unwrap();
+   661	        checkpoint_tx.input.push_back(input)?;
+   662	        // TODO: keep in excess queue if full
+   663	
+   664	        if !dest.is_fee_exempt() {
+   665	            let deposit_fee = nbtc.take(calc_bridge_deposit_fee(nbtc.amount.into()))?;
+   666	            self.insert_pending(Dest::RewardPool, deposit_fee, Identity::None)?;
+   667	        }
+   668	
+   669	        self.insert_pending(dest, nbtc, Identity::None)?;
+   670	
+   671	        Ok(())
+
+[exit-status] 0

@@ -1,0 +1,7 @@
+rg: .cargo: No such file or directory (os error 2)
+rg: config.toml: No such file or directory (os error 2)
+rg: .cargo/config.toml: No such file or directory (os error 2)
+Cargo.toml:159:[profile.release]
+Cargo.toml:160:overflow-checks = true
+
+[exit-status] 2

@@ -1,0 +1,52 @@
+   Compiling hyper v1.5.0
+   Compiling hyper v0.14.31
+   Compiling tendermint v0.38.1
+   Compiling librocksdb-sys v0.16.0+8.10.0
+   Compiling alloy-json-rpc v0.8.0
+   Compiling tendermint v0.40.0
+   Compiling alloy-dyn-abi v0.8.15
+   Compiling alloy-rpc-types-eth v0.8.0
+   Compiling zstd-safe v5.0.2+zstd.1.5.2
+   Compiling nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+   Compiling zstd-sys v2.0.13+zstd.1.5.6
+   Compiling abci2 v0.1.3 (https://github.com/turbofish-org/abci2?rev=27d8d7a5a6e458f5881e3eb13116cb2a3ae049b5#27d8d7a5)
+   Compiling toml_edit v0.13.4
+   Compiling cosmrs v0.14.0
+   Compiling ecies v0.2.7
+   Compiling bitcoincore-rpc-async2 v4.0.2
+   Compiling bitcoin-script v0.1.3
+   Compiling secp256k1-sys v0.10.1
+   Compiling split-iter v0.1.0
+   Compiling hex_lit v0.1.1
+   Compiling bzip2 v0.4.4
+   Compiling rustls v0.21.12
+   Compiling xattr v1.3.1
+   Compiling aes v0.8.4
+   Compiling bitcoin-units v0.1.2
+   Compiling pbkdf2 v0.11.0
+   Compiling base58ck v0.1.0
+   Compiling sha1 v0.10.6
+   Compiling hex-conservative v0.2.1
+   Compiling curl-sys v0.4.77+curl-8.10.1
+   Compiling time v0.3.36
+   Compiling bech32 v0.11.0
+   Compiling minreq v2.13.0
+   Compiling libz-sys v1.1.20
+   Compiling zstd v0.11.2+zstd.1.5.2
+   Compiling secp256k1 v0.29.1
+   Compiling alloy-serde v0.3.6
+   Compiling tar v0.4.42
+   Compiling which v4.4.2
+   Compiling dashmap v5.5.3
+error: failed to run custom build command for `librocksdb-sys v0.16.0+8.10.0`
+
+Caused by:
+  process didn't exit successfully: `/home/nitro/repos/nomic-v13-audit-7278e9b/target/debug/build/librocksdb-sys-0b91dc0e80a11f1c/build-script-build` (exit status: 101)
+  --- stderr
+  rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found
+  thread 'main' panicked at /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/librocksdb-sys-0.16.0+8.10.0/build.rs:40:10:
+  unable to generate rocksdb bindings: ClangDiagnostic("rocksdb/include/rocksdb/c.h:65:10: fatal error: 'stdbool.h' file not found\n")
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...
+
+[exit-status] 101

@@ -1,0 +1,6 @@
+5c9e6bb8bdc4f6b8951bff21c9706ca2e3131391f613f082a52a1ef8ffe19595  Cargo.toml
+7767c545204ab067afd015b43988c4316cf2a051c66c8b45a523ad947bb91d53  Cargo.lock
+78f95d73e5395a931425e4d790a1917b8a8f72ad2da6e014a3fc8866292f457b  rust-toolchain
+sha256sum: rust-toolchain.toml: No such file or directory
+
+[exit-status] 1

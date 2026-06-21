@@ -1,0 +1,26 @@
+   123	    fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
+   124	        let host_height = self.host_height()?;
+   125	        let host_cons_state = self.host_consensus_state(&host_height)?;
+   126	        Ok(host_cons_state
+   127	            .timestamp()
+   128	            .try_into()
+   129	            .map_err(|_| ClientError::Other {
+   130	                description: "Invalid timestamp".into(),
+   131	            })?)
+   132	    }
+   133	
+   134	    fn host_consensus_state(
+   135	        &self,
+   136	        height: &Height,
+   137	    ) -> Result<Self::HostConsensusState, ContextError> {
+   138	        let index = self.host_consensus_states.len() - 1 - (self.height - height.revision_height());
+   139	        Ok(self
+   140	            .host_consensus_states
+   141	            .get(index)
+   142	            .map_err(|_| ClientError::ClientSpecific {
+   143	                description: "Unable to get host consensus state".to_string(),
+   144	            })?
+   145	            .unwrap()
+   146	            .clone()
+
+[exit-status] 0

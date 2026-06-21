@@ -1,0 +1,69 @@
+   139	    pub fn deliver(&mut self, messages: RawIbcTx) -> crate::Result<Vec<TransferInfo>> {
+   140	        let messages: IbcTx = messages.try_into()?;
+   141	        let mut incoming_transfers = vec![];
+   142	        for message in messages.0 {
+   143	            if let Some(incoming_transfer) = self.deliver_message(message)? {
+   144	                incoming_transfers.push(incoming_transfer);
+   145	            }
+   146	        }
+   147	        Ok(incoming_transfers)
+   148	    }
+   149	
+   150	    /// Call for triggering a token transfer.
+   151	    #[call]
+   152	    pub fn raw_transfer(&mut self, message: TransferMessage) -> crate::Result<()> {
+   153	        let message: MsgTransfer = message.inner;
+   154	        let sender_addr: Address = message.packet_data.sender.clone().try_into()?;
+   155	
+   156	        if self.signer()? != sender_addr {
+   157	            return Err(crate::Error::Ibc(
+   158	                "Transfers must be signed by the sender".into(),
+   159	            ));
+   160	        }
+   161	
+   162	        self.deliver_message(IbcMessage::Ics20(message))?;
+   163	
+   164	        Ok(())
+   165	    }
+   166	
+   167	    /// Execute one [IbcMessage].
+   168	    ///
+   169	    /// Returns info about a transfer if the message triggered one.
+   170	    pub fn deliver_message(&mut self, message: IbcMessage) -> crate::Result<Option<TransferInfo>> {
+   171	        let mut maybe_client_update = None;
+   172	
+   173	        use IbcMessage::*;
+   174	
+   175	        match message {
+   176	            Ics26(msg) => {
+   177	                if let MsgEnvelope::Client(ClientMsg::UpdateClient(msg)) = &msg {
+   178	                    maybe_client_update = Some(msg.clone());
+   179	                }
+   180	                dispatch(&mut self.ctx, &mut self.router, msg)
+   181	                    .map_err(|e| Error::Ibc(e.to_string()))?
+   182	            }
+   183	            Ics20(msg) => {
+   184	                let transfer_module = &mut self.router.transfer;
+   185	                send_transfer(&mut self.ctx, transfer_module, msg)
+   186	                    .map_err(|e| Error::Ibc(e.to_string()))?
+   187	            }
+   188	        };
+   189	
+   190	        if let Some(msg) = maybe_client_update {
+   191	            match Header::try_from(msg.client_message) {
+   192	                Ok(header) => {
+   193	                    let mut client = self
+   194	                        .ctx
+   195	                        .clients
+   196	                        .get_mut(msg.client_id.into())?
+   197	                        .ok_or_else(|| Error::Ibc("Expected client".to_string()))?;
+   198	                    client.last_header = Some(header.into())
+   199	                }
+   200	                Err(err) => log::debug!("Error decoding header: {}", err),
+   201	            }
+   202	        }
+   203	
+   204	        Ok(self.transfer_mut().incoming_transfer_mut().take())
+   205	    }
+
+[exit-status] 0

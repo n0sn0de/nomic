@@ -1,0 +1,3 @@
+{"root":"/home/nitro/repos/nomic-v13-audit-7278e9b/Cargo.toml"}
+
+[exit-status] 0

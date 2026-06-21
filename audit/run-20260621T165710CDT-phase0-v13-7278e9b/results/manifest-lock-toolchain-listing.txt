@@ -1,0 +1,7 @@
+ls: cannot access 'rust-toolchain.toml': No such file or directory
+ls: cannot access '.cargo': No such file or directory
+-rw-rw-r-- 1 nitro nitro 198076 Jun 21 16:57 Cargo.lock
+-rw-rw-r-- 1 nitro nitro   5294 Jun 21 16:57 Cargo.toml
+-rw-rw-r-- 1 nitro nitro     43 Jun 21 16:57 rust-toolchain
+
+[exit-status] 2

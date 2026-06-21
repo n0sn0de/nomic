@@ -1,0 +1,3 @@
+./build.rs
+
+[exit-status] 0

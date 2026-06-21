@@ -1,0 +1,168 @@
+    15	/// Initiate a token transfer. Equivalent to calling [`send_transfer_validate`], followed by [`send_transfer_execute`].
+    16	pub fn send_transfer<SendPacketCtx, TokenCtx>(
+    17	    send_packet_ctx_a: &mut SendPacketCtx,
+    18	    token_ctx_a: &mut TokenCtx,
+    19	    msg: MsgTransfer,
+    20	) -> Result<(), TokenTransferError>
+    21	where
+    22	    SendPacketCtx: SendPacketExecutionContext,
+    23	    TokenCtx: TokenTransferExecutionContext,
+    24	{
+    25	    send_transfer_validate(send_packet_ctx_a, token_ctx_a, msg.clone())?;
+    26	    send_transfer_execute(send_packet_ctx_a, token_ctx_a, msg)
+    27	}
+    28	
+    29	/// Validates the token transfer. If this succeeds, then it is legal to initiate the transfer with [`send_transfer_execute`].
+    30	pub fn send_transfer_validate<SendPacketCtx, TokenCtx>(
+    31	    send_packet_ctx_a: &SendPacketCtx,
+    32	    token_ctx_a: &TokenCtx,
+    33	    msg: MsgTransfer,
+    34	) -> Result<(), TokenTransferError>
+    35	where
+    36	    SendPacketCtx: SendPacketValidationContext,
+    37	    TokenCtx: TokenTransferValidationContext,
+    38	{
+    39	    token_ctx_a.can_send_coins()?;
+    40	
+    41	    let chan_end_path_on_a = ChannelEndPath::new(&msg.port_id_on_a, &msg.chan_id_on_a);
+    42	    let chan_end_on_a = send_packet_ctx_a.channel_end(&chan_end_path_on_a)?;
+    43	
+    44	    let port_id_on_b = chan_end_on_a.counterparty().port_id().clone();
+    45	    let chan_id_on_b = chan_end_on_a
+    46	        .counterparty()
+    47	        .channel_id()
+    48	        .ok_or_else(|| TokenTransferError::DestinationChannelNotFound {
+    49	            port_id: msg.port_id_on_a.clone(),
+    50	            channel_id: msg.chan_id_on_a.clone(),
+    51	        })?
+    52	        .clone();
+    53	
+    54	    let seq_send_path_on_a = SeqSendPath::new(&msg.port_id_on_a, &msg.chan_id_on_a);
+    55	    let sequence = send_packet_ctx_a.get_next_sequence_send(&seq_send_path_on_a)?;
+    56	
+    57	    let token = &msg.packet_data.token;
+    58	
+    59	    let sender: TokenCtx::AccountId = msg
+    60	        .packet_data
+    61	        .sender
+    62	        .clone()
+    63	        .try_into()
+    64	        .map_err(|_| TokenTransferError::ParseAccountFailure)?;
+    65	
+    66	    if is_sender_chain_source(
+    67	        msg.port_id_on_a.clone(),
+    68	        msg.chan_id_on_a.clone(),
+    69	        &token.denom,
+    70	    ) {
+    71	        token_ctx_a.escrow_coins_validate(
+    72	            &sender,
+    73	            &msg.port_id_on_a,
+    74	            &msg.chan_id_on_a,
+    75	            token,
+    76	            &msg.packet_data.memo,
+    77	        )?;
+    78	    } else {
+    79	        token_ctx_a.burn_coins_validate(&sender, token, &msg.packet_data.memo)?;
+    80	    }
+    81	
+    82	    let packet = {
+    83	        let data = serde_json::to_vec(&msg.packet_data)
+    84	            .expect("PacketData's infallible Serialize impl failed");
+    85	
+    86	        Packet {
+    87	            seq_on_a: sequence,
+    88	            port_id_on_a: msg.port_id_on_a,
+    89	            chan_id_on_a: msg.chan_id_on_a,
+    90	            port_id_on_b,
+    91	            chan_id_on_b,
+    92	            data,
+    93	            timeout_height_on_b: msg.timeout_height_on_b,
+    94	            timeout_timestamp_on_b: msg.timeout_timestamp_on_b,
+    95	        }
+    96	    };
+    97	
+    98	    send_packet_validate(send_packet_ctx_a, &packet)?;
+    99	
+   100	    Ok(())
+   101	}
+   102	
+   103	/// Executes the token transfer. A prior call to [`send_transfer_validate`] MUST have succeeded.
+   104	pub fn send_transfer_execute<SendPacketCtx, TokenCtx>(
+   105	    send_packet_ctx_a: &mut SendPacketCtx,
+   106	    token_ctx_a: &mut TokenCtx,
+   107	    msg: MsgTransfer,
+   108	) -> Result<(), TokenTransferError>
+   109	where
+   110	    SendPacketCtx: SendPacketExecutionContext,
+   111	    TokenCtx: TokenTransferExecutionContext,
+   112	{
+   113	    let chan_end_path_on_a = ChannelEndPath::new(&msg.port_id_on_a, &msg.chan_id_on_a);
+   114	    let chan_end_on_a = send_packet_ctx_a.channel_end(&chan_end_path_on_a)?;
+   115	
+   116	    let port_on_b = chan_end_on_a.counterparty().port_id().clone();
+   117	    let chan_on_b = chan_end_on_a
+   118	        .counterparty()
+   119	        .channel_id()
+   120	        .ok_or_else(|| TokenTransferError::DestinationChannelNotFound {
+   121	            port_id: msg.port_id_on_a.clone(),
+   122	            channel_id: msg.chan_id_on_a.clone(),
+   123	        })?
+   124	        .clone();
+   125	
+   126	    // get the next sequence
+   127	    let seq_send_path_on_a = SeqSendPath::new(&msg.port_id_on_a, &msg.chan_id_on_a);
+   128	    let sequence = send_packet_ctx_a.get_next_sequence_send(&seq_send_path_on_a)?;
+   129	
+   130	    let token = &msg.packet_data.token;
+   131	
+   132	    let sender = msg
+   133	        .packet_data
+   134	        .sender
+   135	        .clone()
+   136	        .try_into()
+   137	        .map_err(|_| TokenTransferError::ParseAccountFailure)?;
+   138	
+   139	    if is_sender_chain_source(
+   140	        msg.port_id_on_a.clone(),
+   141	        msg.chan_id_on_a.clone(),
+   142	        &token.denom,
+   143	    ) {
+   144	        token_ctx_a.escrow_coins_execute(
+   145	            &sender,
+   146	            &msg.port_id_on_a,
+   147	            &msg.chan_id_on_a,
+   148	            token,
+   149	            &msg.packet_data.memo,
+   150	        )?;
+   151	    } else {
+   152	        token_ctx_a.burn_coins_execute(&sender, token, &msg.packet_data.memo)?;
+   153	    }
+   154	
+   155	    let packet = {
+   156	        let data = {
+   157	            serde_json::to_vec(&msg.packet_data)
+   158	                .expect("PacketData's infallible Serialize impl failed")
+   159	        };
+   160	
+   161	        Packet {
+   162	            seq_on_a: sequence,
+   163	            port_id_on_a: msg.port_id_on_a,
+   164	            chan_id_on_a: msg.chan_id_on_a,
+   165	            port_id_on_b: port_on_b,
+   166	            chan_id_on_b: chan_on_b,
+   167	            data,
+   168	            timeout_height_on_b: msg.timeout_height_on_b,
+   169	            timeout_timestamp_on_b: msg.timeout_timestamp_on_b,
+   170	        }
+   171	    };
+   172	
+   173	    send_packet_execute(send_packet_ctx_a, packet)?;
+   174	
+   175	    {
+   176	        send_packet_ctx_a.log_message(format!(
+   177	            "IBC fungible token transfer: {} --({})--> {}",
+   178	            msg.packet_data.sender, token, msg.packet_data.receiver
+   179	        ))?;
+   180	
+
+[exit-status] 0
