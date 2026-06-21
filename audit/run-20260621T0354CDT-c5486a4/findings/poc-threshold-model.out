@@ -1,0 +1,24 @@
+mainnet 2/3, one of two equal-power validators publishes xpub
+  accepted_sigset=True
+  possible_vp=2 present_vp=1 ratio=2/3
+  strict threshold is signed_vp > 0; minimum signed_vp=1
+  minimum signed_vp as share of possible_vp=50.00%
+
+mainnet 2/3, 51% of validator power publishes xpub
+  accepted_sigset=True
+  possible_vp=100 present_vp=51 ratio=2/3
+  strict threshold is signed_vp > 34; minimum signed_vp=35
+  minimum signed_vp as share of possible_vp=35.00%
+
+testnet 9/10, 51% of validator power publishes xpub
+  accepted_sigset=True
+  possible_vp=100 present_vp=51 ratio=9/10
+  strict threshold is signed_vp > 45; minimum signed_vp=46
+  minimum signed_vp as share of possible_vp=46.00%
+
+mainnet 2/3, all 3 equal-power validators publish xpub
+  accepted_sigset=True
+  possible_vp=3 present_vp=3 ratio=2/3
+  strict threshold is signed_vp > 2; minimum signed_vp=3
+  minimum signed_vp as share of possible_vp=100.00%
+

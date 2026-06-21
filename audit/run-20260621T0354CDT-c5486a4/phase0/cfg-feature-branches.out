@@ -1,0 +1,321 @@
+genesis/testnet-4d.json:3:  "chain_id": "nomic-testnet-4d",
+networks/testnet.toml:8:btc_relayer = ["https://relayer.nomic-testnet.mappum.io:8443"]
+networks/testnet.toml:15:  "chain_id": "nomic-testnet-6",
+genesis/testnet-4.json:3:  "chain_id": "nomic-testnet-4",
+tests/node_spawn.rs:97:fn testnet() {
+tests/node_spawn.rs:106:        "testnet",
+tests/relayer.rs:1:#![cfg(todo)]
+tests/header_queue.rs:333:fn mainnet_from_file() {
+Cargo.toml:101:default = ["full", "testnet"]
+Cargo.toml:117:testnet = []
+Cargo.toml:118:devnet = []
+Cargo.toml:120:signet = []
+Cargo.toml:155:overflow-checks = true
+Cargo.toml:158:unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+Cargo.toml:172:required-features = ["devnet"]
+tests/bitcoin.rs:1912:        Err(Error::Test(_)) => panic!("Test failed to fail on deposit address generation"),
+tests/bitcoin.rs:1915:                panic!("Unexpected error: {}", e);
+tests/bitcoin.rs:1918:        Ok(_) => panic!("Expected error"),
+build.rs:12:    #[cfg(feature = "legacy-bin")]
+build.rs:27:                #[cfg(feature = "testnet")]
+build.rs:29:                    println!("cargo:rerun-if-changed=networks/testnet.toml");
+build.rs:30:                    include_str!("networks/testnet.toml")
+build.rs:32:                #[cfg(not(feature = "testnet"))]
+build.rs:83:        #[cfg(feature = "testnet")]
+build.rs:84:        let default_features = "full,feat-ibc,testnet";
+build.rs:85:        #[cfg(not(feature = "testnet"))]
+src/app/migrations.rs:1:#[cfg(feature = "babylon")]
+src/app/migrations.rs:3:#[cfg(feature = "ethereum")]
+src/app/migrations.rs:32:        #[cfg(not(feature = "testnet"))]
+src/app/migrations.rs:84:            #[cfg(feature = "ethereum")]
+src/app/migrations.rs:92:        // #[cfg(all(feature = "testnet", feature = "ethereum"))]
+src/bin/create-checkpoint.rs:52:            panic!("height must be a multiple of 2016")
+src/incentives.rs:26:    pub testnet_participation: Part,
+src/incentives.rs:32:            testnet_participation: self.testnet_participation.clone(),
+src/incentives.rs:46:        self.testnet_participation.is_empty()
+src/incentives.rs:89:                    testnet_participation: Part {
+src/incentives.rs:128:    pub fn claim_testnet_participation_incentives(&mut self) -> OrgaResult<()> {
+src/incentives.rs:130:        let amount = acct.testnet_participation.claim()?;
+src/incentives.rs:164:        let testnet_participation =
+src/incentives.rs:165:            add_part(&mut dest.testnet_participation, src.testnet_participation);
+src/incentives.rs:167:        Ok(testnet_participation)
+src/bitcoin/relayer.rs:1223:            #[cfg(feature = "testnet")]
+src/bitcoin/relayer.rs:1225:            #[cfg(not(feature = "testnet"))]
+src/bitcoin/relayer.rs:1421:#[cfg(test)]
+src/bitcoin/mod.rs:25:#[cfg(feature = "full")]
+src/bitcoin/mod.rs:42:#[cfg(feature = "full")]
+src/bitcoin/mod.rs:47:#[cfg(feature = "full")]
+src/bitcoin/mod.rs:50:#[cfg(feature = "full")]
+src/bitcoin/mod.rs:65:#[cfg(all(
+src/bitcoin/mod.rs:66:    not(feature = "testnet"),
+src/bitcoin/mod.rs:67:    not(feature = "devnet"),
+src/bitcoin/mod.rs:68:    not(feature = "signet")
+src/bitcoin/mod.rs:71:#[cfg(feature = "signet")]
+src/bitcoin/mod.rs:73:#[cfg(all(feature = "testnet", not(feature = "devnet"), not(feature = "signet")))]
+src/bitcoin/mod.rs:75:#[cfg(all(feature = "devnet", feature = "testnet", not(feature = "signet")))]
+src/bitcoin/mod.rs:79:#[cfg(feature = "testnet")]
+src/bitcoin/mod.rs:81:#[cfg(not(feature = "testnet"))]
+src/bitcoin/mod.rs:161:            #[cfg(feature = "testnet")]
+src/bitcoin/mod.rs:163:            #[cfg(not(feature = "testnet"))]
+src/bitcoin/mod.rs:168:            #[cfg(feature = "testnet")]
+src/bitcoin/mod.rs:170:            #[cfg(not(feature = "testnet"))]
+src/bitcoin/mod.rs:408:        #[cfg(feature = "full")]
+src/bitcoin/mod.rs:443:        #[cfg(feature = "full")]
+src/bitcoin/mod.rs:466:    #[cfg(feature = "full")]
+src/bitcoin/mod.rs:909:    /// The network (e.g. Bitcoin testnet vs mainnet) which is currently
+src/bitcoin/mod.rs:996:    #[cfg(feature = "full")]
+src/bitcoin/mod.rs:1049:    #[cfg(feature = "full")]
+src/bitcoin/mod.rs:1288:#[cfg(test)]
+src/bin/nomic.rs:10:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:12:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:16:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:28:#[cfg(feature = "babylon")]
+src/bin/nomic.rs:36:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:38:#[cfg(feature = "frost")]
+src/bin/nomic.rs:185:    #[cfg(feature = "babylon")]
+src/bin/nomic.rs:187:    #[cfg(feature = "babylon")]
+src/bin/nomic.rs:189:    #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:191:    #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:193:    #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:195:    #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:261:                #[cfg(feature = "babylon")]
+src/bin/nomic.rs:263:                #[cfg(feature = "babylon")]
+src/bin/nomic.rs:265:                #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:267:                #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:269:                #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:271:                #[cfg(feature = "ethereum")]
+src/bin/nomic.rs:363:                None => panic!("Legacy node exited unexpectedly"),
+src/bin/nomic.rs:572:            #[cfg(feature = "legacy-bin")]
+src/bin/nomic.rs:1510:        #[cfg(feature = "frost")]
+src/bin/nomic.rs:1517:        #[cfg(not(feature = "frost"))]
+src/bin/nomic.rs:1771:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:1787:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:1836:        std::panic::set_hook(Box::new(|e| {
+src/bin/nomic.rs:2563:#[cfg(feature = "babylon")]
+src/bin/nomic.rs:2578:#[cfg(feature = "babylon")]
+src/bin/nomic.rs:2626:#[cfg(feature = "babylon")]
+src/bin/nomic.rs:2635:#[cfg(feature = "babylon")]
+src/bin/nomic.rs:2651:#[cfg(feature = "frost")]
+src/bin/nomic.rs:2658:#[cfg(feature = "frost")]
+src/bin/nomic.rs:2678:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:2698:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:3102:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:3112:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:3142:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:3158:#[cfg(feature = "ethereum")]
+src/bin/nomic.rs:3204:    let panic_handler = if backtrace_enabled {
+src/bin/nomic.rs:3205:        Some(std::panic::take_hook())
+src/bin/nomic.rs:3209:    std::panic::set_hook(Box::new(move |info| {
+src/bin/nomic.rs:3211:        if let Some(f) = panic_handler.as_ref() {
+src/airdrop.rs:4:#[cfg(feature = "full")]
+src/airdrop.rs:12:#[cfg(feature = "full")]
+src/airdrop.rs:18:#[cfg(feature = "full")]
+src/airdrop.rs:21:#[cfg(feature = "full")]
+src/airdrop.rs:129:    #[cfg(feature = "full")]
+src/airdrop.rs:154:        #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:155:        let mut testnet_locked = 0;
+src/airdrop.rs:156:        #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:157:        let mut testnet_claimable = 0;
+src/airdrop.rs:160:        for (address, networks, testnet_completions) in recipients.iter() {
+src/airdrop.rs:170:            let res = self.airdrop_to(*address, unom, *testnet_completions)?;
+src/airdrop.rs:174:            #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:176:                testnet_locked += res.0;
+src/airdrop.rs:177:                testnet_claimable += res.1;
+src/airdrop.rs:187:        #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:190:            testnet_locked,
+src/airdrop.rs:191:            testnet_claimable,
+src/airdrop.rs:199:    #[cfg(feature = "full")]
+src/airdrop.rs:204:        testnet_completions: u64,
+src/airdrop.rs:216:    #[cfg(feature = "full")]
+src/airdrop.rs:222:    #[cfg(feature = "full")]
+src/airdrop.rs:252:    #[cfg(feature = "full")]
+src/airdrop.rs:274:    #[cfg(feature = "full")]
+src/airdrop.rs:385:#[cfg(feature = "full")]
+src/airdrop.rs:386:#[cfg(test)]
+src/airdrop.rs:389:    #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:397:    #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:402:    #[cfg(feature = "testnet")]
+src/airdrop.rs:404:    fn airdrop_allocation_no_testnet() {
+src/airdrop.rs:420:    #[cfg(not(feature = "testnet"))]
+src/airdrop.rs:438:    #[cfg(not(feature = "testnet"))]
+src/ethereum/mod.rs:45:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:53:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:56:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:69:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:71:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:768:                return Err(Error::App("Balance overflow".to_string()));
+src/ethereum/mod.rs:990:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:1181:    #[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:1201:#[cfg(feature = "ethereum-full")]
+src/ethereum/mod.rs:1209:#[cfg(all(test, feature = "ethereum-full"))]
+src/lib.rs:15:#[cfg(feature = "full")]
+src/lib.rs:26:#[cfg(feature = "babylon")]
+src/lib.rs:31:#[cfg(feature = "ethereum")]
+src/lib.rs:33:#[cfg(feature = "frost")]
+src/lib.rs:36:#[cfg(feature = "full")]
+src/lib.rs:38:#[cfg(feature = "full")]
+src/lib.rs:41:#[cfg(feature = "full")]
+src/bitcoin/threshold_sig.rs:209:    /// This function expects shares to be unsigned, and will panic if any of
+src/bitcoin/threshold_sig.rs:320:        #[cfg(not(fuzzing))]
+src/bitcoin/header_queue.rs:240:    /// testnet).
+src/bitcoin/header_queue.rs:250:            bitcoin::Network::Bitcoin => Config::mainnet(),
+src/bitcoin/header_queue.rs:251:            bitcoin::Network::Testnet => Config::testnet(),
+src/bitcoin/header_queue.rs:253:            bitcoin::Network::Signet => Config::signet(),
+src/bitcoin/header_queue.rs:259:    pub fn mainnet() -> Self {
+src/bitcoin/header_queue.rs:281:    pub fn testnet() -> Self {
+src/bitcoin/header_queue.rs:282:        let checkpoint_json = include_str!("./testnet_checkpoint.json");
+src/bitcoin/header_queue.rs:303:    pub fn signet() -> Self {
+src/bitcoin/header_queue.rs:304:        let checkpoint_json = include_str!("./signet_checkpoint.json");
+src/bitcoin/header_queue.rs:326:        let checkpoint_json = include_str!("./testnet_checkpoint.json");
+src/bitcoin/header_queue.rs:774:#[cfg(test)]
+src/bitcoin/header_queue.rs:1021:    #[should_panic(expected = "Bitcoin(BlockBadTarget)")]
+src/cosmos.rs:17:#[cfg(feature = "full")]
+src/cosmos.rs:19:#[cfg(feature = "full")]
+src/cosmos.rs:50:#[cfg(feature = "full")]
+src/cosmos.rs:396:#[cfg(feature = "full")]
+src/cosmos.rs:517:#[cfg(test)]
+src/ethereum/consensus/mod.rs:35:#[cfg(feature = "ethereum-full")]
+src/ethereum/consensus/mod.rs:263:    /// Network parameters for the Ethereum mainnet.
+src/ethereum/consensus/mod.rs:264:    pub fn ethereum_mainnet() -> Self {
+src/ethereum/consensus/mod.rs:274:    /// Network parameters for the Ethereum Sepolia testnet.
+src/ethereum/consensus/mod.rs:985:#[cfg(test)]
+src/ethereum/consensus/mod.rs:1024:        let mut client = LightClient::new(bootstrap.data, Network::ethereum_mainnet()).unwrap();
+src/frost/mod.rs:15:#[cfg(feature = "full")]
+src/frost/mod.rs:576:// #[cfg(test)]
+src/app.rs:5:// TODO: remove after switching from "testnet" feature flag to orga channels
+src/app.rs:10:#[cfg(feature = "babylon")]
+src/app.rs:17:#[cfg(feature = "ethereum")]
+src/app.rs:19:#[cfg(feature = "frost")]
+src/app.rs:22:#[cfg(feature = "ethereum")]
+src/app.rs:83:#[cfg(feature = "full")]
+src/app.rs:87:#[cfg(feature = "full")]
+src/app.rs:92:#[cfg(feature = "full")]
+src/app.rs:104:#[cfg(feature = "ethereum")]
+src/app.rs:109:#[cfg(feature = "frost")]
+src/app.rs:111:#[cfg(feature = "frost")]
+src/app.rs:113:#[cfg(feature = "frost")]
+src/app.rs:179:    #[cfg(all(feature = "ethereum", feature = "testnet"))]
+src/app.rs:183:    #[cfg(all(feature = "ethereum", feature = "testnet"))]
+src/app.rs:188:    #[cfg(all(feature = "babylon", feature = "testnet"))]
+src/app.rs:193:    #[cfg(all(feature = "frost", feature = "testnet"))]
+src/app.rs:207:    #[cfg(feature = "full")]
+src/app.rs:306:        #[cfg(feature = "ethereum")]
+src/app.rs:326:        #[cfg(not(feature = "ethereum"))]
+src/app.rs:408:            #[cfg(feature = "ethereum")]
+src/app.rs:419:            #[cfg(feature = "ethereum")]
+src/app.rs:433:            #[cfg(feature = "babylon")]
+src/app.rs:458:            #[cfg(feature = "babylon")]
+src/app.rs:517:                #[cfg(feature = "ethereum")]
+src/app.rs:553:            #[cfg(feature = "ethereum")]
+src/app.rs:563:            #[cfg(feature = "ethereum")]
+src/app.rs:577:            #[cfg(feature = "babylon")]
+src/app.rs:594:            #[cfg(feature = "babylon")]
+src/app.rs:601:                #[cfg(feature = "ethereum")]
+src/app.rs:718:        #[cfg(feature = "babylon")]
+src/app.rs:737:        #[cfg(not(feature = "babylon"))]
+src/app.rs:754:        #[cfg(feature = "babylon")]
+src/app.rs:779:        #[cfg(not(feature = "babylon"))]
+src/app.rs:795:        #[cfg(feature = "babylon")]
+src/app.rs:818:        #[cfg(not(feature = "babylon"))]
+src/app.rs:832:        #[cfg(feature = "ethereum")]
+src/app.rs:846:        #[cfg(not(feature = "ethereum"))]
+src/app.rs:862:    #[cfg(all(feature = "frost", feature = "testnet"))]
+src/app.rs:887:#[cfg(feature = "full")]
+src/app.rs:896:    #[cfg(feature = "ethereum")]
+src/app.rs:898:    #[cfg(feature = "frost")]
+src/app.rs:928:            #[cfg(feature = "testnet")]
+src/app.rs:935:                include_str!("../testnet_addresses.csv")
+src/app.rs:942:                #[cfg(feature = "ethereum")]
+src/app.rs:990:            #[cfg(all(feature = "frost", feature = "testnet"))]
+src/app.rs:995:            #[cfg(feature = "ethereum")]
+src/app.rs:1035:            #[cfg(feature = "babylon")]
+src/app.rs:1478:                            build_call!(self.incentives.claim_testnet_participation_incentives());
+src/app.rs:1776:    #[cfg(feature = "ethereum")]
+src/app.rs:1786:    #[cfg(feature = "ethereum")]
+src/app.rs:1801:    #[cfg(feature = "babylon")]
+src/app.rs:1810:    #[cfg(feature = "babylon")]
+src/app.rs:1880:    #[cfg(feature = "ethereum")]
+src/app.rs:1912:    #[cfg(all(feature = "testnet", not(feature = "devnet")))]
+src/app.rs:1914:    #[cfg(all(not(feature = "testnet"), not(feature = "devnet")))]
+src/app.rs:1916:    #[cfg(all(feature = "devnet", feature = "testnet"))]
+src/app.rs:1940:            #[cfg(feature = "ethereum")]
+src/app.rs:1942:            #[cfg(feature = "ethereum")]
+src/app.rs:1947:            #[cfg(feature = "babylon")]
+src/app.rs:1952:            #[cfg(feature = "babylon")]
+src/app.rs:2095:    #[cfg(feature = "ethereum")]
+src/app.rs:2192:    #[cfg(not(feature = "testnet"))]
+src/app.rs:2201:    #[cfg(feature = "testnet")]
+src/app.rs:2205:#[cfg(test)]
+src/app.rs:2211:        #[cfg(not(feature = "testnet"))]
+src/app.rs:2219:        #[cfg(feature = "testnet")]
+src/bitcoin/signer.rs:239:            #[cfg(feature = "ethereum")]
+src/bitcoin/signer.rs:515:#[cfg(test)]
+src/bitcoin/signer.rs:575:    #[should_panic]
+src/bitcoin/checkpoint.rs:1:#[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:22:#[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:24:#[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:1061:            #[cfg(feature = "testnet")]
+src/bitcoin/checkpoint.rs:1063:            #[cfg(not(feature = "testnet"))]
+src/bitcoin/checkpoint.rs:1363:        #[cfg(not(feature = "full"))]
+src/bitcoin/checkpoint.rs:1366:        #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:1987:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2109:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2229:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2454:#[cfg(test)]
+src/bitcoin/checkpoint.rs:2457:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2462:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2470:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2663:    #[cfg(feature = "full")]
+src/bitcoin/checkpoint.rs:2873:    #[cfg(feature = "full")]
+src/ethereum/consensus/relayer.rs:142:#[cfg(test)]
+src/babylon/mod.rs:37:#[cfg(feature = "full")]
+src/babylon/mod.rs:39:#[cfg(feature = "full")]
+src/babylon/mod.rs:822:            #[cfg(not(fuzzing))]
+src/babylon/mod.rs:1181:#[cfg(test)]
+src/error.rs:43:    #[cfg(feature = "full")]
+src/error.rs:46:    #[cfg(feature = "csv")]
+src/error.rs:77:#[cfg(feature = "full")]
+src/error.rs:84:#[cfg(feature = "full")]
+src/bitcoin/signatory.rs:18:#[cfg(feature = "full")]
+src/bitcoin/signatory.rs:22:#[cfg(feature = "full")]
+src/bitcoin/signatory.rs:24:#[cfg(feature = "full")]
+src/bitcoin/signatory.rs:28:#[cfg(feature = "full")]
+src/bitcoin/signatory.rs:30:#[cfg(feature = "full")]
+src/bitcoin/signatory.rs:110:    #[cfg(feature = "full")]
+src/bitcoin/signatory.rs:330:    #[cfg(feature = "full")]
+src/bitcoin/signatory.rs:338:    #[cfg(feature = "full")]
+src/bitcoin/signatory.rs:512:#[cfg(test)]
+src/bitcoin/signatory.rs:517:    // #[should_panic(expected = "Cannot build script for empty signatory set")]
+src/network.rs:18:#[cfg(feature = "full")]
+src/network.rs:29:    /// Nomic mainnet (currently Stakenet).
+src/network.rs:31:    /// Nomic testnet.
+src/network.rs:42:            Self::Testnet => include_str!("../networks/testnet.toml"),
+src/network.rs:63:            "mainnet" => Ok(Self::Mainnet),
+src/network.rs:65:            "testnet" => Ok(Self::Testnet),
+src/network.rs:86:    /// This can not be used with `--network mainnet` or `--network testnet`,
+src/network.rs:92:    /// This can not be used with `--network mainnet` or `--network testnet`,
+src/network.rs:106:    /// The network to use for configuration defaults. This may be "mainnet" or
+src/network.rs:107:    /// "testnet" to connect to a known public network, or "local" to use a
+src/network.rs:149:    #[cfg(feature = "full")]
+src/network.rs:160:    #[cfg(feature = "full")]
+src/network.rs:191:            #[cfg(feature = "testnet")]
+src/network.rs:193:            #[cfg(not(feature = "testnet"))]
+src/utils.rs:3:#![cfg(not(target_arch = "wasm32"))]
+src/utils.rs:4:#[cfg(feature = "full")]
+src/utils.rs:10:#[cfg(feature = "full")]
+src/utils.rs:12:#[cfg(feature = "full")]
+src/utils.rs:19:#[cfg(feature = "full")]
+src/utils.rs:22:#[cfg(feature = "full")]
+src/utils.rs:24:#[cfg(feature = "full")]
+src/utils.rs:31:#[cfg(feature = "full")]
+src/utils.rs:36:#[cfg(feature = "full")]
+src/utils.rs:38:#[cfg(feature = "full")]
+src/utils.rs:40:#[cfg(feature = "full")]
+src/utils.rs:49:#[cfg(feature = "full")]
+src/utils.rs:215:#[cfg(feature = "full")]
+src/utils.rs:227:#[cfg(feature = "full")]
+src/utils.rs:261:#[cfg(feature = "full")]
+src/utils.rs:303:#[cfg(feature = "full")]
+src/utils.rs:417:#[cfg(feature = "full")]
+src/utils.rs:423:#[cfg(feature = "full")]
+src/utils.rs:485:#[cfg(feature = "full")]

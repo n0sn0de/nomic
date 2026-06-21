@@ -1,0 +1,4 @@
+first_retarget_time 10000
+last_before_retarget 1337
+last_less_than_first True
+modeled_result u32 subtraction would underflow in Rust with overflow checks

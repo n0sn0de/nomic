@@ -1,0 +1,6 @@
+error: no such command: `deny`
+
+	Did you mean `bench`?
+
+	View all installed commands with `cargo --list`
+	Find a package to install `deny` with `cargo search cargo-deny`

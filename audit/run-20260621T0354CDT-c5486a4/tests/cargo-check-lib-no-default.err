@@ -1,0 +1,362 @@
+    Checking cfg-if v1.0.0
+    Checking subtle v2.6.1
+    Checking const-oid v0.9.6
+    Checking memchr v2.7.4
+    Checking once_cell v1.20.2
+   Compiling serde v1.0.213
+    Checking cpufeatures v0.2.14
+    Checking byteorder v1.5.0
+    Checking itoa v1.0.11
+   Compiling num-conv v0.1.0
+   Compiling time-core v0.1.2
+    Checking powerfmt v0.2.0
+   Compiling equivalent v1.0.1
+    Checking indenter v0.3.3
+    Checking base16ct v0.2.0
+    Checking hex v0.4.3
+    Checking futures-core v0.3.31
+    Checking pin-project-lite v0.2.15
+    Checking libc v0.2.161
+    Checking typenum v1.17.0
+   Compiling indexmap v2.6.0
+   Compiling winnow v0.6.20
+    Checking futures-io v0.3.31
+    Checking futures-sink v0.3.31
+    Checking num-traits v0.2.19
+   Compiling serde_json v1.0.132
+    Checking slab v0.4.9
+    Checking pin-utils v0.1.0
+    Checking ryu v1.0.18
+    Checking futures-task v0.3.31
+    Checking subtle-ng v2.5.0
+    Checking opaque-debug v0.3.1
+   Compiling time-macros v0.2.18
+    Checking arrayvec v0.7.6
+    Checking zeroize v1.8.1
+    Checking deranged v0.3.11
+    Checking eyre v0.6.12
+   Compiling derive_more-impl v1.0.0
+    Checking futures-channel v0.3.31
+    Checking keccak v0.1.5
+    Checking byte-slice-cast v1.2.2
+    Checking arrayref v0.3.9
+    Checking constant_time_eq v0.3.1
+    Checking base64 v0.21.7
+    Checking anyhow v1.0.91
+    Checking dyn-clone v1.0.17
+    Checking base64 v0.22.1
+   Compiling crunchy v0.2.2
+    Checking static_assertions v1.1.0
+    Checking der v0.7.9
+    Checking subtle-encoding v0.5.1
+    Checking zerocopy v0.7.35
+    Checking rustc-hex v2.1.0
+   Compiling itertools v0.10.5
+    Checking thiserror v1.0.65
+   Compiling semver v1.0.23
+    Checking fnv v1.0.7
+    Checking tinyvec_macros v0.1.1
+    Checking log v0.4.22
+    Checking blake3 v1.5.4
+   Compiling wasm-bindgen-backend v0.2.95
+    Checking flex-error v0.4.4
+    Checking linux-raw-sys v0.4.14
+    Checking mime v0.3.17
+    Checking hashbrown v0.15.0
+    Checking tinyvec v1.8.0
+    Checking bitflags v2.6.0
+   Compiling aho-corasick v1.1.3
+   Compiling darling_core v0.20.10
+    Checking futures-util v0.3.31
+    Checking unicode-bidi v0.3.17
+    Checking smallvec v1.13.2
+    Checking percent-encoding v2.3.1
+   Compiling winnow v0.5.40
+    Checking regex-syntax v0.8.5
+    Checking scopeguard v1.2.0
+    Checking bitcoin-internals v0.2.0
+   Compiling rustc_version v0.4.1
+    Checking lock_api v0.4.12
+    Checking uint v0.9.5
+    Checking form_urlencoded v1.2.1
+   Compiling secp256k1-sys v0.6.1
+    Checking hex-conservative v0.1.2
+    Checking fastrand v2.1.1
+   Compiling bitcoin_hashes v0.11.0
+    Checking adler v1.0.2
+    Checking ed v0.3.0
+    Checking secp256k1-sys v0.9.2
+    Checking miniz_oxide v0.4.4
+    Checking getrandom v0.2.15
+    Checking generic-array v0.14.7
+    Checking parking_lot_core v0.9.10
+    Checking atty v0.2.14
+    Checking filetime v0.2.15
+    Checking maybe-uninit v2.0.0
+    Checking rustix v0.38.38
+   Compiling curve25519-dalek v4.1.3
+    Checking bitcoin_hashes v0.13.0
+    Checking crc32fast v1.4.2
+    Checking ascii v1.1.0
+    Checking rand_core v0.6.4
+    Checking bech32 v0.9.1
+    Checking humantime v2.1.0
+    Checking termcolor v1.4.1
+    Checking parking_lot v0.12.3
+    Checking nodrop v0.1.14
+    Checking lazy_static v1.5.0
+    Checking parking v2.2.1
+    Checking minimal-lexical v0.2.1
+    Checking ppv-lite86 v0.2.20
+    Checking hashbrown v0.12.3
+    Checking ff v0.13.0
+    Checking chunked_transfer v1.5.0
+    Checking either v1.13.0
+    Checking unicode-normalization v0.1.24
+    Checking prometheus v0.13.4
+    Checking futures-lite v2.3.0
+    Checking array-init v0.0.4
+    Checking group v0.13.0
+    Checking ed v0.3.0 (https://github.com/nomic-io/ed?rev=a657be856792039ff60c2f67e7920e38cd3acffc#a657be85)
+    Checking flate2 v1.0.22
+    Checking nom v7.1.3
+    Checking smallvec v0.6.14
+    Checking spki v0.7.3
+    Checking crypto-common v0.1.6
+    Checking block-buffer v0.10.4
+    Checking crypto-bigint v0.5.5
+    Checking pkcs8 v0.10.2
+    Checking sec1 v0.7.3
+    Checking digest v0.9.0
+    Checking block-buffer v0.9.0
+    Checking digest v0.10.7
+    Checking rand_chacha v0.3.1
+    Checking curve25519-dalek-ng v4.1.1
+    Checking derive_more v1.0.0
+    Checking sha2 v0.9.9
+    Checking indexmap v1.9.3
+    Checking regex-automata v0.4.8
+   Compiling wasm-bindgen-macro-support v0.2.95
+    Checking idna v0.5.0
+    Checking iana-time-zone v0.1.61
+    Checking hex-literal v0.4.1
+    Checking sha2 v0.10.8
+    Checking signature v2.2.0
+    Checking hmac v0.12.1
+    Checking ripemd v0.1.3
+    Checking time v0.3.36
+    Checking ed25519 v2.2.3
+    Checking rfc6979 v0.4.0
+    Checking sha3 v0.10.8
+    Checking blake2 v0.10.6
+    Checking rand v0.8.5
+   Compiling prost-derive v0.11.9
+    Checking pbkdf2 v0.12.2
+   Compiling secp256k1 v0.24.3
+    Checking secp256k1 v0.28.2
+    Checking chrono v0.4.38
+    Checking bs58 v0.5.1
+    Checking merk v2.0.0 (https://github.com/nomic-io/merk?rev=d6f0490993bcf88f786c5271091aa9a84ff2fe69#d6f04909)
+    Checking split-iter v0.1.0
+    Checking base64 v0.13.1
+    Checking url v2.5.2
+    Checking ed25519-consensus v2.1.0
+   Compiling bitcoin v0.29.2
+    Checking fixed-hash v0.8.0
+   Compiling wasm-bindgen-macro v0.2.95
+   Compiling darling_macro v0.20.10
+    Checking xattr v1.3.1
+    Checking tempfile v3.13.0
+    Checking wasm-bindgen v0.2.95
+    Checking tar v0.4.42
+   Compiling darling v0.20.10
+    Checking elliptic-curve v0.13.8
+    Checking bytes v1.8.0
+    Checking serde_bytes v0.11.15
+    Checking informalsystems-pbjson v0.7.0
+    Checking impl-serde v0.4.0
+    Checking serde-json-wasm v1.0.1
+    Checking toml_datetime v0.6.8
+    Checking serde_spanned v0.6.8
+    Checking kstring v1.0.6
+    Checking rust_decimal v1.36.0
+    Checking serde-hex v0.1.0
+    Checking serde-big-array v0.4.1
+    Checking ed25519-dalek v2.1.1
+    Checking primitive-types v0.12.2
+    Checking tiny_http v0.10.0
+    Checking ecdsa v0.16.9
+    Checking toml_edit v0.19.15
+    Checking toml_edit v0.22.22
+    Checking futures-executor v0.3.31
+    Checking futures v0.3.31
+    Checking js-sys v0.3.72
+    Checking prost v0.13.3
+    Checking prost v0.11.9
+    Checking http v1.1.0
+    Checking combine v4.6.7
+    Checking prometheus_exporter v0.8.5
+    Checking regex v1.11.1
+    Checking k256 v0.13.4
+    Checking prost-types v0.13.3
+    Checking ics23 v0.12.0
+    Checking prost-types v0.11.9
+    Checking env_logger v0.9.3
+    Checking schemars v0.8.21
+    Checking pretty_env_logger v0.4.0 (https://github.com/seanmonstar/pretty-env-logger?rev=f9e35b6dbbf06de55222c944c9e1e176ce73b3a7#f9e35b6d)
+    Checking bip32 v0.5.2
+   Compiling orga-macros v0.3.1 (https://github.com/nomic-io/orga.git?rev=3b3d25ade40d81cb64f19335535e3a47bb47778f#3b3d25ad)
+    Checking tendermint-proto v0.38.1
+    Checking tendermint-proto v0.32.2
+    Checking toml v0.7.8
+   Compiling proc-macro-crate v3.2.0
+   Compiling parity-scale-codec-derive v3.6.12
+   Compiling scale-info-derive v2.11.5
+   Compiling borsh-derive v1.5.1
+   Compiling nomic v9.2.0 (/home/nitro/repos/nomic)
+   Compiling bitcoin-script v0.1.3
+    Checking serde-wasm-bindgen v0.6.5
+    Checking borsh v1.5.1
+    Checking parity-scale-codec v3.6.12
+    Checking scale-info v2.11.5
+    Checking toml_edit v0.13.4
+    Checking cosmos-sdk-proto v0.19.0
+    Checking tendermint v0.32.2
+    Checking cosmrs v0.14.0
+    Checking tendermint v0.38.1
+    Checking ibc-proto v0.47.1
+    Checking cosmos-sdk-proto v0.23.0
+    Checking tendermint-light-client-verifier v0.38.1
+    Checking cosmrs v0.18.0
+    Checking ibc-primitives v0.54.0
+    Checking ibc-core-host-types v0.54.0
+    Checking ibc-core-commitment-types v0.54.0
+    Checking ibc-core-router-types v0.54.0
+    Checking ibc-core-client-types v0.54.0
+    Checking ibc-core-connection-types v0.54.0
+    Checking ibc-client-tendermint-types v0.54.0
+    Checking ibc-core-channel-types v0.54.0
+    Checking ibc-core-handler-types v0.54.0
+    Checking ibc-core-router v0.54.0
+    Checking ibc-core-client-context v0.54.0
+    Checking ibc-core-host v0.54.0
+    Checking ibc-core-client v0.54.0
+    Checking ibc-client-wasm-types v0.54.0
+    Checking ibc-client-tendermint v0.54.0
+    Checking ibc-core-connection v0.54.0
+    Checking ibc-clients v0.54.0
+    Checking ibc-core-channel v0.54.0
+    Checking ibc-core-handler v0.54.0
+    Checking ibc-core v0.54.0
+    Checking ibc-app-transfer-types v0.54.0
+    Checking ibc-app-nft-transfer-types v0.54.0
+    Checking ibc-app-transfer v0.54.0
+    Checking ibc-core-host-cosmos v0.54.0
+    Checking ibc-app-nft-transfer v0.54.0
+    Checking ibc-apps v0.54.0
+    Checking ibc v0.54.0
+    Checking orga v0.3.1 (https://github.com/nomic-io/orga.git?rev=3b3d25ade40d81cb64f19335535e3a47bb47778f#3b3d25ad)
+error[E0433]: failed to resolve: use of undeclared crate or module `csv`
+  --> src/incentives.rs:54:23
+   |
+54 |         let mut rdr = csv::Reader::from_reader(data);
+   |                       ^^^ use of undeclared crate or module `csv`
+   |
+help: consider importing this struct
+   |
+4  + use bytes::buf::Reader;
+   |
+help: if you import `Reader`, refer to it directly
+   |
+54 -         let mut rdr = csv::Reader::from_reader(data);
+54 +         let mut rdr = Reader::from_reader(data);
+   |
+
+error[E0433]: failed to resolve: use of undeclared crate or module `csv`
+  --> src/incentives.rs:73:23
+   |
+73 |         let mut rdr = csv::Reader::from_reader(data);
+   |                       ^^^ use of undeclared crate or module `csv`
+   |
+help: consider importing this struct
+   |
+4  + use bytes::buf::Reader;
+   |
+help: if you import `Reader`, refer to it directly
+   |
+73 -         let mut rdr = csv::Reader::from_reader(data);
+73 +         let mut rdr = Reader::from_reader(data);
+   |
+
+warning: unused import: `ValidatorEntry`
+  --> src/bitcoin/mod.rs:27:27
+   |
+27 | use orga::plugins::{Paid, ValidatorEntry};
+   |                           ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unreachable statement
+    --> src/bitcoin/checkpoint.rs:1502:9
+     |
+1364 |         unimplemented!();
+     |         ---------------- any code following this expression is unreachable
+...
+1502 |         self.deduct_emergency_disbursal_fees(fee_rate)?;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
+     |
+     = note: `#[warn(unreachable_code)]` on by default
+
+warning: unused variable: `nbtc_accounts`
+    --> src/bitcoin/checkpoint.rs:1352:9
+     |
+1352 |         nbtc_accounts: &Accounts<Nbtc>,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_nbtc_accounts`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `recovery_scripts`
+    --> src/bitcoin/checkpoint.rs:1353:9
+     |
+1353 |         recovery_scripts: &Map<orga::coins::Address, Adapter<bitcoin::Script>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_recovery_scripts`
+
+warning: unused variable: `reserve_outpoint`
+    --> src/bitcoin/checkpoint.rs:1354:9
+     |
+1354 |         reserve_outpoint: bitcoin::OutPoint,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_outpoint`
+
+warning: unused variable: `external_outputs`
+    --> src/bitcoin/checkpoint.rs:1355:9
+     |
+1355 |         external_outputs: impl Iterator<Item = Result<bitcoin::TxOut>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_external_outputs`
+
+warning: unused variable: `fee_rate`
+    --> src/bitcoin/checkpoint.rs:1356:9
+     |
+1356 |         fee_rate: u64,
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_fee_rate`
+
+warning: unused variable: `reserve_value`
+    --> src/bitcoin/checkpoint.rs:1357:9
+     |
+1357 |         reserve_value: u64,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_value`
+
+warning: unused variable: `config`
+    --> src/bitcoin/checkpoint.rs:1358:9
+     |
+1358 |         config: &Config,
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_config`
+
+warning: unused variable: `signatory_script`
+   --> src/bitcoin/mod.rs:442:43
+    |
+442 |     pub fn set_recovery_script(&mut self, signatory_script: Adapter<Script>) -> Result<()> {
+    |                                           ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_signatory_script`
+
+For more information about this error, try `rustc --explain E0433`.
+warning: `nomic` (lib) generated 10 warnings
+error: could not compile `nomic` (lib) due to 2 previous errors; 10 warnings emitted

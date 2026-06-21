@@ -1,0 +1,14 @@
+Relevant source snippet:
+for bytes in legacy_commitments {
+                let expected_script =
+                    sigset.output_script(&dest_bytes, self.checkpoints.config.sigset_threshold)?;
+                if output.script_pubkey == expected_script {
+                    matched = true;
+                    dest_bytes = bytes;
+                    break;
+                }
+            }
+            
+Model result:
+  current code accepts legacy output: False
+  fixed code accepts legacy output:   True

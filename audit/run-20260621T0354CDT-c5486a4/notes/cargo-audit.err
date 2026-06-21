@@ -1,0 +1,6 @@
+error: no such command: `audit`
+
+	Did you mean `add`?
+
+	View all installed commands with `cargo --list`
+	Find a package to install `audit` with `cargo search cargo-audit`

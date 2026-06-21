@@ -1,0 +1,16 @@
+wasm/Cargo.toml:10:[profile.release]
+wasm/Cargo.toml:11:lto = true
+wasm/Cargo.toml:25:console_error_panic_hook = "0.1.7"
+src/bitcoin/threshold_sig.rs:209:    /// This function expects shares to be unsigned, and will panic if any of
+Cargo.toml:154:[profile.release]
+Cargo.toml:155:overflow-checks = true
+src/bitcoin/signatory.rs:517:    // #[should_panic(expected = "Cannot build script for empty signatory set")]
+src/bitcoin/signer.rs:575:    #[should_panic]
+src/bitcoin/header_queue.rs:1021:    #[should_panic(expected = "Bitcoin(BlockBadTarget)")]
+src/bin/create-checkpoint.rs:52:            panic!("height must be a multiple of 2016")
+src/bin/nomic.rs:363:                None => panic!("Legacy node exited unexpectedly"),
+src/bin/nomic.rs:1836:        std::panic::set_hook(Box::new(|e| {
+src/bin/nomic.rs:3204:    let panic_handler = if backtrace_enabled {
+src/bin/nomic.rs:3205:        Some(std::panic::take_hook())
+src/bin/nomic.rs:3209:    std::panic::set_hook(Box::new(move |info| {
+src/bin/nomic.rs:3211:        if let Some(f) = panic_handler.as_ref() {

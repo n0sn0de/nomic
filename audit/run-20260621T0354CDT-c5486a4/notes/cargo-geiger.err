@@ -1,0 +1,4 @@
+error: no such command: `geiger`
+
+	View all installed commands with `cargo --list`
+	Find a package to install `geiger` with `cargo search cargo-geiger`

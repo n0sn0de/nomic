@@ -1,0 +1,110 @@
+   Compiling nomic v9.2.0 (/home/nitro/repos/nomic)
+warning: unused import: `ValidatorEntry`
+  --> src/bitcoin/mod.rs:27:27
+   |
+27 | use orga::plugins::{Paid, ValidatorEntry};
+   |                           ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unreachable statement
+    --> src/bitcoin/checkpoint.rs:1502:9
+     |
+1364 |         unimplemented!();
+     |         ---------------- any code following this expression is unreachable
+...
+1502 |         self.deduct_emergency_disbursal_fees(fee_rate)?;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
+     |
+     = note: `#[warn(unreachable_code)]` on by default
+
+warning: unused variable: `nbtc_accounts`
+    --> src/bitcoin/checkpoint.rs:1352:9
+     |
+1352 |         nbtc_accounts: &Accounts<Nbtc>,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_nbtc_accounts`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `recovery_scripts`
+    --> src/bitcoin/checkpoint.rs:1353:9
+     |
+1353 |         recovery_scripts: &Map<orga::coins::Address, Adapter<bitcoin::Script>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_recovery_scripts`
+
+warning: unused variable: `reserve_outpoint`
+    --> src/bitcoin/checkpoint.rs:1354:9
+     |
+1354 |         reserve_outpoint: bitcoin::OutPoint,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_outpoint`
+
+warning: unused variable: `external_outputs`
+    --> src/bitcoin/checkpoint.rs:1355:9
+     |
+1355 |         external_outputs: impl Iterator<Item = Result<bitcoin::TxOut>>,
+     |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_external_outputs`
+
+warning: unused variable: `fee_rate`
+    --> src/bitcoin/checkpoint.rs:1356:9
+     |
+1356 |         fee_rate: u64,
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_fee_rate`
+
+warning: unused variable: `reserve_value`
+    --> src/bitcoin/checkpoint.rs:1357:9
+     |
+1357 |         reserve_value: u64,
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reserve_value`
+
+warning: unused variable: `config`
+    --> src/bitcoin/checkpoint.rs:1358:9
+     |
+1358 |         config: &Config,
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_config`
+
+warning: unused variable: `signatory_script`
+   --> src/bitcoin/mod.rs:442:43
+    |
+442 |     pub fn set_recovery_script(&mut self, signatory_script: Adapter<Script>) -> Result<()> {
+    |                                           ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_signatory_script`
+
+warning: type alias `Recipients` is never used
+  --> src/airdrop.rs:36:6
+   |
+36 | type Recipients = Vec<(Address, Vec<(u64, u64)>, u64)>;
+   |      ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: methods `try_credit_dest` and `credit_dest` are never used
+   --> src/app.rs:481:8
+    |
+200 | impl InnerApp {
+    | ------------- methods in this implementation
+...
+481 |     fn try_credit_dest(
+    |        ^^^^^^^^^^^^^^^
+...
+542 |     fn credit_dest(&mut self, dest: Dest, nbtc: Coin<Nbtc>, sender: Identity) -> Result<()> {
+    |        ^^^^^^^^^^^
+
+warning: method `link_intermediate_tx` is never used
+    --> src/bitcoin/checkpoint.rs:1203:8
+     |
+1198 | impl<'a> BuildingCheckpointMut<'a> {
+     | ---------------------------------- method in this implementation
+...
+1203 |     fn link_intermediate_tx(&mut self, tx: &mut BitcoinTx, threshold: (u64, u64)) -> Result<()> {
+     |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: method `fee_adjustment` is never used
+    --> src/bitcoin/checkpoint.rs:2392:8
+     |
+1694 | impl CheckpointQueue {
+     | -------------------- method in this implementation
+...
+2392 |     fn fee_adjustment(&self, fee_rate: u64, config: &Config) -> Result<u64> {
+     |        ^^^^^^^^^^^^^^
+
+warning: `nomic` (lib) generated 14 warnings (run `cargo fix --lib -p nomic` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.27s

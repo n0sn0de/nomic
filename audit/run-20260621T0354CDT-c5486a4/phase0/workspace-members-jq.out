@@ -1,0 +1,9 @@
+{
+  "workspace_members": [
+    "path+file:///home/nitro/repos/nomic#9.2.0"
+  ],
+  "workspace_default_members": [
+    "path+file:///home/nitro/repos/nomic#9.2.0"
+  ],
+  "resolve_root": "path+file:///home/nitro/repos/nomic#9.2.0"
+}

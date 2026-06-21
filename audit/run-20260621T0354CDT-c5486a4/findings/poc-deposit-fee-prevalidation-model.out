@@ -1,0 +1,6 @@
+withdrawal_fee_usats 651000000
+withdrawal_min_total_usats 1251000000
+deposit_input_vbytes 50 examples [(1264, 1251360000, 211860000), (1265, 1252350000, 212850000), (1266, 1253340000, 213840000)]
+deposit_input_vbytes 100 examples [(2100, 2079000000, 0), (2101, 2079990000, 990000), (2102, 2080980000, 1980000)]
+deposit_input_vbytes 200 examples [(4200, 4158000000, 0), (4201, 4158990000, 990000), (4202, 4159980000, 1980000)]
+deposit_input_vbytes 500 examples []
