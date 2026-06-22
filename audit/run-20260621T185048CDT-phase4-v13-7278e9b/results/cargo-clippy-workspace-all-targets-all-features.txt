@@ -1,0 +1,1362 @@
+    Checking tendermint v0.38.1
+    Checking ibc-proto v0.47.1
+   Compiling librocksdb-sys v0.16.0+8.10.0
+    Checking alloy-json-rpc v0.8.0
+    Checking alloy-consensus-any v0.8.0
+    Checking alloy-network-primitives v0.8.0
+    Checking alloy-rpc-types-eth v0.2.1
+    Checking alloy-dyn-abi v0.8.15
+    Checking tendermint v0.40.0
+    Checking cosmos-sdk-proto v0.23.0
+    Checking cosmos-sdk-proto v0.19.0
+    Checking tendermint v0.32.2
+    Checking abci2 v0.1.3 (https://github.com/turbofish-org/abci2?rev=27d8d7a5a6e458f5881e3eb13116cb2a3ae049b5#27d8d7a5)
+    Checking ecies v0.2.7
+    Checking bitcoincore-rpc-async2 v4.0.2
+   Compiling bitcoind v0.36.1
+    Checking bitcoincore-rpc-json v0.19.0
+    Checking alloy-rpc-types-eth v0.8.0
+    Checking alloy-transport v0.8.0
+    Checking alloy-core v0.8.15
+    Checking alloy-transport-http v0.8.0
+    Checking alloy-rpc-client v0.8.0
+    Checking alloy-rpc-types v0.2.1
+    Checking alloy v0.2.1
+    Checking consensus-core v0.6.1 (https://github.com/a16z/helios.git?rev=0.7.0#545d809b)
+    Checking alloy-rpc-types-any v0.8.0
+    Checking alloy-network v0.8.0
+    Checking alloy-signer-local v0.8.0
+    Checking alloy-rpc-types-anvil v0.8.0
+    Checking alloy-rpc-types v0.8.0
+    Checking alloy-provider v0.8.0
+    Checking tendermint-config v0.40.0
+    Checking tendermint-light-client-verifier v0.38.1
+    Checking tendermint-config v0.38.1
+    Checking bitcoincore-rpc v0.19.0
+    Checking tendermint-rpc v0.40.0
+    Checking tendermint-rpc v0.38.1
+    Checking cosmrs v0.14.0
+    Checking alloy-contract v0.8.0
+    Checking cosmrs v0.18.0
+    Checking ibc-primitives v0.54.0
+    Checking ibc-core-host-types v0.54.0
+    Checking ibc-core-commitment-types v0.54.0
+    Checking ibc-core-router-types v0.54.0
+    Checking ibc-core-client-types v0.54.0
+    Checking ibc-core-connection-types v0.54.0
+    Checking ibc-client-tendermint-types v0.54.0
+    Checking ibc-core-channel-types v0.54.0
+    Checking ibc-core-handler-types v0.54.0
+    Checking ibc-core-router v0.54.0
+    Checking ibc-core-client-context v0.54.0
+    Checking ibc-core-host v0.54.0
+    Checking ibc-core-client v0.54.0
+    Checking ibc-client-wasm-types v0.54.0
+    Checking ibc-client-tendermint v0.54.0
+    Checking ibc-core-connection v0.54.0
+    Checking ibc-clients v0.54.0
+    Checking ibc-core-channel v0.54.0
+    Checking ibc-core-handler v0.54.0
+    Checking ibc-core v0.54.0
+    Checking ibc-app-transfer-types v0.54.0
+    Checking ibc-app-nft-transfer-types v0.54.0
+    Checking ibc-app-transfer v0.54.0
+    Checking ibc-core-host-cosmos v0.54.0
+    Checking ibc-app-nft-transfer v0.54.0
+    Checking ibc-apps v0.54.0
+    Checking ibc v0.54.0
+    Checking rocksdb v0.22.0
+    Checking merk v2.0.0 (https://github.com/nomic-io/merk?rev=ece89c3adac49da4f6f202874964df18563b5c5d#ece89c3a)
+    Checking orga v0.3.1 (https://github.com/turbofish-org/orga.git?rev=e539a53e1eed9c3363062d419ea84d8d0d56e1c7#e539a53e)
+    Checking nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+warning: unused variable: `beacon_api_url`
+  --> src/ethereum/relayer.rs:42:9
+   |
+42 |         beacon_api_url: String,
+   |         ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_beacon_api_url`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused import: `alloy_core::sol_types::SolEvent`
+    --> src/ethereum/mod.rs:1267:9
+     |
+1267 |     use alloy_core::sol_types::SolEvent;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(unused_imports)]` on by default
+
+warning: unused variable: `privkey`
+    --> src/babylon/mod.rs:1652:13
+     |
+1652 |         let privkey = keypair.secret_key();
+     |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_privkey`
+
+warning: unused variable: `updates`
+   --> src/ethereum/consensus/relayer.rs:149:13
+    |
+149 |         let updates = client.get_updates(1229, 1).await.unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_updates`
+
+warning: unused variable: `update`
+   --> src/ethereum/consensus/relayer.rs:150:13
+    |
+150 |         let update = client.get_finality_update().await.unwrap();
+    |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_update`
+
+warning: unused variable: `bootstrap`
+   --> src/ethereum/consensus/relayer.rs:151:13
+    |
+151 |         let bootstrap = client
+    |             ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_bootstrap`
+
+warning: unused variable: `pk2`
+    --> src/ethereum/consensus/mod.rs:1030:13
+     |
+1030 |         let pk2 = PublicKey::decode(&bytes[..]).unwrap();
+     |             ^^^ help: if this is intentional, prefix it with an underscore: `_pk2`
+
+warning: unused variable: `lc`
+    --> src/ethereum/consensus/mod.rs:1034:13
+     |
+1034 |         let lc = LightClient::decode(&bytes[..]).unwrap();
+     |             ^^ help: if this is intentional, prefix it with an underscore: `_lc`
+
+warning: unused variable: `pk2`
+    --> src/ethereum/consensus/mod.rs:1042:13
+     |
+1042 |         let pk2: PublicKey = serde_json::from_str(&pk_str).unwrap();
+     |             ^^^ help: if this is intentional, prefix it with an underscore: `_pk2`
+
+warning: unused variable: `sig2`
+    --> src/ethereum/consensus/mod.rs:1047:13
+     |
+1047 |         let sig2: Signature = serde_json::from_str(&sig_str).unwrap();
+     |             ^^^^ help: if this is intentional, prefix it with an underscore: `_sig2`
+
+warning: method `try_relay_consensus` is never used
+   --> src/ethereum/relayer.rs:350:14
+    |
+24  | / impl<
+25  | |         U: Wallet,
+26  | |         T: Transport + Clone,
+27  | |         P: Provider<T, alloy_provider::network::Ethereum> + Clone,
+28  | |     > Relayer<T, U, P>
+    | |______________________- method in this implementation
+...
+350 |       async fn try_relay_consensus(&self, beacon_api_url: String, eth_chainid: u32) -> Result<()> {
+    |                ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `nomic` (lib) generated 2 warnings
+warning: unexpected `cfg` condition name: `todo`
+ --> tests/relayer.rs:1:8
+  |
+1 | #![cfg(todo)]
+  |        ^^^^
+  |
+  = help: expected names are: `clippy`, `debug_assertions`, `doc`, `docsrs`, `doctest`, `feature`, `fuzzing`, `miri`, `overflow_checks`, `panic`, `proc_macro`, `relocation_model`, `rustfmt`, `sanitize`, `sanitizer_cfi_generalize_pointers`, `sanitizer_cfi_normalize_integers`, `target_abi`, `target_arch`, `target_endian`, `target_env`, `target_family`, `target_feature`, `target_has_atomic`, `target_has_atomic_equal_alignment`, `target_has_atomic_load_store`, `target_os`, `target_pointer_width`, `target_thread_local`, `target_vendor`, `test`, `ub_checks`, `unix`, and `windows`
+  = help: consider using a Cargo feature instead
+  = help: or consider adding in `Cargo.toml` the `check-cfg` lint config for the lint:
+           [lints.rust]
+           unexpected_cfgs = { level = "warn", check-cfg = ['cfg(todo)'] }
+  = help: or consider adding `println!("cargo::rustc-check-cfg=cfg(todo)");` to the top of the `build.rs`
+  = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+  = note: requested on the command line with `-W unexpected-cfgs`
+
+warning: `nomic` (test "relayer") generated 1 warning
+error[E0432]: unresolved import `bitcoind::bitcoincore_rpc::json::ImportMultiRescanSince`
+ --> tests/ibc.rs:7:57
+  |
+7 |     ImportMultiRequest, ImportMultiRequestScriptPubkey, ImportMultiRescanSince,
+  |                                                         ^^^^^^^^^^^^^^^^^^^^^^ no `ImportMultiRescanSince` in the root
+
+warning: unused import: `log::info`
+  --> tests/ibc.rs:13:5
+   |
+13 | use log::info;
+   |     ^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `InnerApp` and `Nom`
+  --> tests/ibc.rs:16:18
+   |
+16 | use nomic::app::{InnerApp, Nom};
+   |                  ^^^^^^^^  ^^^
+
+warning: unused import: `nomic::bitcoin::relayer::DepositAddress`
+  --> tests/ibc.rs:20:5
+   |
+20 | use nomic::bitcoin::relayer::DepositAddress;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `AppClient` and `Unsigned`
+  --> tests/ibc.rs:26:26
+   |
+26 |     wallet::{DerivedKey, Unsigned},
+   |                          ^^^^^^^^
+27 |     AppClient,
+   |     ^^^^^^^^^
+
+warning: unused import: `Amount`
+  --> tests/ibc.rs:29:28
+   |
+29 | use orga::coins::{Address, Amount};
+   |                            ^^^^^^
+
+warning: unused import: `orga::tendermint::client::HttpClient`
+  --> tests/ibc.rs:35:5
+   |
+35 | use orga::tendermint::client::HttpClient;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::time::Duration`
+  --> tests/ibc.rs:41:5
+   |
+41 | use std::time::Duration;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `bitcoind::bitcoincore_rpc::json::ImportMultiRescanSince`
+  --> tests/ethereum.rs:13:57
+   |
+13 |     ImportMultiRequest, ImportMultiRequestScriptPubkey, ImportMultiRescanSince,
+   |                                                         ^^^^^^^^^^^^^^^^^^^^^^ no `ImportMultiRescanSince` in the root
+
+error[E0432]: unresolved import `bitcoind::bitcoincore_rpc::json::ImportMultiRescanSince`
+ --> tests/bitcoin.rs:9:57
+  |
+9 |     ImportMultiRequest, ImportMultiRequestScriptPubkey, ImportMultiRescanSince,
+  |                                                         ^^^^^^^^^^^^^^^^^^^^^^ no `ImportMultiRescanSince` in the root
+
+warning: unused imports: `InnerApp` and `Nom`
+  --> tests/ethereum.rs:21:18
+   |
+21 | use nomic::app::{InnerApp, Nom};
+   |                  ^^^^^^^^  ^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `nomic::bitcoin::relayer::DepositAddress`
+  --> tests/ethereum.rs:26:5
+   |
+26 | use nomic::bitcoin::relayer::DepositAddress;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Result`
+  --> tests/ethereum.rs:28:27
+   |
+28 | use nomic::error::{Error, Result};
+   |                           ^^^^^^
+
+warning: unused imports: `AppClient` and `Unsigned`
+  --> tests/ethereum.rs:34:26
+   |
+34 |     wallet::{DerivedKey, Unsigned},
+   |                          ^^^^^^^^
+35 |     AppClient,
+   |     ^^^^^^^^^
+
+warning: unused import: `Address`
+  --> tests/ethereum.rs:37:19
+   |
+37 | use orga::coins::{Address, Amount};
+   |                   ^^^^^^^
+
+warning: unused import: `orga::tendermint::client::HttpClient`
+  --> tests/ethereum.rs:41:5
+   |
+41 | use orga::tendermint::client::HttpClient;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `reqwest::StatusCode`
+  --> tests/ethereum.rs:42:5
+   |
+42 | use reqwest::StatusCode;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::time::Duration`
+  --> tests/ethereum.rs:47:5
+   |
+47 | use std::time::Duration;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::time::Duration`
+  --> tests/bitcoin.rs:41:5
+   |
+41 | use std::time::Duration;
+   |     ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:42:33
+    |
+42  |         .generate_to_address(1, &alice_address)
+    |          -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |          |
+    |          arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: the method `encode` exists for struct `Adapter<Header>`, but its trait bounds were not satisfied
+  --> tests/header_queue.rs:56:14
+   |
+55 |           encoded_trusted_header: Adapter::new(tip_header)
+   |  _________________________________-
+56 | |             .encode()
+   | |             -^^^^^^ method cannot be called on `Adapter<Header>` due to unsatisfied trait bounds
+   | |_____________|
+   |
+   |
+  ::: /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/adapter.rs:16:1
+   |
+16 |   pub struct Adapter<T> {
+   |   --------------------- doesn't satisfy `_: Encode`
+   |
+  ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/block.rs:60:1
+   |
+60 |   pub struct Header {
+   |   ----------------- doesn't satisfy `_: Encodable`
+   |
+   = note: the following trait bounds were not satisfied:
+           `bitcoind::bitcoincore_rpc::bitcoin::block::Header: bitcoin::consensus::Encodable`
+           which is required by `nomic::bitcoin::Adapter<bitcoind::bitcoincore_rpc::bitcoin::block::Header>: orga::encoding::Encode`
+
+error[E0308]: arguments to this method are incorrect
+   --> tests/utils/mod.rs:22:10
+    |
+22  |         .send_to_address(
+    |          ^^^^^^^^^^^^^^^
+23  |             &bitcoin::Address::from_str(&deposit_address.deposit_addr).unwrap(),
+24  |             btc,
+    |             --- expected `Amount`, found `bitcoin::Amount`
+    |
+note: expected `Address`, found `bitcoin::Address`
+   --> tests/utils/mod.rs:23:13
+    |
+23  |             &bitcoin::Address::from_str(&deposit_address.deposit_addr).unwrap(),
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `bitcoin::Address` and `Address` have similar names, but are actually distinct types
+note: `bitcoin::Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+    |
+637 | pub struct Address {
+    | ^^^^^^^^^^^^^^^^^^
+note: `Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `bitcoin::Amount` and `Amount` have similar names, but are actually distinct types
+note: `bitcoin::Amount` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/amount.rs:477:1
+    |
+477 | pub struct Amount(u64);
+    | ^^^^^^^^^^^^^^^^^
+note: `Amount` is defined in crate `bitcoin_units`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-units-0.1.2/src/amount.rs:856:1
+    |
+856 | pub struct Amount(u64);
+    | ^^^^^^^^^^^^^^^^^
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:958:8
+    |
+958 |     fn send_to_address(
+    |        ^^^^^^^^^^^^^^^
+
+error[E0308]: arguments to this method are incorrect
+   --> tests/ibc.rs:114:10
+    |
+114 |         .send_to_address(
+    |          ^^^^^^^^^^^^^^^
+115 |             &bitcoin::Address::from_str(&btc_addr.to_string()).unwrap(),
+116 |             btc,
+    |             --- expected `Amount`, found `bitcoin::Amount`
+    |
+note: expected `Address`, found `bitcoin::Address`
+   --> tests/ibc.rs:115:13
+    |
+115 |             &bitcoin::Address::from_str(&btc_addr.to_string()).unwrap(),
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `bitcoin::Address` and `Address` have similar names, but are actually distinct types
+note: `bitcoin::Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+    |
+637 | pub struct Address {
+    | ^^^^^^^^^^^^^^^^^^
+note: `Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `bitcoin::Amount` and `Amount` have similar names, but are actually distinct types
+note: `bitcoin::Amount` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/amount.rs:477:1
+    |
+477 | pub struct Amount(u64);
+    | ^^^^^^^^^^^^^^^^^
+note: `Amount` is defined in crate `bitcoin_units`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-units-0.1.2/src/amount.rs:856:1
+    |
+856 | pub struct Amount(u64);
+    | ^^^^^^^^^^^^^^^^^
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:958:8
+    |
+958 |     fn send_to_address(
+    |        ^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:72:37
+    |
+72  |             .generate_to_address(1, &alice_address)
+    |              -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |              |
+    |              arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+  --> tests/header_queue.rs:80:49
+   |
+80 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+   |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+   |                      |
+   |                      arguments to this function are incorrect
+   |
+   = note: expected reference `&bitcoin::BlockHeader`
+              found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+  --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+   |
+41 |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+   |            ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:95:33
+    |
+95  |         .generate_to_address(1, &alice_address)
+    |          -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |          |
+    |          arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:104:46
+    |
+104 |         .add(vec![WrappedHeader::from_header(&tip_header, tip_height as u32)].into())
+    |                   -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                   |
+    |                   arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0061]: this method takes 4 arguments but 5 arguments were supplied
+   --> tests/ethereum.rs:207:18
+    |
+207 |                 .start_eth_relay(
+    |                  ^^^^^^^^^^^^^^^
+...
+210 |                     "http://localhost:5052".to_string(),
+    |                     ----------------------------------- expected `u32`, found `std::string::String`
+211 |                     0,
+    |                     - expected `std::string::String`, found `{integer}`
+212 |                     contract_address.clone(),
+    |                     ------------------------ unexpected argument #5 of type `std::string::String`
+    |
+note: method defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/ethereum/relayer.rs:39:18
+    |
+39  |     pub async fn start_eth_relay(
+    |                  ^^^^^^^^^^^^^^^
+help: did you mean
+    |
+207 |                 .start_eth_relay(format!("0x{}", hex::encode(async_eth_priv_key.clone().to_bytes())), "http://localhost:8545".to_string(), 0, "http://localhost:5052".to_string())
+    |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+   --> tests/ibc.rs:264:79
+    |
+264 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+    |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+            which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: mismatched types
+    --> tests/ibc.rs:276:76
+     |
+276  |                 script_pubkey: Some(ImportMultiRequestScriptPubkey::Script(&account.script)),
+     |                                     -------------------------------------- ^^^^^^^^^^^^^^^ expected `Script`, found `bitcoin::Script`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+     = note: `bitcoin::Script` and `Script` have similar names, but are actually distinct types
+note: `bitcoin::Script` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/blockdata/script.rs:55:1
+     |
+55   | pub struct Script(Box<[u8]>);
+     | ^^^^^^^^^^^^^^^^^
+note: `Script` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/script/borrowed.rs:73:1
+     |
+73   | pub struct Script(pub(in crate::blockdata::script) [u8]);
+     | ^^^^^^^^^^^^^^^^^
+note: tuple variant defined here
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-json-0.19.0/src/lib.rs:1063:5
+     |
+1063 |     Script(&'a Script),
+     |     ^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:109:46
+    |
+109 |         node_2.client.generate_to_address(1, &bob_address).unwrap();
+    |                       -------------------    ^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |                       |
+    |                       arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:116:49
+    |
+116 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+   --> tests/bitcoin.rs:227:79
+    |
+227 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+    |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+            which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: mismatched types
+    --> tests/bitcoin.rs:240:76
+     |
+240  |                 script_pubkey: Some(ImportMultiRequestScriptPubkey::Script(&account.script)),
+     |                                     -------------------------------------- ^^^^^^^^^^^^^^^ expected `Script`, found `bitcoin::Script`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+     = note: `bitcoin::Script` and `Script` have similar names, but are actually distinct types
+note: `bitcoin::Script` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/blockdata/script.rs:55:1
+     |
+55   | pub struct Script(Box<[u8]>);
+     | ^^^^^^^^^^^^^^^^^
+note: `Script` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/script/borrowed.rs:73:1
+     |
+73   | pub struct Script(pub(in crate::blockdata::script) [u8]);
+     | ^^^^^^^^^^^^^^^^^
+note: tuple variant defined here
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-json-0.19.0/src/lib.rs:1063:5
+     |
+1063 |     Script(&'a Script),
+     |     ^^^^^^
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+   --> tests/ethereum.rs:243:79
+    |
+243 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+    |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+            which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: mismatched types
+    --> tests/ethereum.rs:255:76
+     |
+255  |                 script_pubkey: Some(ImportMultiRequestScriptPubkey::Script(&account.script)),
+     |                                     -------------------------------------- ^^^^^^^^^^^^^^^ expected `Script`, found `bitcoin::Script`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+     = note: `bitcoin::Script` and `Script` have similar names, but are actually distinct types
+note: `bitcoin::Script` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/blockdata/script.rs:55:1
+     |
+55   | pub struct Script(Box<[u8]>);
+     | ^^^^^^^^^^^^^^^^^
+note: `Script` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/script/borrowed.rs:73:1
+     |
+73   | pub struct Script(pub(in crate::blockdata::script) [u8]);
+     | ^^^^^^^^^^^^^^^^^
+note: tuple variant defined here
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-json-0.19.0/src/lib.rs:1063:5
+     |
+1063 |     Script(&'a Script),
+     |     ^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:142:33
+    |
+142 |         .generate_to_address(1, &alice_address)
+    |          -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |          |
+    |          arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:407:13
+    |
+404 |         withdraw_bitcoin(
+    |         ---------------- arguments to this function are incorrect
+...
+407 |             &withdraw_address,
+    |             ^^^^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |
+    = note: `Address<NetworkUnchecked>` and `bitcoin::Address` have similar names, but are actually distinct types
+note: `Address<NetworkUnchecked>` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: `bitcoin::Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+    |
+637 | pub struct Address {
+    | ^^^^^^^^^^^^^^^^^^
+note: function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/utils.rs:655:14
+    |
+655 | pub async fn withdraw_bitcoin(
+    |              ^^^^^^^^^^^^^^^^
+
+error[E0599]: the method `encode` exists for struct `Adapter<Header>`, but its trait bounds were not satisfied
+   --> tests/header_queue.rs:156:14
+    |
+155 |           encoded_trusted_header: Adapter::new(tip_header)
+    |  _________________________________-
+156 | |             .encode()
+    | |             -^^^^^^ method cannot be called on `Adapter<Header>` due to unsatisfied trait bounds
+    | |_____________|
+    |
+    |
+   ::: /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/adapter.rs:16:1
+    |
+16  |   pub struct Adapter<T> {
+    |   --------------------- doesn't satisfy `_: Encode`
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/block.rs:60:1
+    |
+60  |   pub struct Header {
+    |   ----------------- doesn't satisfy `_: Encodable`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::block::Header: bitcoin::consensus::Encodable`
+            which is required by `nomic::bitcoin::Adapter<bitcoind::bitcoincore_rpc::bitcoin::block::Header>: orga::encoding::Encode`
+
+error[E0277]: can't compare `bitcoind::bitcoincore_rpc::bitcoin::ScriptBuf` with `bitcoin::Script`
+   --> tests/bitcoin.rs:489:41
+    |
+489 |                 if output.script_pubkey == signatory_script {
+    |                                         ^^ no implementation for `bitcoind::bitcoincore_rpc::bitcoin::ScriptBuf == bitcoin::Script`
+    |
+    = help: the trait `std::cmp::PartialEq<bitcoin::Script>` is not implemented for `bitcoind::bitcoincore_rpc::bitcoin::ScriptBuf`
+    = help: the following other types implement trait `std::cmp::PartialEq<Rhs>`:
+              `bitcoind::bitcoincore_rpc::bitcoin::ScriptBuf` implements `std::cmp::PartialEq<bitcoind::bitcoincore_rpc::bitcoin::Script>`
+              `bitcoind::bitcoincore_rpc::bitcoin::ScriptBuf` implements `std::cmp::PartialEq`
+
+error[E0308]: mismatched types
+   --> tests/ibc.rs:773:50
+    |
+773 |             match wallet.get_received_by_address(&funded_accounts[1].bitcoin_address(), None) {
+    |                          ----------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Address`, found `bitcoin::Address`
+    |                          |
+    |                          arguments to this method are incorrect
+    |
+    = note: `bitcoin::Address` and `Address` have similar names, but are actually distinct types
+note: `bitcoin::Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+    |
+637 | pub struct Address {
+    | ^^^^^^^^^^^^^^^^^^
+note: `Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:538:8
+    |
+538 |     fn get_received_by_address(&self, address: &Address, minconf: Option<u32>) -> Result<Amount> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:490:41
+    |
+486 |         let mut signatory_balance = 0;
+    |                                     - expected due to this value
+...
+490 |                     signatory_balance = output.value;
+    |                                         ^^^^^^^^^^^^ expected integer, found `Amount`
+
+error[E0277]: the trait bound `std::string::String: std::convert::From<[u8; 20]>` is not satisfied
+   --> tests/ethereum.rs:457:47
+    |
+457 |                 token_contract.address().0 .0.into(),
+    |                                               ^^^^ the trait `std::convert::From<[u8; 20]>` is not implemented for `std::string::String`, which is required by `[u8; 20]: std::convert::Into<_>`
+    |
+    = help: the following other types implement trait `std::convert::From<T>`:
+              `std::string::String` implements `std::convert::From<&'a js_sys::JsString>`
+              `std::string::String` implements `std::convert::From<&mut str>`
+              `std::string::String` implements `std::convert::From<&std::string::String>`
+              `std::string::String` implements `std::convert::From<&str>`
+              `std::string::String` implements `std::convert::From<alloy_core::alloy_sol_types::Revert>`
+              `std::string::String` implements `std::convert::From<alloy_serde::storage::JsonStorageKey>`
+              `std::string::String` implements `std::convert::From<alloy_serde::storage::JsonStorageKey>`
+              `std::string::String` implements `std::convert::From<alloy_sol_types::types::error::Revert>`
+            and 23 others
+    = note: required for `[u8; 20]` to implement `std::convert::Into<std::string::String>`
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:172:37
+    |
+172 |             .generate_to_address(1, &alice_address)
+    |              -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |              |
+    |              arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:180:49
+    |
+180 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0061]: this method takes 2 arguments but 3 arguments were supplied
+   --> tests/ethereum.rs:456:14
+    |
+456 |               .sendToNomic(
+    |                ^^^^^^^^^^^
+457 |                   token_contract.address().0 .0.into(),
+458 | /                 Dest::NativeAccount {
+459 | |                     address: funded_accounts[1].address,
+460 | |                 }
+461 | |                 .to_string(),
+    | |____________________________- unexpected argument #2 of type `std::string::String`
+    |
+note: method defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/ethereum/mod.rs:47:1
+    |
+47  | / sol!(
+48  | |     #[allow(clippy::too_many_arguments)]
+49  | |     #[allow(missing_docs)]
+50  | |     #[sol(rpc)]
+51  | |     bridge_contract,
+52  | |     "src/ethereum/contracts/Nomic.json",
+53  | | );
+    | |_^
+    = note: this error originates in the macro `sol` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: remove the extra argument
+    |
+457 -                 token_contract.address().0 .0.into(),
+458 -                 Dest::NativeAccount {
+459 -                     address: funded_accounts[1].address,
+460 -                 }
+461 -                 .to_string(),
+457 +                 token_contract.address().0 .0.into(),
+    |
+
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:502:54
+    |
+502 |                 match wallet.get_received_by_address(bitcoin_address, None) {
+    |                              ----------------------- ^^^^^^^^^^^^^^^ expected `Address`, found `bitcoin::Address`
+    |                              |
+    |                              arguments to this method are incorrect
+    |
+    = note: `bitcoin::Address` and `Address` have similar names, but are actually distinct types
+note: `bitcoin::Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+    |
+637 | pub struct Address {
+    | ^^^^^^^^^^^^^^^^^^
+note: `Address` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:538:8
+    |
+538 |     fn get_received_by_address(&self, address: &Address, minconf: Option<u32>) -> Result<Amount> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0308, E0432, E0599.
+For more information about an error, try `rustc --explain E0308`.
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:535:23
+    |
+535 |                 txid: spending_tx.txid(),
+    |                       ^^^^^^^^^^^^^^^^^^ expected `Txid`, found `bitcoin::Txid`
+    |
+    = note: `bitcoin::Txid` and `Txid` have similar names, but are actually distinct types
+note: `bitcoin::Txid` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/hash_types.rs:37:5
+    |
+37  | /     hash_newtype!(
+38  | |         Txid, sha256d::Hash, 32, doc="A bitcoin transaction hash/transaction ID.
+39  | |
+40  | | For compatibility with the existing Bitcoin infrastructure and historical
+...   |
+44  | | See [`hashes::Hash::DISPLAY_BACKWARD`] for more details.
+45  | | ");
+    | |__^
+note: `Txid` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/transaction.rs:41:1
+    |
+41  | / hashes::hash_newtype! {
+42  | |     /// A bitcoin transaction hash/transaction ID.
+43  | |     ///
+44  | |     /// For compatibility with the existing Bitcoin infrastructure and historical and current
+...   |
+51  | |     pub struct Wtxid(sha256d::Hash);
+52  | | }
+    | |_^
+    = note: this error originates in the macro `$crate::hash_newtype` which comes from the expansion of the macro `hashes::hash_newtype` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `nomic` (test "ibc") generated 7 warnings
+error: could not compile `nomic` (test "ibc") due to 6 previous errors; 7 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:195:46
+    |
+195 |         node_1.client.generate_to_address(1, &bob_address).unwrap();
+    |                       -------------------    ^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |                       |
+    |                       arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:202:49
+    |
+202 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+   --> tests/bitcoin.rs:541:30
+    |
+541 |                 dump_address.to_string(),
+    |                              ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+            which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:555:23
+    |
+555 |                     &[privkey],
+    |                       ^^^^^^^ expected `PrivateKey`, found `bitcoin::PrivateKey`
+    |
+    = note: `bitcoin::PrivateKey` and `PrivateKey` have similar names, but are actually distinct types
+note: `bitcoin::PrivateKey` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/key.rs:301:1
+    |
+301 | pub struct PrivateKey {
+    | ^^^^^^^^^^^^^^^^^^^^^
+note: `PrivateKey` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/crypto/key.rs:398:1
+    |
+398 | pub struct PrivateKey {
+    | ^^^^^^^^^^^^^^^^^^^^^
+
+error[E0277]: the trait bound `bitcoind::bitcoincore_rpc::bitcoincore_rpc_json::SigHashType: std::convert::From<bitcoin::EcdsaSighashType>` is not satisfied
+   --> tests/bitcoin.rs:557:48
+    |
+557 |                     Some(EcdsaSighashType::All.into()),
+    |                                                ^^^^ the trait `std::convert::From<bitcoin::EcdsaSighashType>` is not implemented for `bitcoind::bitcoincore_rpc::bitcoincore_rpc_json::SigHashType`, which is required by `bitcoin::EcdsaSighashType: std::convert::Into<_>`
+    |
+    = help: the trait `std::convert::From<bitcoind::bitcoincore_rpc::bitcoin::EcdsaSighashType>` is implemented for `bitcoind::bitcoincore_rpc::bitcoincore_rpc_json::SigHashType`
+    = help: for that trait implementation, expected `bitcoind::bitcoincore_rpc::bitcoin::EcdsaSighashType`, found `bitcoin::EcdsaSighashType`
+    = note: required for `bitcoin::EcdsaSighashType` to implement `std::convert::Into<bitcoind::bitcoincore_rpc::bitcoincore_rpc_json::SigHashType>`
+
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:560:51
+    |
+560 |             let signed_tx: bitcoin::Transaction = sign_res.transaction().unwrap();
+    |                            --------------------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `bitcoin::Transaction`, found `Transaction`
+    |                            |
+    |                            expected due to this
+    |
+    = note: `Transaction` and `bitcoin::Transaction` have similar names, but are actually distinct types
+note: `Transaction` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/transaction.rs:702:1
+    |
+702 | pub struct Transaction {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+note: `bitcoin::Transaction` is defined in crate `bitcoin`
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/blockdata/transaction.rs:573:1
+    |
+573 | pub struct Transaction {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+    = note: perhaps two different versions of crate `bitcoin` are being used?
+
+Some errors have detailed explanations: E0061, E0277, E0308, E0432, E0599.
+For more information about an error, try `rustc --explain E0061`.
+warning: `nomic` (test "ethereum") generated 8 warnings
+error: could not compile `nomic` (test "ethereum") due to 7 previous errors; 8 warnings emitted
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:211:37
+    |
+211 |             .generate_to_address(1, &alice_address)
+    |              -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |              |
+    |              arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:219:49
+    |
+219 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/bitcoin.rs:569:68
+    |
+569 |             let sent_amount = match wallet.get_received_by_address(&dump_address, None) {
+    |                                            ----------------------- ^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |                                            |
+    |                                            arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:538:8
+    |
+538 |     fn get_received_by_address(&self, address: &Address, minconf: Option<u32>) -> Result<Amount> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:246:33
+    |
+246 |         .generate_to_address(1, &alice_address)
+    |          -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |          |
+    |          arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: the method `encode` exists for struct `Adapter<Header>`, but its trait bounds were not satisfied
+   --> tests/header_queue.rs:260:14
+    |
+259 |           encoded_trusted_header: Adapter::new(tip_header)
+    |  _________________________________-
+260 | |             .encode()
+    | |             -^^^^^^ method cannot be called on `Adapter<Header>` due to unsatisfied trait bounds
+    | |_____________|
+    |
+    |
+   ::: /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/adapter.rs:16:1
+    |
+16  |   pub struct Adapter<T> {
+    |   --------------------- doesn't satisfy `_: Encode`
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/blockdata/block.rs:60:1
+    |
+60  |   pub struct Header {
+    |   ----------------- doesn't satisfy `_: Encodable`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::block::Header: bitcoin::consensus::Encodable`
+            which is required by `nomic::bitcoin::Adapter<bitcoind::bitcoincore_rpc::bitcoin::block::Header>: orga::encoding::Encode`
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+   --> tests/bitcoin.rs:807:79
+    |
+807 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+    |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+    |
+   ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+    |
+353 | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+    | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+    |
+    = note: the following trait bounds were not satisfied:
+            `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+            which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:276:37
+    |
+276 |             .generate_to_address(1, &alice_address)
+    |              -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |              |
+    |              arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:284:49
+    |
+284 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:301:37
+    |
+301 |             .generate_to_address(1, &alice_address)
+    |              -------------------    ^^^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |              |
+    |              arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:309:49
+    |
+309 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+warning: `nomic` (lib test) generated 11 warnings (2 duplicates)
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+    --> tests/bitcoin.rs:1056:79
+     |
+1056 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+     |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+     |
+    ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+     |
+353  | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+     | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+     |
+     = note: the following trait bounds were not satisfied:
+             `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+             which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:315:46
+    |
+315 |         node_2.client.generate_to_address(1, &bob_address).unwrap();
+    |                       -------------------    ^^^^^^^^^^^^ expected `&Address`, found `&Address<NetworkUnchecked>`
+    |                       |
+    |                       arguments to this method are incorrect
+    |
+    = note: expected reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkChecked>`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>`
+note: method defined here
+   --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:906:8
+    |
+906 |     fn generate_to_address(
+    |        ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/header_queue.rs:322:49
+    |
+322 |         headers.push(WrappedHeader::from_header(&tip_header, tip_height as u32));
+    |                      -------------------------- ^^^^^^^^^^^ expected `&BlockHeader`, found `&Header`
+    |                      |
+    |                      arguments to this function are incorrect
+    |
+    = note: expected reference `&bitcoin::BlockHeader`
+               found reference `&bitcoind::bitcoincore_rpc::bitcoin::block::Header`
+note: associated function defined here
+   --> /home/nitro/repos/nomic-v13-audit-7278e9b/src/bitcoin/header_queue.rs:41:12
+    |
+41  |     pub fn from_header(header: &BlockHeader, height: u32) -> Self {
+    |            ^^^^^^^^^^^
+
+error[E0308]: arguments to this method are incorrect
+    --> tests/bitcoin.rs:1084:14
+     |
+1084 |             .send_to_address(
+     |              ^^^^^^^^^^^^^^^
+1085 |                 &bitcoin::Address::from_str(&deposit_address.deposit_addr).unwrap(),
+1086 |                 bitcoin::Amount::from_btc(10.0).unwrap(),
+     |                 ---------------------------------------- expected `Amount`, found `bitcoin::Amount`
+     |
+note: expected `Address`, found `bitcoin::Address`
+    --> tests/bitcoin.rs:1085:17
+     |
+1085 |                 &bitcoin::Address::from_str(&deposit_address.deposit_addr).unwrap(),
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `bitcoin::Address` and `Address` have similar names, but are actually distinct types
+note: `bitcoin::Address` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+     |
+637  | pub struct Address {
+     | ^^^^^^^^^^^^^^^^^^
+note: `Address` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+     |
+353  | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `bitcoin::Amount` and `Amount` have similar names, but are actually distinct types
+note: `bitcoin::Amount` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/amount.rs:477:1
+     |
+477  | pub struct Amount(u64);
+     | ^^^^^^^^^^^^^^^^^
+note: `Amount` is defined in crate `bitcoin_units`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-units-0.1.2/src/amount.rs:856:1
+     |
+856  | pub struct Amount(u64);
+     | ^^^^^^^^^^^^^^^^^
+note: method defined here
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:958:8
+     |
+958  |     fn send_to_address(
+     |        ^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0308, E0599.
+error: could not compile `nomic` (test "header_queue") due to 24 previous errors
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+    --> tests/bitcoin.rs:1308:79
+     |
+1308 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+     |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+     |
+    ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+     |
+353  | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+     | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+     |
+     = note: the following trait bounds were not satisfied:
+             `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+             which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+    --> tests/bitcoin.rs:1685:79
+     |
+1685 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+     |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+     |
+    ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+     |
+353  | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+     | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+     |
+     = note: the following trait bounds were not satisfied:
+             `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+             which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+error[E0308]: arguments to this method are incorrect
+    --> tests/bitcoin.rs:1743:14
+     |
+1743 |             .send_to_address(
+     |              ^^^^^^^^^^^^^^^
+1744 |                 &bitcoin::Address::from_str(&expiring_deposit_address.deposit_addr).unwrap(),
+1745 |                 bitcoin::Amount::from_btc(0.4).unwrap(),
+     |                 --------------------------------------- expected `Amount`, found `bitcoin::Amount`
+     |
+note: expected `Address`, found `bitcoin::Address`
+    --> tests/bitcoin.rs:1744:17
+     |
+1744 |                 &bitcoin::Address::from_str(&expiring_deposit_address.deposit_addr).unwrap(),
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `bitcoin::Address` and `Address` have similar names, but are actually distinct types
+note: `bitcoin::Address` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/address.rs:637:1
+     |
+637  | pub struct Address {
+     | ^^^^^^^^^^^^^^^^^^
+note: `Address` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+     |
+353  | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `bitcoin::Amount` and `Amount` have similar names, but are actually distinct types
+note: `bitcoin::Amount` is defined in crate `bitcoin`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.29.2/src/util/amount.rs:477:1
+     |
+477  | pub struct Amount(u64);
+     | ^^^^^^^^^^^^^^^^^
+note: `Amount` is defined in crate `bitcoin_units`
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-units-0.1.2/src/amount.rs:856:1
+     |
+856  | pub struct Amount(u64);
+     | ^^^^^^^^^^^^^^^^^
+note: method defined here
+    --> /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoincore-rpc-0.19.0/src/client.rs:958:8
+     |
+958  |     fn send_to_address(
+     |        ^^^^^^^^^^^^^^^
+
+error[E0599]: `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` doesn't implement `std::fmt::Display`
+    --> tests/bitcoin.rs:1992:79
+     |
+1992 |             bitcoincore_rpc_async::bitcoin::Address::from_str(&wallet_address.to_string()).unwrap();
+     |                                                                               ^^^^^^^^^ `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>` cannot be formatted with the default formatter
+     |
+    ::: /home/nitro/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitcoin-0.32.5/src/address/mod.rs:353:1
+     |
+353  | pub struct Address<V = NetworkChecked>(AddressInner, PhantomData<V>)
+     | -------------------------------------- doesn't satisfy `_: Display` or `_: ToString`
+     |
+     = note: the following trait bounds were not satisfied:
+             `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::fmt::Display`
+             which is required by `bitcoind::bitcoincore_rpc::bitcoin::Address<bitcoind::bitcoincore_rpc::bitcoin::address::NetworkUnchecked>: std::string::ToString`
+
+Some errors have detailed explanations: E0277, E0308, E0432, E0599.
+For more information about an error, try `rustc --explain E0277`.
+warning: `nomic` (test "bitcoin") generated 1 warning
+error: could not compile `nomic` (test "bitcoin") due to 21 previous errors; 1 warning emitted
+
+[exit-status] 101

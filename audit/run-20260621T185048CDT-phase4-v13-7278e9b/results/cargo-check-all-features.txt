@@ -1,0 +1,28 @@
+   Compiling nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+warning: unused variable: `beacon_api_url`
+  --> src/ethereum/relayer.rs:42:9
+   |
+42 |         beacon_api_url: String,
+   |         ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_beacon_api_url`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: method `try_relay_consensus` is never used
+   --> src/ethereum/relayer.rs:350:14
+    |
+24  | / impl<
+25  | |         U: Wallet,
+26  | |         T: Transport + Clone,
+27  | |         P: Provider<T, alloy_provider::network::Ethereum> + Clone,
+28  | |     > Relayer<T, U, P>
+    | |______________________- method in this implementation
+...
+350 |       async fn try_relay_consensus(&self, beacon_api_url: String, eth_chainid: u32) -> Result<()> {
+    |                ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `nomic` (lib) generated 2 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.56s
+
+[exit-status] 0

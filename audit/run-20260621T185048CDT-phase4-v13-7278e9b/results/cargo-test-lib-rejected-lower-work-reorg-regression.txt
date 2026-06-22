@@ -1,0 +1,81 @@
+   Compiling nomic v13.0.0 (/home/nitro/repos/nomic-v13-audit-7278e9b)
+warning: unused import: `alloy_core::sol_types::SolEvent`
+    --> src/ethereum/mod.rs:1267:9
+     |
+1267 |     use alloy_core::sol_types::SolEvent;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(unused_imports)]` on by default
+
+warning: unused variable: `privkey`
+    --> src/babylon/mod.rs:1652:13
+     |
+1652 |         let privkey = keypair.secret_key();
+     |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_privkey`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `updates`
+   --> src/ethereum/consensus/relayer.rs:149:13
+    |
+149 |         let updates = client.get_updates(1229, 1).await.unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_updates`
+
+warning: unused variable: `update`
+   --> src/ethereum/consensus/relayer.rs:150:13
+    |
+150 |         let update = client.get_finality_update().await.unwrap();
+    |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_update`
+
+warning: unused variable: `bootstrap`
+   --> src/ethereum/consensus/relayer.rs:151:13
+    |
+151 |         let bootstrap = client
+    |             ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_bootstrap`
+
+warning: unused variable: `pk2`
+    --> src/ethereum/consensus/mod.rs:1030:13
+     |
+1030 |         let pk2 = PublicKey::decode(&bytes[..]).unwrap();
+     |             ^^^ help: if this is intentional, prefix it with an underscore: `_pk2`
+
+warning: unused variable: `lc`
+    --> src/ethereum/consensus/mod.rs:1034:13
+     |
+1034 |         let lc = LightClient::decode(&bytes[..]).unwrap();
+     |             ^^ help: if this is intentional, prefix it with an underscore: `_lc`
+
+warning: unused variable: `pk2`
+    --> src/ethereum/consensus/mod.rs:1042:13
+     |
+1042 |         let pk2: PublicKey = serde_json::from_str(&pk_str).unwrap();
+     |             ^^^ help: if this is intentional, prefix it with an underscore: `_pk2`
+
+warning: unused variable: `sig2`
+    --> src/ethereum/consensus/mod.rs:1047:13
+     |
+1047 |         let sig2: Signature = serde_json::from_str(&sig_str).unwrap();
+     |             ^^^^ help: if this is intentional, prefix it with an underscore: `_sig2`
+
+warning: `nomic` (lib test) generated 9 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.80s
+     Running unittests src/lib.rs (target/debug/deps/nomic-0e3081a2c806309c)
+
+running 1 test
+thread 'bitcoin::header_queue::test::rejected_lower_work_reorg_preserves_queue_state' panicked at src/bitcoin/header_queue.rs:1142:9:
+assertion `left == right` failed: rejected lower-work reorg changed queue height
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test bitcoin::header_queue::test::rejected_lower_work_reorg_preserves_queue_state ... FAILED
+
+failures:
+
+failures:
+    bitcoin::header_queue::test::rejected_lower_work_reorg_preserves_queue_state
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 55 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+
+[exit-status] 101

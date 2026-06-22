@@ -1,0 +1,102 @@
+diff --git a/src/bitcoin/header_queue.rs b/src/bitcoin/header_queue.rs
+index dc86205b..76d61167 100644
+--- a/src/bitcoin/header_queue.rs
++++ b/src/bitcoin/header_queue.rs
+@@ -1064,4 +1064,97 @@ mod test {
+         q.configure(test_config).unwrap();
+         q.add_into_iter(header_list).unwrap();
+     }
++
++    #[test]
++    fn rejected_lower_work_reorg_preserves_queue_state() {
++        use bitcoin::hashes::Hash as _;
++
++        fn mine_header(prev: BlockHash, height: u32, salt: u32, bits: u32) -> BlockHeader {
++            let target = WrappedHeader::u256_from_compact(bits);
++            let seed = [height.to_le_bytes(), salt.to_le_bytes()].concat();
++            let merkle_root = TxMerkleNode::from_hash(Hash::hash(&seed));
++
++            for nonce in 0..10_000 {
++                let header = BlockHeader {
++                    version: 1,
++                    prev_blockhash: prev,
++                    merkle_root,
++                    time: 1_700_000_000 + height,
++                    bits,
++                    nonce,
++                };
++
++                if WrappedHeader::from_header(&header, height)
++                    .validate_pow(&target)
++                    .is_ok()
++                {
++                    return header;
++                }
++            }
++
++            panic!("failed to mine low-difficulty test header");
++        }
++
++        let bits = 0x207f_ffff;
++        let trusted_prev = BlockHash::from_hash(Hash::hash(b"phase4-trusted-prev"));
++        let trusted = mine_header(trusted_prev, 0, 0, bits);
++        let mut trusted_bytes = vec![];
++        trusted.consensus_encode(&mut trusted_bytes).unwrap();
++
++        let test_config = Config {
++            max_length: 2000,
++            max_time_increase: 8 * 60 * 60,
++            trusted_height: 0,
++            retarget_interval: 2016,
++            target_spacing: 10 * 60,
++            target_timespan: 2016 * (10 * 60),
++            max_target: bits,
++            retargeting: false,
++            min_difficulty_blocks: false,
++            encoded_trusted_header: trusted_bytes.try_into().unwrap(),
++        };
++
++        let mut q = HeaderQueue::default();
++        q.configure(test_config).unwrap();
++
++        let h1 = mine_header(trusted.block_hash(), 1, 1, bits);
++        let h2 = mine_header(h1.block_hash(), 2, 2, bits);
++        q.add_into_iter(vec![
++            WrappedHeader::from_header(&h1, 1),
++            WrappedHeader::from_header(&h2, 2),
++        ])
++        .unwrap();
++
++        let before_height = q.height().unwrap();
++        let before_work = *q.current_work;
++        let before_tip = q.get_by_height(before_height).unwrap().unwrap().block_hash();
++
++        let replacement_h1 = mine_header(trusted.block_hash(), 1, 99, bits);
++        assert_ne!(replacement_h1.block_hash(), h1.block_hash());
++
++        let err = q
++            .add_into_iter(vec![WrappedHeader::from_header(&replacement_h1, 1)])
++            .unwrap_err();
++        assert!(err
++            .to_string()
++            .contains("New best chain must include more work"));
++
++        assert_eq!(
++            q.height().unwrap(),
++            before_height,
++            "rejected lower-work reorg changed queue height"
++        );
++        assert_eq!(
++            *q.current_work, before_work,
++            "rejected lower-work reorg changed cumulative work"
++        );
++        assert_eq!(
++            q.get_by_height(before_height)
++                .unwrap()
++                .unwrap()
++                .block_hash(),
++            before_tip,
++            "rejected lower-work reorg changed queue tip"
++        );
++    }
+ }
