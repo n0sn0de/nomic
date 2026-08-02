@@ -1,5 +1,8 @@
 //! Contract and lifecycle support for the isolated interchain test harness.
 
+pub mod contract;
+pub mod manifest;
+
 #[cfg(test)]
 mod tests {
     use std::path::Path;
