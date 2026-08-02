@@ -1,4 +1,5 @@
 schema_version = "1"
+profile = "h0"
 
 [[scenarios]]
 id = "HAR-001"
@@ -25,7 +26,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_001"
+executable = "h0/v1::har_001"
 
 [[scenarios]]
 id = "HAR-002"
@@ -52,7 +53,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_002"
+executable = "h0/v1::har_002"
 
 [[scenarios]]
 id = "HAR-003"
@@ -131,7 +132,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_005"
+executable = "h0/v1::har_005"
 
 [[scenarios]]
 id = "HAR-006"
@@ -158,7 +159,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_006"
+executable = "h0/v1::har_006"
 
 [[scenarios]]
 id = "HAR-007"
@@ -185,7 +186,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_007"
+executable = "h0/v1::har_007"
 
 [[scenarios]]
 id = "HAR-008"
@@ -212,7 +213,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_008"
+executable = "h0/v1::har_008"
 
 [[scenarios]]
 id = "HAR-009"
@@ -239,7 +240,7 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-container"
-executable = "h0::har_009"
+executable = "h0/v1::har_009"
 
 [[scenarios]]
 id = "HAR-010"
@@ -266,4 +267,4 @@ overall_deadline_ms = 30000
 memory_budget_bytes = 134217728
 artifact_budget_bytes = 8388608
 ci_lane = "h0-process"
-executable = "h0::har_010"
+executable = "h0/v1::har_010"

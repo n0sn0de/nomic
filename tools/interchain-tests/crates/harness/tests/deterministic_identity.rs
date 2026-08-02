@@ -10,6 +10,7 @@ const SOURCE_LOCK_B: &str = "1123456789abcdef0123456789abcdef0123456789abcdef012
 fn input() -> SemanticSeedInput<'static> {
     SemanticSeedInput {
         source_lock_digest: SOURCE_LOCK_A,
+        semantic_seed_domain: "nomic-zcash-h0",
         scenario_id: "deposit-finality",
         case_id: "happy-path",
         spec_version: "zcash-h0-v1",
@@ -32,6 +33,10 @@ fn every_semantic_field_changes_the_seed() {
     let variants = [
         SemanticSeedInput {
             source_lock_digest: SOURCE_LOCK_B,
+            ..input()
+        },
+        SemanticSeedInput {
+            semantic_seed_domain: "nomic-zcash-h1",
             ..input()
         },
         SemanticSeedInput {
@@ -59,6 +64,14 @@ fn every_semantic_field_changes_the_seed() {
     for variant in variants {
         assert_ne!(baseline, SemanticSeed::derive(variant).unwrap());
     }
+}
+
+#[test]
+fn semantic_seed_has_a_fixed_golden_vector() {
+    assert_eq!(
+        SemanticSeed::derive(input()).unwrap().to_hex(),
+        "01c8d1f309a3425e88c3c730ed61a22b5bf607664cb9d2ffd26a324085d94250"
+    );
 }
 
 #[test]
@@ -108,6 +121,13 @@ fn normalized_receipts_ignore_run_diagnostics() {
     let second = serde_json::to_string(&second_receipt).unwrap();
     assert_ne!(first_diagnostics, second_diagnostics);
     assert_eq!(first, second);
+    assert_eq!(
+        first,
+        format!(
+            r#"{{"semantic_seed":"{}","scenario_id":"deposit-finality","case_id":"happy-path","outcome":"pass"}}"#,
+            seed.to_hex()
+        )
+    );
     for marker in [
         "host-path-a",
         "host-path-b",
@@ -120,7 +140,7 @@ fn normalized_receipts_ignore_run_diagnostics() {
     }
 
     let with_diagnostics = format!(
-        r#"{{"semantic_seed":"{}","scenario_id":"deposit-finality","case_id":"happy-path","outcome":"Pass","diagnostics":{{"path":"host-path-a"}}}}"#,
+        r#"{{"semantic_seed":"{}","scenario_id":"deposit-finality","case_id":"happy-path","outcome":"pass","diagnostics":{{"path":"host-path-a"}}}}"#,
         seed.to_hex()
     );
     assert!(serde_json::from_str::<NormalizedSemanticReceipt>(&with_diagnostics).is_err());
@@ -167,6 +187,11 @@ fn malformed_digests_and_blank_or_oversized_semantic_fields_fail() {
     }
     assert!(SemanticSeed::derive(SemanticSeedInput {
         scenario_id: " ",
+        ..input()
+    })
+    .is_err());
+    assert!(SemanticSeed::derive(SemanticSeedInput {
+        semantic_seed_domain: " ",
         ..input()
     })
     .is_err());

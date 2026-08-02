@@ -1,5 +1,8 @@
-use nomic_bridge_harness::contract::{ExecutionResult, ScenarioOutcome, ScenarioStatus};
-use nomic_bridge_harness::manifest::{parse_manifest, InventoryCounts};
+use nomic_bridge_harness::contract::{
+    h0_binding_registry, BindingRegistry, ContractProfile, ExecutableBinding, ExecutionResult,
+    ScenarioOutcome, ScenarioStatus,
+};
+use nomic_bridge_harness::manifest::{load_manifest, parse_manifest, InventoryCounts};
 use nomic_harness_oracle::{
     verify, BucketMembership, MerklePath, OracleReason, OutPoint, ProtocolEvent, ProtocolReceipt,
     Transition,
@@ -9,6 +12,7 @@ fn valid_contract(id: &str, status: &str) -> String {
     format!(
         r#"
 schema_version = "1"
+profile = "h0"
 
 [[scenarios]]
 id = "{id}"
@@ -35,7 +39,7 @@ overall_deadline_ms = 5000
 memory_budget_bytes = 67108864
 artifact_budget_bytes = 1048576
 ci_lane = "h0-process"
-executable = "h0::{id}"
+executable = "h0/v1::har_001"
 "#
     )
 }
@@ -45,7 +49,9 @@ fn rejects_duplicate_ids() {
     let input = format!(
         "{}\n{}",
         valid_contract("HAR-001", "enabled"),
-        valid_contract("HAR-001", "enabled").replace("schema_version = \"1\"", "")
+        valid_contract("HAR-001", "enabled")
+            .replace("schema_version = \"1\"", "")
+            .replace("profile = \"h0\"", "")
     );
     assert!(parse_manifest(&input)
         .unwrap_err()
@@ -70,7 +76,7 @@ fn rejects_unknown_fields_and_statuses() {
 
 #[test]
 fn rejects_enabled_without_executable() {
-    let input = valid_contract("HAR-001", "enabled").replace("executable = \"h0::HAR-001\"", "");
+    let input = valid_contract("HAR-001", "enabled").replace("executable = \"h0/v1::har_001\"", "");
     assert!(parse_manifest(&input)
         .unwrap_err()
         .to_string()
@@ -116,11 +122,11 @@ fn rejects_empty_required_values_and_oversized_inputs() {
         .to_string()
         .contains("oracles must not be empty"));
     let whitespace_executable = valid_contract("HAR-001", "enabled")
-        .replace("executable = \"h0::HAR-001\"", "executable = \"   \"");
+        .replace("executable = \"h0/v1::har_001\"", "executable = \"   \"");
     assert!(parse_manifest(&whitespace_executable)
         .unwrap_err()
         .to_string()
-        .contains("enabled scenario requires executable"));
+        .contains("executable binding must use canonical"));
     let huge =
         valid_contract("HAR-001", "enabled").replace("H0 harness contract", &"x".repeat(5000));
     assert!(parse_manifest(&huge)
@@ -141,6 +147,156 @@ fn rejects_empty_required_values_and_oversized_inputs() {
         .unwrap_err()
         .to_string()
         .contains("capabilities exceeds 32 items"));
+}
+
+#[test]
+fn executable_bindings_are_typed_versioned_and_canonical() {
+    for invalid in [
+        "h0::har_001",
+        "h0/v0::har_001",
+        "h0/v01::har_001",
+        "H0/v1::har_001",
+        "h0/v1::HAR_001",
+        "h0/v1::har-001",
+        " h0/v1::har_001",
+    ] {
+        let input = valid_contract("HAR-001", "enabled").replace("h0/v1::har_001", invalid);
+        assert!(
+            parse_manifest(&input).is_err(),
+            "accepted non-canonical binding {invalid:?}"
+        );
+    }
+    assert_eq!(
+        ExecutableBinding::parse("h0/v1::har_001").unwrap().as_str(),
+        "h0/v1::har_001"
+    );
+}
+
+#[test]
+fn blocked_contracts_must_not_have_executable_bindings() {
+    let input = valid_contract("HAR-003", "blocked");
+    assert!(parse_manifest(&input)
+        .unwrap_err()
+        .to_string()
+        .contains("HAR-003: blocked scenario must not have executable"));
+}
+
+#[test]
+fn declared_profile_rejects_unknown_or_misspelled_bindings() {
+    let generic = parse_manifest(
+        &valid_contract("HAR-001", "enabled").replace("h0/v1::har_001", "h0/v1::har_001_typo"),
+    )
+    .unwrap();
+    let registry = h0_binding_registry();
+    assert!(generic
+        .validate_declared_profile(&registry)
+        .unwrap_err()
+        .to_string()
+        .contains("does not match registered binding h0/v1::har_001"));
+}
+
+#[test]
+fn declared_profile_rejects_swapped_bindings() {
+    let input = valid_contract("HAR-001", "enabled").replace("h0/v1::har_001", "h0/v1::har_002");
+    let manifest = parse_manifest(&input).unwrap();
+    assert!(manifest
+        .validate_declared_profile(&h0_binding_registry())
+        .unwrap_err()
+        .to_string()
+        .contains("HAR-001: executable binding h0/v1::har_002 does not match registered binding h0/v1::har_001"));
+
+    let absent = parse_manifest(&valid_contract("HAR-011", "enabled")).unwrap();
+    assert!(absent
+        .validate_declared_profile(&h0_binding_registry())
+        .unwrap_err()
+        .to_string()
+        .contains("HAR-011: no executable binding registered"));
+}
+
+#[test]
+fn binding_registries_are_explicit_and_h0_has_exactly_eight() {
+    let registry = h0_binding_registry();
+    assert_eq!(registry.profile(), &ContractProfile::parse("h0").unwrap());
+    assert_eq!(registry.len(), 8);
+    let expected = [1, 2, 5, 6, 7, 8, 9, 10]
+        .map(|number| ExecutableBinding::parse(&format!("h0/v1::har_{number:03}")).unwrap());
+    assert_eq!(
+        registry
+            .bindings()
+            .map(|(id, binding)| (id.to_owned(), binding.clone()))
+            .collect::<Vec<_>>(),
+        [1, 2, 5, 6, 7, 8, 9, 10]
+            .into_iter()
+            .zip(expected)
+            .map(|(number, binding)| (format!("HAR-{number:03}"), binding))
+            .collect::<Vec<_>>()
+    );
+
+    let future = BindingRegistry::new(
+        ContractProfile::parse("future").unwrap(),
+        [(
+            "HAR-011".into(),
+            ExecutableBinding::parse("future/v1::har_011").unwrap(),
+        )],
+    )
+    .unwrap();
+    assert_eq!(future.len(), 1);
+}
+
+#[test]
+fn binding_registry_rejects_duplicate_entries() {
+    let profile = ContractProfile::parse("h0").unwrap();
+    let har_001 = ExecutableBinding::parse("h0/v1::har_001").unwrap();
+    let har_002 = ExecutableBinding::parse("h0/v1::har_002").unwrap();
+
+    let duplicate_id = BindingRegistry::new(
+        profile.clone(),
+        [
+            ("HAR-001".into(), har_001.clone()),
+            ("HAR-001".into(), har_002),
+        ],
+    )
+    .unwrap_err();
+    assert!(duplicate_id
+        .to_string()
+        .contains("duplicate registry scenario ID HAR-001"));
+
+    let duplicate_binding = BindingRegistry::new(
+        profile,
+        [
+            ("HAR-001".into(), har_001.clone()),
+            ("HAR-002".into(), har_001),
+        ],
+    )
+    .unwrap_err();
+    assert!(duplicate_binding
+        .to_string()
+        .contains("duplicate registry executable binding h0/v1::har_001"));
+
+    let blank_id = BindingRegistry::new(
+        ContractProfile::parse("h0").unwrap(),
+        [(
+            " ".into(),
+            ExecutableBinding::parse("h0/v1::har_001").unwrap(),
+        )],
+    )
+    .unwrap_err();
+    assert_eq!(
+        blank_id.to_string(),
+        "registry scenario ID must not be blank"
+    );
+
+    let wrong_profile = BindingRegistry::new(
+        ContractProfile::parse("h0").unwrap(),
+        [(
+            "HAR-001".into(),
+            ExecutableBinding::parse("h1/v1::har_001").unwrap(),
+        )],
+    )
+    .unwrap_err();
+    assert!(wrong_profile
+        .to_string()
+        .contains("binding h1/v1::har_001 does not belong to profile h0"));
 }
 
 #[test]
@@ -165,7 +321,11 @@ fn accepts_only_canonical_generic_scenario_ids() {
 fn har_011_parses_generically_but_is_rejected_by_h0_inventory() {
     let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scenarios/manifest.toml");
     let mut input = std::fs::read_to_string(path).unwrap();
-    input.push_str(&valid_contract("HAR-011", "enabled").replace("schema_version = \"1\"", ""));
+    input.push_str(
+        &valid_contract("HAR-011", "enabled")
+            .replace("schema_version = \"1\"", "")
+            .replace("profile = \"h0\"", ""),
+    );
     let manifest = parse_manifest(&input).unwrap();
     assert!(manifest
         .validate_h0_inventory()
@@ -196,6 +356,9 @@ fn result_accounting_is_honest() {
 fn checked_in_inventory_is_complete_and_legally_blocked() {
     let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scenarios/manifest.toml");
     let manifest = nomic_bridge_harness::manifest::load_manifest(path).unwrap();
+    manifest
+        .validate_declared_profile(&h0_binding_registry())
+        .unwrap();
     manifest.validate_h0_inventory().unwrap();
     assert_eq!(manifest.scenarios.len(), 10);
     for scenario in &manifest.scenarios {
@@ -213,16 +376,42 @@ fn checked_in_inventory_is_complete_and_legally_blocked() {
 }
 
 #[test]
+fn checked_in_manifest_declares_h0_profile() {
+    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scenarios/manifest.toml");
+    let manifest = load_manifest(path).unwrap();
+    assert_eq!(manifest.profile.as_str(), "h0");
+}
+
+#[test]
+fn file_loader_rejects_an_oversized_stream_before_parsing() {
+    use std::io::Write;
+
+    let path = std::env::temp_dir().join(format!(
+        "nomic-harness-oversized-{}-{}.toml",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let mut file = std::fs::File::create(&path).unwrap();
+    file.write_all(&vec![b'x'; 1_048_577]).unwrap();
+    drop(file);
+
+    let error = load_manifest(&path).unwrap_err().to_string();
+    std::fs::remove_file(&path).unwrap();
+    assert_eq!(error, "manifest exceeds 1048576 bytes");
+}
+
+#[test]
 fn illegal_blocked_inventory_fails_closed() {
     let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scenarios/manifest.toml");
     let input = std::fs::read_to_string(path).unwrap();
     let input = input.replacen("status = \"enabled\"", "status = \"blocked\"", 1);
-    let manifest = parse_manifest(&input).unwrap();
-    assert!(manifest
-        .validate_h0_inventory()
+    assert!(parse_manifest(&input)
         .unwrap_err()
         .to_string()
-        .contains("illegal H0 status for HAR-001"));
+        .contains("HAR-001: blocked scenario must not have executable"));
 }
 
 #[test]
@@ -388,7 +577,7 @@ fn public_receipt_oracle_rejects_malformed_or_oversized_inputs_first() {
 }
 
 #[test]
-fn oracle_dependency_closure_excludes_harness_and_production_packages() {
+fn oracle_dependency_closure_is_fail_closed() {
     let workspace = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
     let output = std::process::Command::new(env!("CARGO"))
         .current_dir(workspace)
@@ -423,17 +612,14 @@ fn oracle_dependency_closure_excludes_harness_and_production_packages() {
                 .map(|dependency| dependency.as_str().unwrap()),
         );
     }
-    let prohibited = ["nomic", "nomic-bridge-harness"];
-    let found: Vec<_> = packages
+    let found: std::collections::BTreeSet<_> = packages
         .iter()
         .filter(|package| closure.contains(package["id"].as_str().unwrap()))
-        .filter_map(|package| {
-            let name = package["name"].as_str().unwrap();
-            prohibited.contains(&name).then_some(name)
-        })
+        .map(|package| package["name"].as_str().unwrap())
         .collect();
-    assert!(
-        found.is_empty(),
-        "prohibited oracle dependencies: {found:?}"
+    assert_eq!(
+        found,
+        std::collections::BTreeSet::from(["nomic-harness-oracle"]),
+        "oracle dependency closure must match the fail-closed allowlist"
     );
 }

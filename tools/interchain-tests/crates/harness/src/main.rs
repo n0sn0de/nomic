@@ -1,3 +1,4 @@
+use nomic_bridge_harness::contract::h0_binding_registry;
 use nomic_bridge_harness::manifest::{load_manifest, InventoryCounts};
 use serde::Serialize;
 use std::env;
@@ -35,6 +36,9 @@ fn main() -> ExitCode {
 fn run(args: Vec<String>) -> Result<String, String> {
     let (command, manifest_path, json) = parse_args(&args)?;
     let manifest = load_manifest(manifest_path).map_err(|error| error.to_string())?;
+    manifest
+        .validate_declared_profile(&h0_binding_registry())
+        .map_err(|error| error.to_string())?;
     manifest
         .validate_h0_inventory()
         .map_err(|error| error.to_string())?;

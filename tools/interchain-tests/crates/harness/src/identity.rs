@@ -15,6 +15,7 @@ const MAX_SEMANTIC_FIELD_LEN: usize = 256;
 #[derive(Clone, Copy, Debug)]
 pub struct SemanticSeedInput<'a> {
     pub source_lock_digest: &'a str,
+    pub semantic_seed_domain: &'a str,
     pub scenario_id: &'a str,
     pub case_id: &'a str,
     pub spec_version: &'a str,
@@ -29,6 +30,7 @@ pub struct SemanticSeed([u8; 32]);
 impl SemanticSeed {
     pub fn derive(input: SemanticSeedInput<'_>) -> Result<Self, IdentityError> {
         let source_lock = decode_source_lock_digest(input.source_lock_digest)?;
+        validate_semantic_field("semantic_seed_domain", input.semantic_seed_domain)?;
         validate_semantic_field("scenario_id", input.scenario_id)?;
         validate_semantic_field("case_id", input.case_id)?;
         validate_semantic_field("spec_version", input.spec_version)?;
@@ -36,6 +38,11 @@ impl SemanticSeed {
 
         let mut hasher = Sha256::new();
         encode_part(&mut hasher, b"domain", SEMANTIC_DOMAIN);
+        encode_part(
+            &mut hasher,
+            b"semantic-seed-domain",
+            input.semantic_seed_domain.as_bytes(),
+        );
         encode_part(&mut hasher, b"source-lock-sha256", &source_lock);
         encode_part(&mut hasher, b"scenario-id", input.scenario_id.as_bytes());
         encode_part(&mut hasher, b"case-id", input.case_id.as_bytes());

@@ -1,8 +1,11 @@
-use crate::contract::{ScenarioContract, ScenarioOutcome, ScenarioStatus};
+use crate::contract::{
+    BindingRegistry, ContractProfile, ScenarioContract, ScenarioOutcome, ScenarioStatus,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Display, Formatter};
-use std::fs;
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 
 const MAX_MANIFEST_BYTES: usize = 1_048_576;
@@ -27,6 +30,7 @@ impl std::error::Error for ManifestError {}
 #[serde(deny_unknown_fields)]
 pub struct ScenarioManifest {
     pub schema_version: String,
+    pub profile: ContractProfile,
     pub scenarios: Vec<ScenarioContract>,
 }
 
@@ -65,17 +69,22 @@ impl InventoryCounts {
 
 pub fn load_manifest(path: impl AsRef<Path>) -> Result<ScenarioManifest, ManifestError> {
     let path = path.as_ref();
-    let metadata = fs::metadata(path).map_err(|error| {
+    let file = File::open(path).map_err(|error| {
         ManifestError(format!("cannot read manifest {}: {error}", path.display()))
     })?;
-    if metadata.len() > MAX_MANIFEST_BYTES as u64 {
+    let mut bytes = Vec::new();
+    file.take((MAX_MANIFEST_BYTES + 1) as u64)
+        .read_to_end(&mut bytes)
+        .map_err(|error| {
+            ManifestError(format!("cannot read manifest {}: {error}", path.display()))
+        })?;
+    if bytes.len() > MAX_MANIFEST_BYTES {
         return Err(ManifestError(format!(
             "manifest exceeds {MAX_MANIFEST_BYTES} bytes"
         )));
     }
-    let input = fs::read_to_string(path).map_err(|error| {
-        ManifestError(format!("cannot read manifest {}: {error}", path.display()))
-    })?;
+    let input = String::from_utf8(bytes)
+        .map_err(|error| ManifestError(format!("invalid manifest UTF-8: {error}")))?;
     parse_manifest(&input)
 }
 
@@ -144,6 +153,42 @@ impl ScenarioManifest {
                         ScenarioStatus::Blocked => "blocked",
                         ScenarioStatus::Enabled => "enabled",
                     }
+                )));
+            }
+        }
+        Ok(())
+    }
+
+    pub fn validate_declared_profile(
+        &self,
+        registry: &BindingRegistry,
+    ) -> Result<(), ManifestError> {
+        self.validate()?;
+        if &self.profile != registry.profile() {
+            return Err(ManifestError(format!(
+                "manifest profile {} does not match binding registry profile {}",
+                self.profile.as_str(),
+                registry.profile().as_str()
+            )));
+        }
+        for scenario in &self.scenarios {
+            if scenario.status == ScenarioStatus::Blocked {
+                continue;
+            }
+            let binding = scenario
+                .executable
+                .as_ref()
+                .expect("enabled scenarios have an executable after validation");
+            let Some(registered) = registry.binding_for(&scenario.id) else {
+                return Err(ManifestError(format!(
+                    "{}: no executable binding registered",
+                    scenario.id
+                )));
+            };
+            if binding != registered {
+                return Err(ManifestError(format!(
+                    "{}: executable binding {binding} does not match registered binding {registered}",
+                    scenario.id
                 )));
             }
         }
@@ -219,16 +264,19 @@ impl ScenarioContract {
             )));
         }
         if self.status == ScenarioStatus::Enabled {
-            let executable = self.executable.as_deref().unwrap_or_default();
-            if executable.trim().is_empty() {
+            let Some(executable) = &self.executable else {
                 return Err(ManifestError(format!(
                     "{}: enabled scenario requires executable",
                     self.id
                 )));
-            }
-            bounded_string("executable", executable).map_err(|error| error.with_id(&self.id))?;
-        } else if let Some(executable) = &self.executable {
-            bounded_string("executable", executable).map_err(|error| error.with_id(&self.id))?;
+            };
+            bounded_string("executable", executable.as_str())
+                .map_err(|error| error.with_id(&self.id))?;
+        } else if self.executable.is_some() {
+            return Err(ManifestError(format!(
+                "{}: blocked scenario must not have executable",
+                self.id
+            )));
         }
         Ok(())
     }
