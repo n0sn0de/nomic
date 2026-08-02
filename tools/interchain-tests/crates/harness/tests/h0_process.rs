@@ -1,6 +1,7 @@
 use nomic_harness_fixture::{
-    CanaryInputs, EventChannel, FailureClass, Fixture, FixtureConfig, FixtureError, Mode, Request,
-    Response, WorkDisposition, MAX_CANARY_BYTES, MAX_DELAY_MS, MAX_FAILURE_COUNT,
+    CanaryInputs, CanonicalId, EventChannel, FailureClass, Fixture, FixtureConfig, FixtureError,
+    Mode, ReadinessIdentity, Request, Response, WorkDisposition, MAX_CANARY_BYTES, MAX_DELAY_MS,
+    MAX_FAILURE_COUNT,
 };
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
@@ -25,6 +26,13 @@ fn config(mode: Mode) -> FixtureConfig {
         },
         read_timeout: Duration::from_millis(100),
         write_timeout: Duration::from_millis(100),
+        readiness: ReadinessIdentity::ready(
+            CanonicalId::new("fixture").unwrap(),
+            CanonicalId::new("run-a").unwrap(),
+            CanonicalId::new("testnet").unwrap(),
+            [CanonicalId::new("echo").unwrap()],
+        )
+        .unwrap(),
     }
 }
 
@@ -35,7 +43,9 @@ fn healthy_readiness_and_echo_are_deterministic_and_logs_are_channel_safe() {
     assert_ne!(fixture.local_addr().port(), 0);
     assert_eq!(
         fixture.handle(Request::Readiness),
-        WorkDisposition::Reply(Response::Ready)
+        WorkDisposition::Reply(Response::Readiness {
+            report: config(Mode::Healthy).readiness
+        })
     );
     assert_eq!(
         fixture.handle(Request::Echo {
@@ -69,13 +79,23 @@ fn delayed_and_failure_modes_are_typed_and_bounded() {
         Fixture::bind_at(config(Mode::DelayedReadiness { delay_ms: 200 }), origin).unwrap();
     assert_eq!(
         delayed.try_handle_at(Request::Readiness, origin).unwrap(),
-        WorkDisposition::Reply(Response::NotReady)
+        WorkDisposition::Reply(Response::Readiness {
+            report: ReadinessIdentity::not_ready(
+                CanonicalId::new("fixture").unwrap(),
+                CanonicalId::new("run-a").unwrap(),
+                CanonicalId::new("testnet").unwrap(),
+                [CanonicalId::new("echo").unwrap()]
+            )
+            .unwrap()
+        })
     );
     assert_eq!(
         delayed
             .try_handle_at(Request::Readiness, origin + delay)
             .unwrap(),
-        WorkDisposition::Reply(Response::Ready)
+        WorkDisposition::Reply(Response::Readiness {
+            report: config(Mode::Healthy).readiness
+        })
     );
 
     let mut transient = Fixture::bind(config(Mode::TransientFailure { failures: 2 })).unwrap();
@@ -118,7 +138,12 @@ fn line_protocol_round_trips_typed_requests_over_a_dynamic_loopback_socket() {
     let server = std::thread::spawn(|| fixture.serve());
 
     for (request, expected) in [
-        (Request::Readiness, Response::Ready),
+        (
+            Request::Readiness,
+            Response::Readiness {
+                report: config(Mode::Healthy).readiness,
+            },
+        ),
         (
             Request::Echo {
                 payload: "echo".into(),
@@ -150,7 +175,9 @@ fn crash_and_hang_modes_activate_only_after_readiness() {
     let mut panic_fixture = Fixture::bind(config(Mode::PanicAfterReadiness)).unwrap();
     assert_eq!(
         panic_fixture.handle(Request::Readiness),
-        WorkDisposition::Reply(Response::Ready)
+        WorkDisposition::Reply(Response::Readiness {
+            report: config(Mode::Healthy).readiness
+        })
     );
     assert_eq!(
         panic_fixture.handle(Request::Echo {
@@ -162,7 +189,9 @@ fn crash_and_hang_modes_activate_only_after_readiness() {
     let mut crash = Fixture::bind(config(Mode::CrashAfterReadiness)).unwrap();
     assert_eq!(
         crash.handle(Request::Readiness),
-        WorkDisposition::Reply(Response::Ready)
+        WorkDisposition::Reply(Response::Readiness {
+            report: config(Mode::Healthy).readiness
+        })
     );
     assert_eq!(
         crash.handle(Request::Echo {
@@ -174,7 +203,9 @@ fn crash_and_hang_modes_activate_only_after_readiness() {
     let mut hang = Fixture::bind(config(Mode::Hang)).unwrap();
     assert_eq!(
         hang.handle(Request::Readiness),
-        WorkDisposition::Reply(Response::Ready)
+        WorkDisposition::Reply(Response::Readiness {
+            report: config(Mode::Healthy).readiness
+        })
     );
     assert_eq!(
         hang.handle(Request::Echo {

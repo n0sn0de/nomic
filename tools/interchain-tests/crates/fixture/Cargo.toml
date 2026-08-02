@@ -14,8 +14,12 @@ name = "nomic-harness-fixture"
 path = "src/main.rs"
 
 [dependencies]
+nomic-harness-protocol = { version = "=0.1.0", path = "../protocol" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[dev-dependencies]
+nomic-bridge-harness = { version = "=0.1.0", path = "../harness" }
 
 [[test]]
 name = "cli"

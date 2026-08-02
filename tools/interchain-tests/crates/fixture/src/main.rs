@@ -7,7 +7,7 @@ use std::process;
 use std::time::Duration;
 
 const NAMED_CANARY_ENV: &str = "NOMIC_FIXTURE_SYNTHETIC_CANARY";
-const HELP: &str = "Usage: nomic-harness-fixture --listen <loopback>:0 --mode <MODE> --argv-canary <VALUE> --log-canary <VALUE>\nConfiguration: one JSON object on stdin: {\"config_canary\":\"<VALUE>\"}";
+const HELP: &str = "Usage: nomic-harness-fixture --listen <loopback>:0 --mode <MODE> --argv-canary <VALUE> --log-canary <VALUE>\nConfiguration: one bounded typed JSON object on stdin containing config_canary, component_id, run_id, network_id, and capabilities";
 
 fn main() {
     if let Err(error) = run() {
@@ -65,6 +65,13 @@ fn run() -> Result<(), String> {
             },
             read_timeout: Duration::from_millis(500),
             write_timeout: Duration::from_millis(500),
+            readiness: nomic_harness_fixture::ReadinessIdentity::ready(
+                stdin_config.component_id,
+                stdin_config.run_id,
+                stdin_config.network_id,
+                stdin_config.capabilities,
+            )
+            .map_err(|error| error.to_string())?,
         },
         std::io::stdout(),
     )

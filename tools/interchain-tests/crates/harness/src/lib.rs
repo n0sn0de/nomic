@@ -1,8 +1,11 @@
 //! Contract and lifecycle support for the isolated interchain test harness.
 
 pub mod contract;
+pub mod driver;
 pub mod identity;
 pub mod manifest;
+pub mod readiness;
+pub mod topology;
 
 #[cfg(test)]
 mod tests {

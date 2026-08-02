@@ -1,5 +1,9 @@
 //! Bounded synthetic lifecycle target used by the process harness.
 
+pub use nomic_harness_protocol::{
+    CanonicalId, FailureClass, ReadinessIdentity, ReadinessState, Request, Response, StartupEvent,
+    MAX_STARTUP_EVENT_BYTES,
+};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::{BufRead, BufReader, Read, Write};
@@ -9,7 +13,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 pub const MAX_CANARY_BYTES: usize = 64;
-pub const MAX_CONFIG_BYTES: usize = 256;
+pub const MAX_CONFIG_BYTES: usize = 1024;
 pub const MAX_REQUEST_BYTES: usize = 256;
 pub const MAX_EVENT_BYTES: usize = 512;
 pub const MAX_RECORDED_EVENTS: usize = 64;
@@ -34,6 +38,10 @@ pub enum Mode {
 #[serde(deny_unknown_fields)]
 pub struct StdinConfig {
     pub config_canary: String,
+    pub component_id: CanonicalId,
+    pub run_id: CanonicalId,
+    pub network_id: CanonicalId,
+    pub capabilities: Vec<CanonicalId>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -51,31 +59,7 @@ pub struct FixtureConfig {
     pub canaries: CanaryInputs,
     pub read_timeout: Duration,
     pub write_timeout: Duration,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum FailureClass {
-    Transient,
-    Permanent,
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
-pub enum Request {
-    Readiness,
-    Echo { payload: String },
-    Stop,
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
-pub enum Response {
-    Ready,
-    NotReady,
-    Echo { payload: String },
-    Failure { class: FailureClass, remaining: u16 },
-    Stopped,
+    pub readiness: ReadinessIdentity,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -144,6 +128,7 @@ pub enum FixtureError {
     EventWriterStopped,
     Io(std::io::Error),
     Json(serde_json::Error),
+    InvalidReadiness,
 }
 
 impl fmt::Display for FixtureError {
@@ -162,6 +147,7 @@ impl fmt::Display for FixtureError {
             Self::EventWriterStopped => formatter.write_str("event writer stopped"),
             Self::Io(error) => write!(formatter, "fixture I/O failed: {error}"),
             Self::Json(error) => write!(formatter, "fixture JSON failed: {error}"),
+            Self::InvalidReadiness => formatter.write_str("invalid readiness identity"),
         }
     }
 }
@@ -193,6 +179,7 @@ pub struct Fixture {
     readiness_observed: bool,
     read_timeout: Duration,
     write_timeout: Duration,
+    readiness: ReadinessIdentity,
     events: Vec<Event>,
     dropped_event_count: usize,
     event_writer: Option<EventWriter>,
@@ -291,12 +278,25 @@ impl Fixture {
             readiness_observed: false,
             read_timeout: config.read_timeout,
             write_timeout: config.write_timeout,
+            readiness: config.readiness,
             events: Vec::with_capacity(8),
             dropped_event_count: 0,
             event_writer,
         };
-        let endpoint = fixture.local_addr().to_string();
-        fixture.record(EventChannel::Lifecycle, "started", Some(endpoint))?;
+        let startup = StartupEvent::listening(
+            fixture.local_addr().to_string(),
+            fixture.readiness.component_id.clone(),
+            fixture.readiness.run_id.clone(),
+            fixture.readiness.network_id.clone(),
+        )
+        .map_err(|_| FixtureError::InvalidReadiness)?;
+        let encoded = serde_json::to_string(&startup).map_err(FixtureError::Json)?;
+        if encoded.len() > MAX_STARTUP_EVENT_BYTES {
+            return Err(FixtureError::OversizedEvent);
+        }
+        if let Some(writer) = &fixture.event_writer {
+            writer.write(encoded)?;
+        }
         fixture.record(EventChannel::ArgvCanary, "observed", None)?;
         fixture.record(EventChannel::NamedEnvCanary, "observed", None)?;
         fixture.record(EventChannel::ConfigCanary, "observed", None)?;
@@ -352,11 +352,13 @@ impl Fixture {
                 if ready { "ready" } else { "not_ready" },
                 None,
             )?;
-            return Ok(WorkDisposition::Reply(if ready {
-                Response::Ready
+            let mut report = self.readiness.clone();
+            report.state = if ready {
+                ReadinessState::Ready
             } else {
-                Response::NotReady
-            }));
+                ReadinessState::NotReady
+            };
+            return Ok(WorkDisposition::Reply(Response::Readiness { report }));
         }
         if matches!(request, Request::Stop) {
             self.record(EventChannel::Lifecycle, "stopped", None)?;
@@ -503,6 +505,10 @@ fn validate_config(config: &FixtureConfig) -> Result<(), FixtureError> {
     if config.listen_addr.port() != 0 {
         return Err(FixtureError::NonDynamicPort);
     }
+    config
+        .readiness
+        .validate()
+        .map_err(|_| FixtureError::InvalidReadiness)?;
     match config.mode {
         Mode::DelayedReadiness { delay_ms } if delay_ms > MAX_DELAY_MS => {
             return Err(FixtureError::InvalidMode("delay exceeds bound"));

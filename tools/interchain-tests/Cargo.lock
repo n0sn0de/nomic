@@ -115,6 +115,7 @@ dependencies = [
  "getrandom",
  "nomic-harness-fixture",
  "nomic-harness-oracle",
+ "nomic-harness-protocol",
  "serde",
  "serde_json",
  "sha2",
@@ -126,6 +127,8 @@ dependencies = [
 name = "nomic-harness-fixture"
 version = "0.1.0"
 dependencies = [
+ "nomic-bridge-harness",
+ "nomic-harness-protocol",
  "serde",
  "serde_json",
 ]
@@ -133,6 +136,14 @@ dependencies = [
 [[package]]
 name = "nomic-harness-oracle"
 version = "0.1.0"
+
+[[package]]
+name = "nomic-harness-protocol"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "proc-macro2"

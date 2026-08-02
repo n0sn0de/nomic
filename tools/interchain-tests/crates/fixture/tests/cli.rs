@@ -87,14 +87,11 @@ fn command(mode: &str) -> Command {
     command
 }
 
+const STDIN_CONFIG: &[u8] = br#"{"config_canary":"config-private","component_id":"fixture","run_id":"run-a","network_id":"testnet","capabilities":["echo"]}"#;
+
 fn spawn(mode: &str) -> Running {
     let mut child = command(mode).spawn().unwrap();
-    child
-        .stdin
-        .take()
-        .unwrap()
-        .write_all(br#"{"config_canary":"config-private"}"#)
-        .unwrap();
+    child.stdin.take().unwrap().write_all(STDIN_CONFIG).unwrap();
     let stdout = child.stdout.take().unwrap();
     let stderr = child.stderr.take().unwrap();
     let (sender, stdout_lines) = mpsc::channel();
@@ -118,9 +115,9 @@ fn spawn(mode: &str) -> Running {
         .stdout_lines
         .recv_timeout(TIMEOUT)
         .expect("startup event deadline");
-    let event: Event = serde_json::from_str(&startup).unwrap();
-    assert_eq!(event.action(), "started");
-    let endpoint: SocketAddr = event.value().unwrap().parse().unwrap();
+    let event: nomic_harness_fixture::StartupEvent = serde_json::from_str(&startup).unwrap();
+    let nomic_harness_fixture::StartupEvent::Listening { endpoint, .. } = event;
+    let endpoint: SocketAddr = endpoint.parse().unwrap();
     assert!(endpoint.ip().is_loopback());
     assert_ne!(endpoint.port(), 0);
     running.endpoint = Some(endpoint);
@@ -201,7 +198,7 @@ fn cli_parsing_and_stdin_config_are_bounded_and_typed() {
         .stdin
         .take()
         .unwrap()
-        .write_all(br#"{"config_canary":"private","unknown":true}"#)
+        .write_all(br#"{"config_canary":"private","component_id":"fixture","run_id":"run-a","network_id":"testnet","capabilities":["echo"],"unknown":true}"#)
         .unwrap();
     let output = unknown_config.wait_with_output().unwrap();
     assert_eq!(output.status.code(), Some(2));
@@ -224,7 +221,15 @@ fn startup_endpoint_protocol_events_and_stream_separation_are_real() {
     let running = spawn("healthy");
     assert_eq!(
         request(running.endpoint(), &Request::Readiness),
-        Some(Response::Ready)
+        Some(Response::Readiness {
+            report: nomic_harness_fixture::ReadinessIdentity::ready(
+                nomic_harness_fixture::CanonicalId::new("fixture").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
+                [nomic_harness_fixture::CanonicalId::new("echo").unwrap()]
+            )
+            .unwrap()
+        })
     );
     assert_eq!(
         request(
@@ -239,9 +244,11 @@ fn startup_endpoint_protocol_events_and_stream_separation_are_real() {
     );
     let (stdout, stderr) = stop(running);
     assert!(stderr.is_empty());
-    assert!(stdout
-        .lines()
-        .all(|line| serde_json::from_str::<Event>(line).is_ok()));
+    let mut lines = stdout.lines();
+    assert!(
+        serde_json::from_str::<nomic_harness_fixture::StartupEvent>(lines.next().unwrap()).is_ok()
+    );
+    assert!(lines.all(|line| serde_json::from_str::<Event>(line).is_ok()));
     assert!(stdout.contains("synthetic-log-marker"));
     for marker in [
         "argv-private",
@@ -255,11 +262,100 @@ fn startup_endpoint_protocol_events_and_stream_separation_are_real() {
 }
 
 #[test]
+fn production_process_driver_drains_overflow_and_rejects_invalid_specs_before_spawn() {
+    use nomic_bridge_harness::driver::process::{ProcessDriver, ProcessError, ProcessSpec};
+    use nomic_bridge_harness::readiness::{AwaitBudget, ExpectedReadiness};
+    use std::ffi::OsString;
+
+    let make_spec = |component: &str| ProcessSpec {
+        program: OsString::from(env!("CARGO_BIN_EXE_nomic-harness-fixture")),
+        args: [
+            "--listen",
+            "127.0.0.1:0",
+            "--mode",
+            "healthy",
+            "--argv-canary",
+            "argv-private",
+            "--log-canary",
+            "synthetic-log-marker",
+        ]
+        .into_iter()
+        .map(OsString::from)
+        .collect(),
+        env: vec![(OsString::from(ENV_NAME), OsString::from("env-private"))],
+        stdin: STDIN_CONFIG.to_vec(),
+        component_id: nomic_harness_fixture::CanonicalId::new(component).unwrap(),
+        run_id: nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
+        network_id: nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
+        startup_deadline: TIMEOUT,
+    };
+
+    let driver = ProcessDriver::spawn(make_spec("fixture")).unwrap();
+    let expected = ExpectedReadiness::new(
+        nomic_harness_fixture::CanonicalId::new("fixture").unwrap(),
+        nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
+        nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
+        [nomic_harness_fixture::CanonicalId::new("echo").unwrap()],
+    )
+    .unwrap();
+
+    for _ in 0..40 {
+        assert!(matches!(
+            request(driver.endpoint().socket_addr(), &Request::Readiness),
+            Some(Response::Readiness { .. })
+        ));
+    }
+    let drop_deadline = Instant::now() + TIMEOUT;
+    while driver.dropped_event_count() == 0 && Instant::now() < drop_deadline {
+        std::thread::yield_now();
+    }
+    assert!(driver.dropped_event_count() > 0);
+    assert_eq!(
+        driver
+            .await_ready(
+                &expected,
+                AwaitBudget::new(4, TIMEOUT, Duration::from_millis(10)).unwrap(),
+            )
+            .unwrap()
+            .state,
+        nomic_harness_fixture::ReadinessState::Ready
+    );
+    assert!(!driver.terminate().unwrap().success());
+
+    assert!(ProcessDriver::spawn(make_spec("other")).is_err());
+
+    for env in [
+        vec![
+            (OsString::from(ENV_NAME), OsString::from("first")),
+            (OsString::from(ENV_NAME), OsString::from("second")),
+        ],
+        vec![(OsString::from("invalid-name"), OsString::from("value"))],
+        vec![(OsString::new(), OsString::from("value"))],
+    ] {
+        let mut spec = make_spec("fixture");
+        spec.program = OsString::from("program-must-not-exist");
+        spec.env = env;
+        assert!(matches!(
+            ProcessDriver::spawn(spec),
+            Err(ProcessError::InvalidSpec)
+        ));
+    }
+}
+
+#[test]
 fn panic_and_crash_have_distinct_process_outcomes() {
     let mut panic = spawn("panic-after-readiness");
     assert_eq!(
         request(panic.endpoint(), &Request::Readiness),
-        Some(Response::Ready)
+        Some(Response::Readiness {
+            report: nomic_harness_fixture::ReadinessIdentity::ready(
+                nomic_harness_fixture::CanonicalId::new("fixture").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
+                [nomic_harness_fixture::CanonicalId::new("echo").unwrap()]
+            )
+            .unwrap()
+        })
     );
     assert_eq!(
         request(
@@ -281,7 +377,15 @@ fn panic_and_crash_have_distinct_process_outcomes() {
     let mut crash = spawn("crash-after-readiness");
     assert_eq!(
         request(crash.endpoint(), &Request::Readiness),
-        Some(Response::Ready)
+        Some(Response::Readiness {
+            report: nomic_harness_fixture::ReadinessIdentity::ready(
+                nomic_harness_fixture::CanonicalId::new("fixture").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
+                [nomic_harness_fixture::CanonicalId::new("echo").unwrap()]
+            )
+            .unwrap()
+        })
     );
     assert_eq!(
         request(
@@ -303,7 +407,15 @@ fn hang_requires_and_receives_bounded_supervisor_cleanup() {
     let mut running = spawn("hang");
     assert_eq!(
         request(running.endpoint(), &Request::Readiness),
-        Some(Response::Ready)
+        Some(Response::Readiness {
+            report: nomic_harness_fixture::ReadinessIdentity::ready(
+                nomic_harness_fixture::CanonicalId::new("fixture").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
+                nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
+                [nomic_harness_fixture::CanonicalId::new("echo").unwrap()]
+            )
+            .unwrap()
+        })
     );
     assert_eq!(
         request(
