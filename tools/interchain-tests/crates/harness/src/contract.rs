@@ -14,7 +14,7 @@ pub enum ExecutionResult {
     MissingCapability,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum ScenarioOutcome {
     Pass,
     Fail,
