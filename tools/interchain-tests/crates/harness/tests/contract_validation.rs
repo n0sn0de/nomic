@@ -1,5 +1,9 @@
 use nomic_bridge_harness::contract::{ExecutionResult, ScenarioOutcome, ScenarioStatus};
 use nomic_bridge_harness::manifest::{parse_manifest, InventoryCounts};
+use nomic_harness_oracle::{
+    verify, BucketMembership, MerklePath, OracleReason, OutPoint, ProtocolEvent, ProtocolReceipt,
+    Transition,
+};
 
 fn valid_contract(id: &str, status: &str) -> String {
     format!(
@@ -242,4 +246,194 @@ fn cli_listing_reports_inventory_but_no_execution_passes() {
     assert_eq!(json["blocked"], 2);
     assert_eq!(json["pass"], 0);
     assert_eq!(json["fail"], 0);
+}
+
+fn control_receipt() -> ProtocolReceipt {
+    ProtocolReceipt {
+        amount: 50_000,
+        events: vec![
+            ProtocolEvent {
+                kind: "shielded-lock".into(),
+                amount: 50_000,
+            },
+            ProtocolEvent {
+                kind: "ibc-mint".into(),
+                amount: 49_000,
+            },
+        ],
+        asset_tag: "synthetic-zec".into(),
+        transitions: vec![
+            Transition {
+                id: "lock".into(),
+                state: "observed".into(),
+            },
+            Transition {
+                id: "mint".into(),
+                state: "final".into(),
+            },
+        ],
+        bucket_membership: vec![
+            BucketMembership {
+                transition_id: "lock".into(),
+                bucket: "pending".into(),
+            },
+            BucketMembership {
+                transition_id: "mint".into(),
+                bucket: "finalized".into(),
+            },
+        ],
+        outpoint: OutPoint {
+            txid: [0x11; 32],
+            vout: 2,
+        },
+        merkle_path: MerklePath {
+            siblings: vec![[0x22; 32], [0x33; 32]],
+            index: 1,
+        },
+        branch_id: [0xaa, 0xbb, 0xcc, 0xdd],
+        synthetic_signature: vec![0x44; 64],
+        fee: 1_000,
+        expiry: 2_000_000,
+        ibc_denom_trace: "transfer/channel-0/uzec".into(),
+    }
+}
+
+#[test]
+fn public_receipt_mutation_ledger_is_exact() {
+    type Mutation = fn(&mut ProtocolReceipt);
+    let cases: [(&str, OracleReason, Mutation); 13] = [
+        ("amount", OracleReason::AmountMismatch, |r| r.amount += 1),
+        ("omitted event", OracleReason::EventMismatch, |r| {
+            r.events.pop();
+        }),
+        ("asset tag", OracleReason::AssetTagMismatch, |r| {
+            r.asset_tag = "synthetic-other".into();
+        }),
+        (
+            "transition order",
+            OracleReason::TransitionOrderMismatch,
+            |r| r.transitions.swap(0, 1),
+        ),
+        (
+            "duplicate bucket membership",
+            OracleReason::DuplicateBucketMembership,
+            |r| {
+                r.bucket_membership[1].transition_id = "lock".into();
+            },
+        ),
+        ("outpoint", OracleReason::OutpointMismatch, |r| {
+            r.outpoint.vout += 1;
+        }),
+        ("Merkle sibling", OracleReason::MerkleSiblingMismatch, |r| {
+            r.merkle_path.siblings[0][0] ^= 1
+        }),
+        ("Merkle index", OracleReason::MerkleIndexMismatch, |r| {
+            r.merkle_path.index ^= 1;
+        }),
+        ("branch ID", OracleReason::BranchIdMismatch, |r| {
+            r.branch_id[0] ^= 1;
+        }),
+        (
+            "synthetic signature bytes",
+            OracleReason::SyntheticSignatureMismatch,
+            |r| r.synthetic_signature[0] ^= 1,
+        ),
+        ("fee", OracleReason::FeeMismatch, |r| r.fee += 1),
+        ("expiry", OracleReason::ExpiryMismatch, |r| r.expiry += 1),
+        (
+            "IBC denom trace",
+            OracleReason::IbcDenomTraceMismatch,
+            |r| r.ibc_denom_trace = "transfer/channel-9/uzec".into(),
+        ),
+    ];
+
+    let expected = control_receipt();
+    for (field, reason, mutate) in cases {
+        let control = expected.clone();
+        assert_eq!(verify(&expected, &control), Ok(()), "control for {field}");
+        let mut changed = control;
+        mutate(&mut changed);
+        assert_eq!(
+            verify(&expected, &changed),
+            Err(reason),
+            "mutation for {field}"
+        );
+    }
+}
+
+#[test]
+fn public_receipt_oracle_rejects_malformed_or_oversized_inputs_first() {
+    let expected = control_receipt();
+    let mut malformed = expected.clone();
+    malformed.asset_tag.clear();
+    malformed.amount += 1;
+    assert_eq!(
+        verify(&expected, &malformed),
+        Err(OracleReason::MalformedReceipt)
+    );
+
+    let mut oversized = expected.clone();
+    oversized.events = std::iter::repeat_n(oversized.events[0].clone(), 65).collect();
+    assert_eq!(
+        verify(&expected, &oversized),
+        Err(OracleReason::ReceiptTooLarge)
+    );
+
+    let mut oversized_string = expected.clone();
+    oversized_string.ibc_denom_trace = "x".repeat(257);
+    assert_eq!(
+        verify(&expected, &oversized_string),
+        Err(OracleReason::ReceiptTooLarge)
+    );
+}
+
+#[test]
+fn oracle_dependency_closure_excludes_harness_and_production_packages() {
+    let workspace = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+    let output = std::process::Command::new(env!("CARGO"))
+        .current_dir(workspace)
+        .args(["metadata", "--format-version", "1", "--locked"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "cargo metadata failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let metadata: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let packages = metadata["packages"].as_array().unwrap();
+    let oracle = packages
+        .iter()
+        .find(|package| package["name"] == "nomic-harness-oracle")
+        .unwrap();
+    let oracle_id = oracle["id"].as_str().unwrap();
+    let nodes = metadata["resolve"]["nodes"].as_array().unwrap();
+    let mut pending = vec![oracle_id];
+    let mut closure = std::collections::BTreeSet::new();
+    while let Some(id) = pending.pop() {
+        if !closure.insert(id) {
+            continue;
+        }
+        let node = nodes.iter().find(|node| node["id"] == id).unwrap();
+        pending.extend(
+            node["dependencies"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|dependency| dependency.as_str().unwrap()),
+        );
+    }
+    let prohibited = ["nomic", "nomic-bridge-harness"];
+    let found: Vec<_> = packages
+        .iter()
+        .filter(|package| closure.contains(package["id"].as_str().unwrap()))
+        .filter_map(|package| {
+            let name = package["name"].as_str().unwrap();
+            prohibited.contains(&name).then_some(name)
+        })
+        .collect();
+    assert!(
+        found.is_empty(),
+        "prohibited oracle dependencies: {found:?}"
+    );
 }

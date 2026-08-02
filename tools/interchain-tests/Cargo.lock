@@ -113,6 +113,7 @@ name = "nomic-bridge-harness"
 version = "0.1.0"
 dependencies = [
  "getrandom",
+ "nomic-harness-oracle",
  "serde",
  "serde_json",
  "sha2",
