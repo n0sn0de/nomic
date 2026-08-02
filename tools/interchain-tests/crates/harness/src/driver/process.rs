@@ -76,6 +76,12 @@ pub struct ProcessDriver {
     dropped_event_count: Arc<AtomicUsize>,
 }
 
+#[derive(Debug)]
+pub struct StoppedProcess {
+    pub status: ExitStatus,
+    pub events: Vec<Vec<u8>>,
+}
+
 impl ProcessDriver {
     pub fn spawn(spec: ProcessSpec) -> Result<Self, ProcessError> {
         validate_spec(&spec)?;
@@ -238,6 +244,20 @@ impl ProcessDriver {
     }
 
     pub fn stop_and_wait_until(self, deadline: Instant) -> Result<ExitStatus, ProcessError> {
+        self.stop_and_collect_until(deadline)
+            .map(|stopped| stopped.status)
+    }
+
+    pub fn stop_and_collect(self, timeout: Duration) -> Result<StoppedProcess, ProcessError> {
+        let deadline = Instant::now()
+            .checked_add(timeout)
+            .ok_or(ProcessError::GracefulDeadline)?;
+        self.stop_and_collect_until(deadline)
+    }
+
+    /// Requests typed graceful shutdown, reaps the process, and returns the
+    /// complete bounded stdout event stream after joining its reader.
+    pub fn stop_and_collect_until(self, deadline: Instant) -> Result<StoppedProcess, ProcessError> {
         let mut this = self;
         match protocol_request(this.endpoint, &Request::Stop, deadline) {
             Ok(Response::Stopped) => {}
@@ -271,11 +291,11 @@ impl ProcessDriver {
             .ok_or(ProcessError::AlreadyReaped)?;
         lock_recover(&this.cleanup.permit).take();
         drop(guard);
-        this.finish_reader_and_drain(deadline)?;
+        let events = this.finish_reader_and_drain(deadline)?;
         if !status.success() {
             return Err(ProcessError::NonzeroExit);
         }
-        Ok(status)
+        Ok(StoppedProcess { status, events })
     }
 
     /// After the process has been reaped, waits for stdout EOF, joins the

@@ -7,7 +7,7 @@ use crate::identity::{
     SemanticSeedInput,
 };
 use crate::readiness::{protocol_request, AwaitBudget, ExpectedReadiness, ProtocolRequestError};
-use crate::retry::{run, InvalidRetryBudget, RetryBudget, RetryClass, RetryOutcome};
+use crate::retry::{run, InvalidRetryBudget, RetryBudget, RetryClass, RetryFailure, RetryOutcome};
 use crate::topology::{Topology, TopologyError};
 use crate::watchdog::{ArmedWatchdog, WatchdogError, WatchdogOutcome};
 use nomic_harness_protocol::{CanonicalId, FailureClass, Request, Response};
@@ -81,6 +81,8 @@ pub struct ReplayReceipt {
 pub struct SupervisionReceipt {
     pub retry_attempts: u16,
     pub retry_outcome: RetryOutcome,
+    pub permanent_attempts: u16,
+    pub permanent_outcome: RetryOutcome,
     pub watchdog_outcome: WatchdogOutcome,
     pub cleanup_restored: bool,
     pub outcome: ScenarioOutcome,
@@ -103,6 +105,7 @@ impl Eq for SupervisionOutput {}
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SupervisionDiagnostics {
     pub retry_elapsed: Duration,
+    pub permanent_elapsed: Duration,
     pub watchdog_elapsed: Duration,
 }
 
@@ -228,7 +231,7 @@ fn run_har_001(request: &H0RunnerRequest<'_>) -> Result<BootstrapReceipt, H0Erro
                 deadline,
                 request.controls.startup_failure_node == Some(index),
             )?;
-            owner.own(driver);
+            owner.own((*node).clone(), driver);
             ready(
                 request,
                 owner.last(),
@@ -240,13 +243,12 @@ fn run_har_001(request: &H0RunnerRequest<'_>) -> Result<BootstrapReceipt, H0Erro
         }
         Ok(())
     })();
-    let startup_order = order.iter().map(|node| node.as_str().to_owned()).collect();
-    let shutdown_order = order
-        .iter()
-        .rev()
-        .map(|node| node.as_str().to_owned())
-        .collect();
-    owner.finish(work)?;
+    let startup_order: Vec<String> = order.iter().map(|node| node.as_str().to_owned()).collect();
+    let shutdown_order = owner.finish_with_shutdown_order(work)?;
+    let expected_shutdown_order: Vec<_> = startup_order.iter().rev().cloned().collect();
+    if shutdown_order != expected_shutdown_order {
+        return Err(H0Error::UnexpectedResponse);
+    }
     Ok(BootstrapReceipt {
         scenario_id: request.contract.id.clone(),
         startup_order,
@@ -303,7 +305,7 @@ fn replay_once(
             deadline,
             false,
         )?;
-        owner.own(driver);
+        owner.own(node.clone(), driver);
         ready(
             request,
             owner.last(),
@@ -357,7 +359,7 @@ fn run_har_006(request: &H0RunnerRequest<'_>) -> Result<SupervisionOutput, H0Err
             deadline,
             false,
         )?;
-        owner.own(driver);
+        owner.own(node.clone(), driver);
         ready(
             request,
             owner.last(),
@@ -389,7 +391,7 @@ fn run_har_006(request: &H0RunnerRequest<'_>) -> Result<SupervisionOutput, H0Err
                 Ok(Response::Failure {
                     class: FailureClass::Permanent,
                     ..
-                }) => Err(RetryClass::Permanent(H0Error::RetryFailed)),
+                }) => Err::<(), _>(RetryClass::Permanent(H0Error::RetryFailed)),
                 Ok(_) => Err(RetryClass::Permanent(H0Error::UnexpectedResponse)),
                 Err(error) => Err(RetryClass::Permanent(H0Error::Protocol(error))),
             }
@@ -402,6 +404,70 @@ fn run_har_006(request: &H0RunnerRequest<'_>) -> Result<SupervisionOutput, H0Err
             return Err(H0Error::RetryFailed);
         }
         owner.stop_last()?;
+
+        let permanent_label = RunIdentity::new(seed, request.run_nonces[1])
+            .resource_label("h0-permanent")
+            .map_err(H0Error::Identity)?;
+        let permanent_run = canonical_label(permanent_label)?;
+        let permanent = spawn_fixture(
+            request,
+            node,
+            &permanent_run,
+            &capabilities,
+            "permanent-failure",
+            deadline,
+            false,
+        )?;
+        owner.own(node.clone(), permanent);
+        ready(
+            request,
+            owner.last(),
+            node,
+            &permanent_run,
+            &capabilities,
+            deadline,
+        )?;
+        let permanent_budget = RetryBudget::until(
+            2,
+            operation_deadline(request, deadline)?,
+            request.controls.retry_backoff,
+        )
+        .map_err(H0Error::RetryBudget)?;
+        let permanent_report = run(permanent_budget, |attempt| {
+            match protocol_request(
+                owner.last().endpoint(),
+                &Request::Echo {
+                    payload: "classified".into(),
+                },
+                attempt.deadline(),
+            ) {
+                Ok(Response::Failure {
+                    class: FailureClass::Permanent,
+                    ..
+                }) => Err::<(), _>(RetryClass::Permanent(H0Error::RetryFailed)),
+                Ok(Response::Failure {
+                    class: FailureClass::Transient,
+                    ..
+                }) => Err(RetryClass::Transient(H0Error::RetryFailed)),
+                Ok(_) => Err(RetryClass::Permanent(H0Error::UnexpectedResponse)),
+                Err(error) => Err(RetryClass::Permanent(H0Error::Protocol(error))),
+            }
+        });
+        let permanent_receipt = *permanent_report.receipt();
+        if !matches!(
+            permanent_report.into_result(),
+            Err(RetryFailure::Permanent(_))
+        ) || permanent_receipt.attempts() != 1
+            || permanent_receipt.outcome() != RetryOutcome::Permanent
+        {
+            return Err(H0Error::RetryFailed);
+        }
+        let permanent_events = owner.stop_last()?;
+        if lifecycle_action_count(&permanent_events, "echo")? != 1
+            || lifecycle_action_count(&permanent_events, "failure")? != 1
+        {
+            return Err(H0Error::RetryFailed);
+        }
 
         let hang_label = RunIdentity::new(seed, request.run_nonces[1])
             .resource_label("h0-hang")
@@ -416,7 +482,7 @@ fn run_har_006(request: &H0RunnerRequest<'_>) -> Result<SupervisionOutput, H0Err
             deadline,
             false,
         )?;
-        owner.own(hang);
+        owner.own(node.clone(), hang);
         ready(
             request,
             owner.last(),
@@ -465,12 +531,15 @@ fn run_har_006(request: &H0RunnerRequest<'_>) -> Result<SupervisionOutput, H0Err
             receipt: SupervisionReceipt {
                 retry_attempts: retry_receipt.attempts(),
                 retry_outcome: retry_receipt.outcome(),
+                permanent_attempts: permanent_receipt.attempts(),
+                permanent_outcome: permanent_receipt.outcome(),
                 watchdog_outcome: watchdog_receipt.outcome(),
                 cleanup_restored: true,
                 outcome: ScenarioOutcome::Pass,
             },
             diagnostics: SupervisionDiagnostics {
                 retry_elapsed: retry_receipt.elapsed(),
+                permanent_elapsed: permanent_receipt.elapsed(),
                 watchdog_elapsed: watchdog_receipt.elapsed(),
             },
         })
@@ -504,6 +573,35 @@ fn observe_descendant(events: &[Vec<u8>]) -> Result<(), H0Error> {
         }
     }
     Err(H0Error::UnexpectedResponse)
+}
+
+fn observe_stopped(events: &[Vec<u8>]) -> Result<(), H0Error> {
+    for encoded in events {
+        let event: FixtureDiagnostic =
+            serde_json::from_slice(encoded).map_err(|_| H0Error::UnexpectedResponse)?;
+        if event.schema == "fixture-event-v1"
+            && event.channel == "lifecycle"
+            && event.action == "stopped"
+        {
+            return Ok(());
+        }
+    }
+    Err(H0Error::UnexpectedResponse)
+}
+
+fn lifecycle_action_count(events: &[Vec<u8>], action: &str) -> Result<usize, H0Error> {
+    let mut count = 0;
+    for encoded in events {
+        let event: FixtureDiagnostic =
+            serde_json::from_slice(encoded).map_err(|_| H0Error::UnexpectedResponse)?;
+        if event.schema == "fixture-event-v1"
+            && event.channel == "lifecycle"
+            && event.action == action
+        {
+            count += 1;
+        }
+    }
+    Ok(count)
 }
 
 #[derive(Serialize)]
@@ -662,7 +760,13 @@ fn ensure_before(deadline: Instant) -> Result<(), H0Error> {
 struct ProcessOwner<'a> {
     request: &'a H0RunnerRequest<'a>,
     overall_deadline: Instant,
-    drivers: Vec<ProcessDriver>,
+    drivers: Vec<OwnedProcess>,
+    shutdown_order: Vec<String>,
+}
+
+struct OwnedProcess {
+    node: CanonicalId,
+    driver: ProcessDriver,
 }
 
 impl<'a> ProcessOwner<'a> {
@@ -671,48 +775,57 @@ impl<'a> ProcessOwner<'a> {
             request,
             overall_deadline,
             drivers: Vec::new(),
+            shutdown_order: Vec::new(),
         }
     }
 
-    fn own(&mut self, driver: ProcessDriver) {
-        self.drivers.push(driver);
+    fn own(&mut self, node: CanonicalId, driver: ProcessDriver) {
+        self.drivers.push(OwnedProcess { node, driver });
     }
 
     fn last(&self) -> &ProcessDriver {
-        self.drivers.last().expect("owned process")
+        &self.drivers.last().expect("owned process").driver
     }
 
     fn last_mut(&mut self) -> &mut ProcessDriver {
-        self.drivers.last_mut().expect("owned process")
+        &mut self.drivers.last_mut().expect("owned process").driver
     }
 
-    fn stop_last(&mut self) -> Result<(), H0Error> {
-        let driver = self.drivers.pop().expect("owned process");
+    fn stop_last(&mut self) -> Result<Vec<Vec<u8>>, H0Error> {
+        let owned = self.drivers.pop().expect("owned process");
         let deadline = operation_deadline(self.request, self.overall_deadline)?;
-        driver
-            .stop_and_wait_until(deadline)
+        let stopped = owned
+            .driver
+            .stop_and_collect_until(deadline)
             .map_err(H0Error::Process)?;
-        Ok(())
+        observe_stopped(&stopped.events)?;
+        self.shutdown_order.push(owned.node.as_str().to_owned());
+        Ok(stopped.events)
     }
 
     fn cleanup(&mut self) -> Result<(), H0Error> {
         let mut first_error = None;
-        while let Some(driver) = self.drivers.pop() {
-            let pending = driver.has_pending_cleanup().map_err(H0Error::Process);
+        while let Some(owned) = self.drivers.pop() {
+            let pending = owned.driver.has_pending_cleanup().map_err(H0Error::Process);
             match pending {
-                Ok(false) => drop(driver),
+                Ok(false) => drop(owned.driver),
                 Ok(true) => {
                     let deadline = operation_deadline(self.request, self.overall_deadline)
                         .unwrap_or(self.overall_deadline);
-                    let result = driver
-                        .stop_and_wait_until(deadline)
-                        .map_err(H0Error::Process);
+                    let result = owned
+                        .driver
+                        .stop_and_collect_until(deadline)
+                        .map_err(H0Error::Process)
+                        .and_then(|stopped| observe_stopped(&stopped.events));
+                    if result.is_ok() {
+                        self.shutdown_order.push(owned.node.as_str().to_owned());
+                    }
                     if first_error.is_none() {
                         first_error = result.err();
                     }
                 }
                 Err(error) => {
-                    drop(driver);
+                    drop(owned.driver);
                     if first_error.is_none() {
                         first_error = Some(error);
                     }
@@ -729,10 +842,31 @@ impl<'a> ProcessOwner<'a> {
             Ok(value) => cleanup.map(|()| value),
         }
     }
+
+    fn finish_with_shutdown_order<T>(
+        &mut self,
+        result: Result<T, H0Error>,
+    ) -> Result<Vec<String>, H0Error> {
+        self.finish(result)?;
+        Ok(std::mem::take(&mut self.shutdown_order))
+    }
 }
 
 impl Drop for ProcessOwner<'_> {
     fn drop(&mut self) {
         let _ = self.cleanup();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::observe_stopped;
+
+    #[test]
+    fn collected_events_without_stopped_are_rejected() {
+        let events = vec![
+            br#"{"schema":"fixture-event-v1","channel":"lifecycle","action":"ready"}"#.to_vec(),
+        ];
+        assert!(observe_stopped(&events).is_err());
     }
 }

@@ -188,9 +188,15 @@ fn har_006_retries_real_typed_failures_then_times_out_and_reaps_tree() {
         panic!("wrong receipt")
     };
     assert_eq!(receipt.receipt.retry_attempts, 3);
+    assert_eq!(receipt.receipt.permanent_attempts, 1);
+    assert_eq!(
+        receipt.receipt.permanent_outcome,
+        nomic_bridge_harness::retry::RetryOutcome::Permanent
+    );
     assert!(receipt.receipt.cleanup_restored);
     let mut changed_diagnostics = receipt.clone();
     changed_diagnostics.diagnostics.retry_elapsed += Duration::from_secs(1);
+    changed_diagnostics.diagnostics.permanent_elapsed += Duration::from_secs(1);
     changed_diagnostics.diagnostics.watchdog_elapsed += Duration::from_secs(1);
     assert_eq!(receipt, changed_diagnostics);
     let serialized = serde_json::to_string(&receipt.receipt).unwrap();
