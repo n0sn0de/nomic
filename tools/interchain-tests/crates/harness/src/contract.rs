@@ -272,7 +272,7 @@ pub struct ScenarioContract {
     pub executable: Option<ExecutableBinding>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Backend {
     Process,
@@ -280,7 +280,7 @@ pub enum Backend {
     ProcessAndContainer,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Fidelity {
     Synthetic,
