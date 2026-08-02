@@ -32,6 +32,7 @@ pub enum Mode {
     PanicAfterReadiness,
     CrashAfterReadiness,
     Hang,
+    HangWithDescendant,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
@@ -68,6 +69,7 @@ pub enum WorkDisposition {
     Panic,
     Crash,
     Hang,
+    HangWithDescendant,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -369,6 +371,7 @@ impl Fixture {
                 Mode::PanicAfterReadiness => Some(WorkDisposition::Panic),
                 Mode::CrashAfterReadiness => Some(WorkDisposition::Crash),
                 Mode::Hang => Some(WorkDisposition::Hang),
+                Mode::HangWithDescendant => Some(WorkDisposition::HangWithDescendant),
                 _ => None,
             };
             if let Some(disposition) = disposition {
@@ -376,6 +379,7 @@ impl Fixture {
                     WorkDisposition::Panic => "panic",
                     WorkDisposition::Crash => "crash",
                     WorkDisposition::Hang => "hang",
+                    WorkDisposition::HangWithDescendant => "hang-with-descendant",
                     WorkDisposition::Reply(_) => unreachable!(),
                 };
                 self.record(EventChannel::Lifecycle, action, None)?;
@@ -470,6 +474,24 @@ impl Fixture {
             WorkDisposition::Hang => loop {
                 thread::park();
             },
+            WorkDisposition::HangWithDescendant => {
+                let child =
+                    std::process::Command::new(std::env::current_exe().map_err(FixtureError::Io)?)
+                        .args(["--internal-child", "hang"])
+                        .stdin(std::process::Stdio::null())
+                        .stdout(std::process::Stdio::null())
+                        .stderr(std::process::Stdio::null())
+                        .spawn()
+                        .map_err(FixtureError::Io)?;
+                self.record(
+                    EventChannel::Lifecycle,
+                    "descendant_spawned",
+                    Some(child.id().to_string()),
+                )?;
+                loop {
+                    thread::park();
+                }
+            }
         }
     }
 

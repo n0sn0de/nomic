@@ -5,7 +5,9 @@ pub mod driver;
 pub mod identity;
 pub mod manifest;
 pub mod readiness;
+pub mod retry;
 pub mod topology;
+pub mod watchdog;
 
 #[cfg(test)]
 mod tests {

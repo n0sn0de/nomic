@@ -1,4 +1,6 @@
-use nomic_harness_fixture::{Event, Request, Response, CRASH_EXIT_CODE, MAX_CONFIG_BYTES};
+use nomic_harness_fixture::{
+    CanonicalId, Event, Request, Response, CRASH_EXIT_CODE, MAX_CONFIG_BYTES,
+};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{SocketAddr, TcpStream};
 use std::process::{Child, ChildStderr, Command, ExitStatus, Stdio};
@@ -263,7 +265,9 @@ fn startup_endpoint_protocol_events_and_stream_separation_are_real() {
 
 #[test]
 fn production_process_driver_drains_overflow_and_rejects_invalid_specs_before_spawn() {
-    use nomic_bridge_harness::driver::process::{ProcessDriver, ProcessError, ProcessSpec};
+    use nomic_bridge_harness::driver::process::{
+        ProcessContainment, ProcessDriver, ProcessError, ProcessSpec,
+    };
     use nomic_bridge_harness::readiness::{AwaitBudget, ExpectedReadiness};
     use std::ffi::OsString;
 
@@ -288,6 +292,7 @@ fn production_process_driver_drains_overflow_and_rejects_invalid_specs_before_sp
         run_id: nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
         network_id: nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
         startup_deadline: TIMEOUT,
+        containment: ProcessContainment::NoProcessGroupOrSessionEscape,
     };
 
     let driver = ProcessDriver::spawn(make_spec("fixture")).unwrap();
@@ -324,6 +329,14 @@ fn production_process_driver_drains_overflow_and_rejects_invalid_specs_before_sp
 
     assert!(ProcessDriver::spawn(make_spec("other")).is_err());
 
+    let mut unsupported = make_spec("fixture");
+    unsupported.program = OsString::from("program-must-not-exist");
+    unsupported.containment = ProcessContainment::StrongerIsolationRequired;
+    assert!(matches!(
+        ProcessDriver::spawn(unsupported),
+        Err(ProcessError::UnsupportedContainment)
+    ));
+
     for env in [
         vec![
             (OsString::from(ENV_NAME), OsString::from("first")),
@@ -340,6 +353,209 @@ fn production_process_driver_drains_overflow_and_rejects_invalid_specs_before_sp
             Err(ProcessError::InvalidSpec)
         ));
     }
+}
+
+#[test]
+fn watchdog_cancel_has_strict_deadline_precedence() {
+    use nomic_bridge_harness::driver::process::{ProcessContainment, ProcessDriver, ProcessSpec};
+    use nomic_bridge_harness::watchdog::{ArmedWatchdog, WatchdogOutcome};
+    use std::ffi::OsString;
+
+    let driver = ProcessDriver::spawn(ProcessSpec {
+        program: OsString::from(env!("CARGO_BIN_EXE_nomic-harness-fixture")),
+        args: [
+            "--listen",
+            "127.0.0.1:0",
+            "--mode",
+            "healthy",
+            "--argv-canary",
+            "argv-private",
+            "--log-canary",
+            "synthetic-log-marker",
+        ]
+        .into_iter()
+        .map(OsString::from)
+        .collect(),
+        env: vec![(OsString::from(ENV_NAME), OsString::from("env-private"))],
+        stdin: STDIN_CONFIG.to_vec(),
+        component_id: CanonicalId::new("fixture").unwrap(),
+        run_id: CanonicalId::new("run-a").unwrap(),
+        network_id: CanonicalId::new("testnet").unwrap(),
+        startup_deadline: TIMEOUT,
+        containment: ProcessContainment::NoProcessGroupOrSessionEscape,
+    })
+    .unwrap();
+    let stale_handle = driver.termination_handle();
+    let receipt = ArmedWatchdog::arm(Duration::from_millis(200), stale_handle.clone())
+        .unwrap()
+        .cancel()
+        .unwrap();
+    assert_eq!(receipt.outcome(), WatchdogOutcome::Cancelled);
+    assert!(driver.has_pending_cleanup().unwrap());
+    assert!(matches!(
+        request(driver.endpoint().socket_addr(), &Request::Readiness),
+        Some(Response::Readiness { .. })
+    ));
+    driver.terminate().unwrap();
+    assert!(stale_handle.terminate().unwrap().is_none());
+
+    let watchdog = ArmedWatchdog::arm(Duration::from_millis(20), stale_handle).unwrap();
+    std::thread::sleep(Duration::from_millis(30));
+    let receipt = watchdog.cancel().unwrap();
+    assert_eq!(receipt.outcome(), WatchdogOutcome::TimedOut);
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn termination_handle_reaps_an_already_exited_direct_child() {
+    use nomic_bridge_harness::driver::process::{ProcessContainment, ProcessDriver, ProcessSpec};
+    use std::ffi::OsString;
+
+    let driver = ProcessDriver::spawn(ProcessSpec {
+        program: OsString::from(env!("CARGO_BIN_EXE_nomic-harness-fixture")),
+        args: [
+            "--listen",
+            "127.0.0.1:0",
+            "--mode",
+            "healthy",
+            "--argv-canary",
+            "argv-private",
+            "--log-canary",
+            "synthetic-log-marker",
+        ]
+        .into_iter()
+        .map(OsString::from)
+        .collect(),
+        env: vec![(OsString::from(ENV_NAME), OsString::from("env-private"))],
+        stdin: STDIN_CONFIG.to_vec(),
+        component_id: CanonicalId::new("fixture").unwrap(),
+        run_id: CanonicalId::new("run-a").unwrap(),
+        network_id: CanonicalId::new("testnet").unwrap(),
+        startup_deadline: TIMEOUT,
+        containment: ProcessContainment::NoProcessGroupOrSessionEscape,
+    })
+    .unwrap();
+    let terminator = driver.termination_handle();
+    assert!(matches!(
+        request(driver.endpoint().socket_addr(), &Request::Stop),
+        Some(Response::Stopped)
+    ));
+
+    let exit_deadline = Instant::now() + TIMEOUT;
+    while !has_exited_without_reaping(driver.id()).unwrap() && Instant::now() < exit_deadline {
+        std::thread::yield_now();
+    }
+    assert!(has_exited_without_reaping(driver.id()).unwrap());
+    assert!(terminator.terminate().unwrap().unwrap().success());
+    assert!(terminator.terminate().unwrap().is_none());
+}
+
+#[cfg(unix)]
+#[test]
+fn outer_watchdog_kills_and_reaps_hung_parent_and_descendant_group() {
+    use nomic_bridge_harness::driver::process::{ProcessContainment, ProcessDriver, ProcessSpec};
+    use nomic_bridge_harness::readiness::{AwaitBudget, ExpectedReadiness};
+    use nomic_bridge_harness::watchdog::{ArmedWatchdog, WatchdogOutcome};
+    use std::ffi::OsString;
+
+    let driver = ProcessDriver::spawn(ProcessSpec {
+        program: OsString::from(env!("CARGO_BIN_EXE_nomic-harness-fixture")),
+        args: [
+            "--listen",
+            "127.0.0.1:0",
+            "--mode",
+            "hang-with-descendant",
+            "--argv-canary",
+            "argv-private",
+            "--log-canary",
+            "synthetic-log-marker",
+        ]
+        .into_iter()
+        .map(OsString::from)
+        .collect(),
+        env: vec![(OsString::from(ENV_NAME), OsString::from("env-private"))],
+        stdin: STDIN_CONFIG.to_vec(),
+        component_id: CanonicalId::new("fixture").unwrap(),
+        run_id: CanonicalId::new("run-a").unwrap(),
+        network_id: CanonicalId::new("testnet").unwrap(),
+        startup_deadline: TIMEOUT,
+        containment: ProcessContainment::NoProcessGroupOrSessionEscape,
+    })
+    .unwrap();
+    let parent_pid = driver.id();
+    let expected = ExpectedReadiness::new(
+        CanonicalId::new("fixture").unwrap(),
+        CanonicalId::new("run-a").unwrap(),
+        CanonicalId::new("testnet").unwrap(),
+        [CanonicalId::new("echo").unwrap()],
+    )
+    .unwrap();
+    driver
+        .await_ready(
+            &expected,
+            AwaitBudget::new(4, TIMEOUT, Duration::from_millis(5)).unwrap(),
+        )
+        .unwrap();
+
+    let watchdog =
+        ArmedWatchdog::arm(Duration::from_millis(60), driver.termination_handle()).unwrap();
+    let endpoint = driver.endpoint().socket_addr();
+    let blocked_request = std::thread::spawn(move || {
+        request(
+            endpoint,
+            &Request::Echo {
+                payload: "hang".into(),
+            },
+        )
+    });
+    let child_pid = (0..16)
+        .find_map(|_| {
+            let diagnostic = driver.next_event(TIMEOUT).ok()?;
+            let event: Event = serde_json::from_slice(&diagnostic).ok()?;
+            (event.channel() == nomic_harness_fixture::EventChannel::Lifecycle
+                && event.action() == "descendant_spawned")
+                .then(|| event.value()?.parse().ok())
+                .flatten()
+        })
+        .expect("bounded descendant diagnostic");
+    let receipt = watchdog.wait().unwrap();
+    assert_eq!(receipt.outcome(), WatchdogOutcome::TimedOut);
+    assert!(receipt.elapsed() >= Duration::from_millis(50));
+    blocked_request.join().unwrap();
+    assert!(!driver.has_pending_cleanup().unwrap());
+
+    assert!(!process_exists(parent_pid));
+    assert!(!process_exists(child_pid));
+}
+
+#[cfg(unix)]
+fn process_exists(pid: u32) -> bool {
+    unsafe extern "C" {
+        fn kill(pid: i32, signal: i32) -> i32;
+    }
+    let Ok(pid) = i32::try_from(pid) else {
+        return false;
+    };
+    unsafe { kill(pid, 0) == 0 }
+}
+
+#[cfg(target_os = "linux")]
+fn has_exited_without_reaping(pid: u32) -> std::io::Result<bool> {
+    let pid = libc::pid_t::try_from(pid)
+        .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid child pid"))?;
+    let mut info = std::mem::MaybeUninit::<libc::siginfo_t>::zeroed();
+    let result = unsafe {
+        libc::waitid(
+            libc::P_PID,
+            pid.cast_unsigned(),
+            info.as_mut_ptr(),
+            libc::WEXITED | libc::WNOHANG | libc::WNOWAIT,
+        )
+    };
+    if result == -1 {
+        return Err(std::io::Error::last_os_error());
+    }
+    Ok(unsafe { info.assume_init().si_pid() } == pid)
 }
 
 #[test]
@@ -440,7 +656,7 @@ fn hang_requires_and_receives_bounded_supervisor_cleanup() {
 fn running_drop_kills_and_reaps_an_unstopped_child() {
     let running = spawn("hang");
     let pid = running.child.as_ref().unwrap().id();
-    assert!(std::path::Path::new(&format!("/proc/{pid}")).exists());
+    assert!(process_exists(pid));
     drop(running);
-    assert!(!std::path::Path::new(&format!("/proc/{pid}")).exists());
+    assert!(!process_exists(pid));
 }

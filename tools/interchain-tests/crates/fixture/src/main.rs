@@ -18,6 +18,11 @@ fn main() {
 
 fn run() -> Result<(), String> {
     let args = env::args().skip(1).collect::<Vec<_>>();
+    if args.as_slice() == ["--internal-child", "hang"] {
+        loop {
+            std::thread::park();
+        }
+    }
     if args.as_slice() == ["--help"] {
         println!("{HELP}");
         return Ok(());
@@ -86,6 +91,7 @@ fn parse_mode(value: &str) -> Result<Mode, String> {
         "panic-after-readiness" => Ok(Mode::PanicAfterReadiness),
         "crash-after-readiness" => Ok(Mode::CrashAfterReadiness),
         "hang" => Ok(Mode::Hang),
+        "hang-with-descendant" => Ok(Mode::HangWithDescendant),
         _ if value.starts_with("delayed-readiness:") => value[18..]
             .parse()
             .map(|delay_ms| Mode::DelayedReadiness { delay_ms })

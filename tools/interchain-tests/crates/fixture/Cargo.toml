@@ -21,6 +21,9 @@ serde_json = "1.0"
 [dev-dependencies]
 nomic-bridge-harness = { version = "=0.1.0", path = "../harness" }
 
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+libc = "0.2"
+
 [[test]]
 name = "cli"
 path = "tests/cli.rs"

@@ -1,7 +1,8 @@
 use nomic_bridge_harness::driver::DynamicEndpoint;
 use nomic_bridge_harness::readiness::{
-    await_ready, AwaitBudget, ExpectedReadiness, ReadinessErrorClass,
+    await_ready, await_ready_with_receipt, AwaitBudget, ExpectedReadiness, ReadinessErrorClass,
 };
+use nomic_bridge_harness::retry::RetryOutcome;
 use nomic_bridge_harness::topology::Topology;
 use nomic_harness_protocol::{CanonicalId, ReadinessIdentity, ReadinessState, Response};
 use std::io::{Read, Write};
@@ -53,8 +54,12 @@ fn missing_listener_exhausts_a_stable_budget() {
         AwaitBudget::new(3, Duration::from_millis(80), Duration::from_millis(5)).unwrap(),
     )
     .unwrap_err();
-    assert_eq!(error.class(), ReadinessErrorClass::DeadlineExceeded);
+    assert_eq!(error.class(), ReadinessErrorClass::AttemptsExhausted);
     assert_eq!(error.attempts(), 3);
+    assert_eq!(
+        error.receipt().unwrap().outcome(),
+        RetryOutcome::AttemptsExhausted
+    );
 }
 
 #[test]
@@ -163,6 +168,29 @@ fn exact_identity_and_delayed_not_ready_succeed_within_budget() {
 }
 
 #[test]
+fn not_ready_success_exposes_the_exact_retry_receipt() {
+    let not_ready =
+        ReadinessIdentity::not_ready(id("fixture"), id("run-a"), id("testnet"), [id("echo")])
+            .unwrap();
+    let ready =
+        ReadinessIdentity::ready(id("fixture"), id("run-a"), id("testnet"), [id("echo")]).unwrap();
+    let (endpoint, server) = serve_responses(vec![
+        encoded(not_ready.clone()),
+        encoded(not_ready),
+        encoded(ready),
+    ]);
+    let success = await_ready_with_receipt(
+        endpoint,
+        &expected(),
+        AwaitBudget::new(3, Duration::from_millis(200), Duration::from_millis(2)).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(success.receipt.attempts(), 3);
+    assert_eq!(success.receipt.outcome(), RetryOutcome::Succeeded);
+    server.finish();
+}
+
+#[test]
 fn identity_schema_and_capability_errors_are_permanent_on_first_attempt() {
     let cases = [
         (
@@ -211,6 +239,7 @@ fn identity_schema_and_capability_errors_are_permanent_on_first_attempt() {
         assert_eq!(error.class(), class);
         assert_eq!(error.attempts(), 1);
         assert!(error.is_permanent());
+        assert_eq!(error.receipt().unwrap().outcome(), RetryOutcome::Permanent);
         server.finish();
     }
 }
@@ -234,6 +263,7 @@ fn malformed_and_oversized_responses_fail_permanently() {
         assert_eq!(error.class(), class);
         assert_eq!(error.attempts(), 1);
         assert!(error.is_permanent());
+        assert_eq!(error.receipt().unwrap().outcome(), RetryOutcome::Permanent);
         server.finish();
     }
 }
@@ -320,14 +350,16 @@ fn stalled_response_cannot_multiply_the_supervisor_deadline() {
     });
     let declared = Duration::from_millis(60);
     let started = Instant::now();
-    let error = await_ready(
+    let error = await_ready_with_receipt(
         endpoint,
         &expected(),
         AwaitBudget::new(4, declared, Duration::from_millis(5)).unwrap(),
     )
     .unwrap_err();
     assert_eq!(error.class(), ReadinessErrorClass::DeadlineExceeded);
-    assert!(started.elapsed() <= declared + Duration::from_millis(80));
+    let elapsed = started.elapsed();
+    assert!(elapsed >= declared);
+    assert!(elapsed <= declared + Duration::from_millis(80));
     done_rx
         .recv_timeout(Duration::from_secs(1))
         .expect("stall completion deadline");

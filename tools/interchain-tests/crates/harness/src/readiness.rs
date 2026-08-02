@@ -1,6 +1,7 @@
 //! Bounded, identity-validating readiness probes.
 
 use crate::driver::DynamicEndpoint;
+use crate::retry::{run, RetryBudget, RetryClass, RetryFailure, RetryReceipt};
 use nomic_harness_protocol::{
     CanonicalId, ReadinessIdentity, ReadinessState, Request, Response, READINESS_SCHEMA,
 };
@@ -80,6 +81,9 @@ impl AwaitBudget {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ReadinessErrorClass {
     DeadlineExceeded,
+    AttemptsExhausted,
+    NotReady,
+    TransportUnavailable,
     WrongSchema,
     IdentityMismatch,
     CapabilityMismatch,
@@ -95,6 +99,7 @@ pub struct ReadinessError {
     class: ReadinessErrorClass,
     attempts: u16,
     permanent: bool,
+    receipt: Option<RetryReceipt>,
 }
 impl ReadinessError {
     fn permanent(class: ReadinessErrorClass, attempts: u16) -> Self {
@@ -102,6 +107,7 @@ impl ReadinessError {
             class,
             attempts,
             permanent: true,
+            receipt: None,
         }
     }
     pub fn class(&self) -> ReadinessErrorClass {
@@ -112,6 +118,9 @@ impl ReadinessError {
     }
     pub fn is_permanent(&self) -> bool {
         self.permanent
+    }
+    pub fn receipt(&self) -> Option<&RetryReceipt> {
+        self.receipt.as_ref()
     }
 }
 impl fmt::Display for ReadinessError {
@@ -130,42 +139,53 @@ pub fn await_ready(
     expected: &ExpectedReadiness,
     budget: AwaitBudget,
 ) -> Result<ReadinessIdentity, ReadinessError> {
-    let started = Instant::now();
-    let deadline = started
-        .checked_add(budget.deadline)
-        .expect("bounded duration");
-    for attempt in 1..=budget.max_attempts {
-        let now = Instant::now();
-        if now >= deadline {
-            return Err(ReadinessError {
-                class: ReadinessErrorClass::DeadlineExceeded,
-                attempts: attempt - 1,
-                permanent: false,
-            });
+    await_ready_with_receipt(endpoint, expected, budget).map(|success| success.identity)
+}
+
+#[derive(Debug)]
+pub struct ReadyWithReceipt {
+    pub identity: ReadinessIdentity,
+    pub receipt: RetryReceipt,
+}
+
+pub fn await_ready_with_receipt(
+    endpoint: DynamicEndpoint,
+    expected: &ExpectedReadiness,
+    budget: AwaitBudget,
+) -> Result<ReadyWithReceipt, ReadinessError> {
+    let retry_budget = RetryBudget::new(budget.max_attempts, budget.deadline, budget.backoff)
+        .expect("readiness budget is already validated");
+    let report = run(retry_budget, |attempt| {
+        let number = attempt.number();
+        probe(endpoint, expected, attempt.deadline(), number).map_err(|error| {
+            if error.permanent {
+                RetryClass::Permanent(error)
+            } else {
+                RetryClass::Transient(error)
+            }
+        })
+    });
+    let receipt = *report.receipt();
+    match report.into_result() {
+        Ok(identity) => Ok(ReadyWithReceipt { identity, receipt }),
+        Err(RetryFailure::Permanent(mut error)) => {
+            error.attempts = receipt.attempts();
+            error.receipt = Some(receipt);
+            Err(error)
         }
-        match probe(endpoint, expected, deadline, attempt) {
-            Ok(report) => return Ok(report),
-            Err(error) if error.permanent => return Err(error),
-            Err(_) => {}
-        }
-        if attempt == budget.max_attempts {
-            return Err(ReadinessError {
-                class: ReadinessErrorClass::DeadlineExceeded,
-                attempts: attempt,
-                permanent: false,
-            });
-        }
-        let remaining = deadline.saturating_duration_since(Instant::now());
-        if remaining.is_zero() {
-            return Err(ReadinessError {
-                class: ReadinessErrorClass::DeadlineExceeded,
-                attempts: attempt,
-                permanent: false,
-            });
-        }
-        std::thread::sleep(budget.backoff.min(remaining));
+        Err(RetryFailure::DeadlineExceeded(_)) => Err(ReadinessError {
+            class: ReadinessErrorClass::DeadlineExceeded,
+            attempts: receipt.attempts(),
+            permanent: false,
+            receipt: Some(receipt),
+        }),
+        Err(RetryFailure::AttemptsExhausted(_)) => Err(ReadinessError {
+            class: ReadinessErrorClass::AttemptsExhausted,
+            attempts: receipt.attempts(),
+            permanent: false,
+            receipt: Some(receipt),
+        }),
     }
-    unreachable!("nonzero bounded attempts")
 }
 
 fn probe(
@@ -177,42 +197,47 @@ fn probe(
     let mut stream =
         TcpStream::connect_timeout(&endpoint.socket_addr(), remaining(deadline, attempt)?)
             .map_err(|_| ReadinessError {
-                class: ReadinessErrorClass::DeadlineExceeded,
+                class: ReadinessErrorClass::TransportUnavailable,
                 attempts: attempt,
                 permanent: false,
+                receipt: None,
             })?;
     let write_timeout = remaining(deadline, attempt)?;
     stream
         .set_write_timeout(Some(write_timeout))
         .map_err(|_| ReadinessError {
-            class: ReadinessErrorClass::DeadlineExceeded,
+            class: ReadinessErrorClass::TransportUnavailable,
             attempts: attempt,
             permanent: false,
+            receipt: None,
         })?;
     let mut request = serde_json::to_vec(&Request::Readiness)
         .map_err(|_| ReadinessError::permanent(ReadinessErrorClass::MalformedResponse, attempt))?;
     request.push(b'\n');
     stream.write_all(&request).map_err(|_| ReadinessError {
-        class: ReadinessErrorClass::DeadlineExceeded,
+        class: ReadinessErrorClass::TransportUnavailable,
         attempts: attempt,
         permanent: false,
+        receipt: None,
     })?;
     let read_timeout = remaining(deadline, attempt)?;
     stream
         .set_read_timeout(Some(read_timeout))
         .map_err(|_| ReadinessError {
-            class: ReadinessErrorClass::DeadlineExceeded,
+            class: ReadinessErrorClass::TransportUnavailable,
             attempts: attempt,
             permanent: false,
+            receipt: None,
         })?;
     let mut encoded = Vec::new();
     BufReader::new(stream)
         .take((MAX_RESPONSE_BYTES + 1) as u64)
         .read_until(b'\n', &mut encoded)
         .map_err(|_| ReadinessError {
-            class: ReadinessErrorClass::DeadlineExceeded,
+            class: ReadinessErrorClass::TransportUnavailable,
             attempts: attempt,
             permanent: false,
+            receipt: None,
         })?;
     if encoded.len() > MAX_RESPONSE_BYTES {
         return Err(ReadinessError::permanent(
@@ -260,9 +285,10 @@ fn probe(
     }
     if report.state == ReadinessState::NotReady {
         return Err(ReadinessError {
-            class: ReadinessErrorClass::DeadlineExceeded,
+            class: ReadinessErrorClass::NotReady,
             attempts: attempt,
             permanent: false,
+            receipt: None,
         });
     }
     Ok(report)
@@ -276,5 +302,6 @@ fn remaining(deadline: Instant, attempt: u16) -> Result<Duration, ReadinessError
             class: ReadinessErrorClass::DeadlineExceeded,
             attempts: attempt,
             permanent: false,
+            receipt: None,
         })
 }
