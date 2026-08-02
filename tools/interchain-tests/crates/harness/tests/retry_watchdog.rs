@@ -1,5 +1,20 @@
 use nomic_bridge_harness::retry::{run, RetryBudget, RetryClass, RetryOutcome};
-use std::time::Duration;
+use std::time::{Duration, Instant};
+
+#[test]
+fn absolute_retry_deadline_is_passed_through_exactly() {
+    let deadline = Instant::now() + Duration::from_millis(100);
+    let mut observed = None;
+    let report = run(
+        RetryBudget::until(1, deadline, Duration::from_millis(1)).unwrap(),
+        |attempt| {
+            observed = Some(attempt.deadline());
+            Ok::<_, RetryClass<()>>(())
+        },
+    );
+    report.into_result().unwrap();
+    assert_eq!(observed, Some(deadline));
+}
 
 #[test]
 fn transient_retries_have_an_exact_success_receipt() {

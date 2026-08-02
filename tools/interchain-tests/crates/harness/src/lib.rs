@@ -6,6 +6,7 @@ pub mod identity;
 pub mod manifest;
 pub mod readiness;
 pub mod retry;
+pub mod scenario;
 pub mod topology;
 pub mod watchdog;
 

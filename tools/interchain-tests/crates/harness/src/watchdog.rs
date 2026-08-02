@@ -1,6 +1,7 @@
 //! An outer deadline that can terminate an owned process independently of I/O.
 
 use crate::driver::process::{ProcessError, ProcessTerminator};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::sync::mpsc::{self, SyncSender};
 use std::thread::JoinHandle;
@@ -8,7 +9,7 @@ use std::time::{Duration, Instant};
 
 const MAX_DEADLINE: Duration = Duration::from_secs(60 * 60);
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum WatchdogOutcome {
     Cancelled,
     TimedOut,
@@ -63,10 +64,19 @@ impl ArmedWatchdog {
         if deadline.is_zero() || deadline > MAX_DEADLINE {
             return Err(WatchdogError::InvalidDeadline);
         }
-        let started = Instant::now();
-        let expires = started
+        let expires = Instant::now()
             .checked_add(deadline)
             .ok_or(WatchdogError::InvalidDeadline)?;
+        Self::until(expires, terminator)
+    }
+
+    /// Arms a watchdog for an exact absolute monotonic deadline.
+    pub fn until(expires: Instant, terminator: ProcessTerminator) -> Result<Self, WatchdogError> {
+        let started = Instant::now();
+        let remaining = expires.saturating_duration_since(started);
+        if remaining.is_zero() || remaining > MAX_DEADLINE {
+            return Err(WatchdogError::InvalidDeadline);
+        }
         let (sender, receiver) = mpsc::sync_channel(1);
         let worker = std::thread::spawn(move || loop {
             let now = Instant::now();

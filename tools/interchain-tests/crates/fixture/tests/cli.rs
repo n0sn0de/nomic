@@ -292,6 +292,7 @@ fn production_process_driver_drains_overflow_and_rejects_invalid_specs_before_sp
         run_id: nomic_harness_fixture::CanonicalId::new("run-a").unwrap(),
         network_id: nomic_harness_fixture::CanonicalId::new("testnet").unwrap(),
         startup_deadline: TIMEOUT,
+        startup_until: None,
         containment: ProcessContainment::NoProcessGroupOrSessionEscape,
     };
 
@@ -382,6 +383,7 @@ fn watchdog_cancel_has_strict_deadline_precedence() {
         run_id: CanonicalId::new("run-a").unwrap(),
         network_id: CanonicalId::new("testnet").unwrap(),
         startup_deadline: TIMEOUT,
+        startup_until: None,
         containment: ProcessContainment::NoProcessGroupOrSessionEscape,
     })
     .unwrap();
@@ -432,6 +434,7 @@ fn termination_handle_reaps_an_already_exited_direct_child() {
         run_id: CanonicalId::new("run-a").unwrap(),
         network_id: CanonicalId::new("testnet").unwrap(),
         startup_deadline: TIMEOUT,
+        startup_until: None,
         containment: ProcessContainment::NoProcessGroupOrSessionEscape,
     })
     .unwrap();
@@ -479,6 +482,7 @@ fn outer_watchdog_kills_and_reaps_hung_parent_and_descendant_group() {
         run_id: CanonicalId::new("run-a").unwrap(),
         network_id: CanonicalId::new("testnet").unwrap(),
         startup_deadline: TIMEOUT,
+        startup_until: None,
         containment: ProcessContainment::NoProcessGroupOrSessionEscape,
     })
     .unwrap();

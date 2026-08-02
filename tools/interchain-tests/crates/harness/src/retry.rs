@@ -1,5 +1,6 @@
 //! Classified, bounded retries driven by one monotonic deadline.
 
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::time::{Duration, Instant};
 
@@ -10,7 +11,7 @@ const MAX_BACKOFF: Duration = Duration::from_secs(60);
 #[derive(Clone, Copy, Debug)]
 pub struct RetryBudget {
     max_attempts: u16,
-    deadline: Duration,
+    deadline: Instant,
     backoff: Duration,
 }
 
@@ -27,6 +28,29 @@ impl RetryBudget {
             || backoff.is_zero()
             || backoff > MAX_BACKOFF
             || backoff >= deadline
+        {
+            return Err(InvalidRetryBudget);
+        }
+        let deadline = Instant::now()
+            .checked_add(deadline)
+            .ok_or(InvalidRetryBudget)?;
+        Self::until(max_attempts, deadline, backoff)
+    }
+
+    /// Creates a retry budget ending at the caller's absolute monotonic deadline.
+    pub fn until(
+        max_attempts: u16,
+        deadline: Instant,
+        backoff: Duration,
+    ) -> Result<Self, InvalidRetryBudget> {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if max_attempts == 0
+            || max_attempts > MAX_ATTEMPTS
+            || remaining.is_zero()
+            || remaining > MAX_DEADLINE
+            || backoff.is_zero()
+            || backoff > MAX_BACKOFF
+            || backoff >= remaining
         {
             return Err(InvalidRetryBudget);
         }
@@ -55,7 +79,7 @@ pub enum RetryClass<E> {
     Permanent(E),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum RetryOutcome {
     Succeeded,
     Permanent,
@@ -130,9 +154,7 @@ pub fn run<T, E>(
     mut operation: impl FnMut(RetryAttempt) -> Result<T, RetryClass<E>>,
 ) -> RetryReport<T, E> {
     let started = Instant::now();
-    let deadline = started
-        .checked_add(budget.deadline)
-        .expect("bounded retry deadline");
+    let deadline = budget.deadline;
     let mut attempts = 0;
     loop {
         if Instant::now() >= deadline {

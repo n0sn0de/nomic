@@ -1,9 +1,10 @@
 //! Shell-free, direct-child process supervision.
 
 use super::{DynamicEndpoint, EndpointError};
+use crate::readiness::protocol_request;
 use crate::readiness::{await_ready, AwaitBudget, ExpectedReadiness, ReadinessError};
 use nomic_harness_protocol::{
-    CanonicalId, ReadinessIdentity, StartupEvent, MAX_STARTUP_EVENT_BYTES,
+    CanonicalId, ReadinessIdentity, Request, Response, StartupEvent, MAX_STARTUP_EVENT_BYTES,
 };
 use std::collections::{BTreeSet, VecDeque};
 use std::ffi::OsString;
@@ -13,7 +14,7 @@ use std::io::{BufRead, BufReader, Read, Write};
 use std::os::unix::process::CommandExt;
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::mpsc::{self, Receiver, SyncSender, TrySendError};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError};
 use std::sync::OnceLock;
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
@@ -46,6 +47,9 @@ pub struct ProcessSpec {
     pub run_id: CanonicalId,
     pub network_id: CanonicalId,
     pub startup_deadline: Duration,
+    /// Absolute startup deadline. When present this is authoritative; the
+    /// duration field remains only as a compatibility wrapper.
+    pub startup_until: Option<Instant>,
     /// Required H0 containment contract. The launched program must not use
     /// daemonization, `setsid`, `setpgid`, PID namespaces, or otherwise create
     /// unreported descendants outside its inherited process group. Programs
@@ -68,6 +72,7 @@ pub struct ProcessDriver {
     child_id: u32,
     endpoint: DynamicEndpoint,
     events: Receiver<Result<Vec<u8>, ProcessError>>,
+    reader: Option<ReaderHandle>,
     dropped_event_count: Arc<AtomicUsize>,
 }
 
@@ -98,9 +103,12 @@ impl ProcessDriver {
             Err(error) => return Err(ProcessError::Io(error)),
         };
         let mut owned = OwnedChild::new(child, permit);
-        let startup_deadline = Instant::now()
-            .checked_add(spec.startup_deadline)
-            .ok_or(ProcessError::InvalidSpec)?;
+        let startup_deadline = match spec.startup_until {
+            Some(deadline) => deadline,
+            None => Instant::now()
+                .checked_add(spec.startup_deadline)
+                .ok_or(ProcessError::InvalidSpec)?,
+        };
 
         let stdout = owned
             .child_mut()
@@ -127,43 +135,32 @@ impl ProcessDriver {
         let (event_tx, event_rx) = mpsc::sync_channel(EVENT_QUEUE_CAPACITY);
         let dropped_event_count = Arc::new(AtomicUsize::new(0));
         let reader_dropped_event_count = Arc::clone(&dropped_event_count);
-        std::thread::spawn(move || {
-            let mut reader = BufReader::new(stdout);
-            let startup = read_bounded_line(&mut reader, MAX_STARTUP_EVENT_BYTES);
-            if startup_tx.send(startup).is_err() {
-                return;
-            }
-            loop {
-                match read_bounded_line(&mut reader, MAX_LATER_EVENT_BYTES) {
-                    Ok(line) if line.is_empty() => return,
-                    result => {
-                        let failed = result.is_err();
-                        match event_tx.try_send(result) {
-                            Ok(()) if failed => return,
-                            Ok(()) => {}
-                            Err(TrySendError::Full(_)) => {
-                                reader_dropped_event_count.fetch_add(1, Ordering::Relaxed);
-                                if failed {
-                                    return;
-                                }
-                            }
-                            Err(TrySendError::Disconnected(_)) => return,
-                        }
-                    }
+        let reader = ReaderHandle::spawn(stdout, startup_tx, event_tx, reader_dropped_event_count)?;
+        let startup_result = (|| {
+            let startup = startup_rx
+                .recv_timeout(startup_remaining(startup_deadline)?)
+                .map_err(|_| ProcessError::StartupDeadline)??;
+            let event: StartupEvent =
+                serde_json::from_slice(&startup).map_err(ProcessError::Json)?;
+            DynamicEndpoint::from_startup_event(
+                &event,
+                &spec.component_id,
+                &spec.run_id,
+                &spec.network_id,
+            )
+            .map_err(ProcessError::Endpoint)
+        })();
+        let endpoint = match startup_result {
+            Ok(endpoint) => endpoint,
+            Err(original) => {
+                let _ = cleanup_once(owned.cleanup.as_mut().expect("owned child cleanup state"));
+                let mut reader = reader;
+                if let Ok(deadline) = bounded_reap_deadline() {
+                    let _ = reader.finish(deadline);
                 }
+                return Err(original);
             }
-        });
-        let startup = startup_rx
-            .recv_timeout(startup_remaining(startup_deadline)?)
-            .map_err(|_| ProcessError::StartupDeadline)??;
-        let event: StartupEvent = serde_json::from_slice(&startup).map_err(ProcessError::Json)?;
-        let endpoint = DynamicEndpoint::from_startup_event(
-            &event,
-            &spec.component_id,
-            &spec.run_id,
-            &spec.network_id,
-        )
-        .map_err(ProcessError::Endpoint)?;
+        };
         let (cleanup, permit) = owned.disarm();
         let child_id = cleanup.child_id().expect("new child cleanup state");
         Ok(Self {
@@ -171,6 +168,7 @@ impl ProcessDriver {
             child_id,
             endpoint,
             events: event_rx,
+            reader: Some(reader),
             dropped_event_count,
         })
     }
@@ -191,6 +189,15 @@ impl ProcessDriver {
         self.events
             .recv_timeout(timeout)
             .map_err(|_| ProcessError::EventDeadline)?
+    }
+
+    /// Drains an event that is already buffered without extending a deadline.
+    pub fn try_next_event(&self) -> Result<Option<Vec<u8>>, ProcessError> {
+        match self.events.try_recv() {
+            Ok(event) => event.map(Some),
+            Err(TryRecvError::Empty) => Ok(None),
+            Err(TryRecvError::Disconnected) => Ok(None),
+        }
     }
 
     pub fn dropped_event_count(&self) -> usize {
@@ -215,14 +222,183 @@ impl ProcessDriver {
     }
 
     pub fn terminate(self) -> Result<ExitStatus, ProcessError> {
-        terminate_shared(&self.cleanup)?.ok_or(ProcessError::AlreadyReaped)
+        let mut this = self;
+        let status = terminate_shared(&this.cleanup)?.ok_or(ProcessError::AlreadyReaped)?;
+        let deadline = bounded_reap_deadline()?;
+        this.finish_reader_and_drain(deadline)?;
+        Ok(status)
+    }
+
+    /// Requests typed graceful shutdown and waits for a clean exit using one deadline.
+    pub fn stop_and_wait(self, timeout: Duration) -> Result<ExitStatus, ProcessError> {
+        let deadline = Instant::now()
+            .checked_add(timeout)
+            .ok_or(ProcessError::GracefulDeadline)?;
+        self.stop_and_wait_until(deadline)
+    }
+
+    pub fn stop_and_wait_until(self, deadline: Instant) -> Result<ExitStatus, ProcessError> {
+        let mut this = self;
+        match protocol_request(this.endpoint, &Request::Stop, deadline) {
+            Ok(Response::Stopped) => {}
+            Ok(_) => return Err(ProcessError::UnexpectedStopResponse),
+            Err(_) => return Err(ProcessError::GracefulDeadline),
+        }
+        let mut guard = lock_recover(&this.cleanup.state);
+        loop {
+            let child = guard
+                .direct_child
+                .as_mut()
+                .ok_or(ProcessError::AlreadyReaped)?;
+            if let Some(status) = child.try_wait().map_err(ProcessError::Io)? {
+                guard.direct_child = None;
+                guard.direct_status = Some(status);
+                break;
+            }
+            if Instant::now() >= deadline {
+                return Err(ProcessError::GracefulDeadline);
+            }
+            std::thread::sleep(REAP_POLL_INTERVAL);
+        }
+        #[cfg(target_os = "linux")]
+        if let Some(group) = guard.pending_process_group {
+            reap_descendants_until(group, deadline)?;
+            guard.pending_process_group = None;
+        }
+        let status = guard
+            .direct_status
+            .take()
+            .ok_or(ProcessError::AlreadyReaped)?;
+        lock_recover(&this.cleanup.permit).take();
+        drop(guard);
+        this.finish_reader_and_drain(deadline)?;
+        if !status.success() {
+            return Err(ProcessError::NonzeroExit);
+        }
+        Ok(status)
+    }
+
+    /// After the process has been reaped, waits for stdout EOF, joins the
+    /// retained reader, and returns every event it published.
+    pub fn finish_reader_and_drain(
+        &mut self,
+        deadline: Instant,
+    ) -> Result<Vec<Vec<u8>>, ProcessError> {
+        let mut reader = self.reader.take().ok_or(ProcessError::ReaderDisconnected)?;
+        if let Err(error) = reader.finish(deadline) {
+            self.reader = Some(reader);
+            return Err(error);
+        }
+        let mut events = Vec::with_capacity(EVENT_QUEUE_CAPACITY);
+        let mut first_error = None;
+        for _ in 0..EVENT_QUEUE_CAPACITY {
+            match self.events.try_recv() {
+                Ok(Ok(event)) => events.push(event),
+                Ok(Err(error)) => {
+                    first_error.get_or_insert(error);
+                }
+                Err(TryRecvError::Empty | TryRecvError::Disconnected) => break,
+            };
+        }
+        first_error.map_or(Ok(events), Err)
     }
 }
 
 impl Drop for ProcessDriver {
     fn drop(&mut self) {
         let _ = terminate_shared(&self.cleanup);
+        if let Ok(deadline) = bounded_reap_deadline() {
+            let _ = self.finish_reader_and_drain(deadline);
+        }
     }
+}
+
+struct ReaderHandle {
+    join: Option<JoinHandle<()>>,
+    completed: Receiver<()>,
+}
+
+impl ReaderHandle {
+    fn spawn(
+        stdout: impl Read + Send + 'static,
+        startup_tx: SyncSender<Result<Vec<u8>, ProcessError>>,
+        event_tx: SyncSender<Result<Vec<u8>, ProcessError>>,
+        dropped_event_count: Arc<AtomicUsize>,
+    ) -> Result<Self, ProcessError> {
+        Self::spawn_inner(stdout, startup_tx, event_tx, dropped_event_count, || {})
+    }
+
+    fn spawn_inner<B: FnMut() + Send + 'static>(
+        stdout: impl Read + Send + 'static,
+        startup_tx: SyncSender<Result<Vec<u8>, ProcessError>>,
+        event_tx: SyncSender<Result<Vec<u8>, ProcessError>>,
+        dropped_event_count: Arc<AtomicUsize>,
+        mut before_event_handoff: B,
+    ) -> Result<Self, ProcessError> {
+        let (completed_tx, completed) = mpsc::sync_channel(1);
+        let join = std::thread::Builder::new()
+            .name("process-stdout-reader".into())
+            .spawn(move || {
+                let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let mut reader = BufReader::new(stdout);
+                    let startup = read_bounded_line(&mut reader, MAX_STARTUP_EVENT_BYTES);
+                    if startup_tx.send(startup).is_ok() {
+                        loop {
+                            match read_bounded_line(&mut reader, MAX_LATER_EVENT_BYTES) {
+                                Ok(line) if line.is_empty() => break,
+                                result => {
+                                    before_event_handoff();
+                                    let failed = result.is_err();
+                                    match event_tx.try_send(result) {
+                                        Ok(()) if failed => break,
+                                        Ok(()) => {}
+                                        Err(TrySendError::Full(_)) => {
+                                            dropped_event_count.fetch_add(1, Ordering::Relaxed);
+                                            if failed {
+                                                break;
+                                            }
+                                        }
+                                        Err(TrySendError::Disconnected(_)) => break,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }));
+                let _ = completed_tx.send(());
+                if let Err(payload) = outcome {
+                    std::panic::resume_unwind(payload);
+                }
+            })
+            .map_err(ProcessError::Io)?;
+        Ok(Self {
+            join: Some(join),
+            completed,
+        })
+    }
+
+    fn finish(&mut self, deadline: Instant) -> Result<(), ProcessError> {
+        let remaining = deadline
+            .checked_duration_since(Instant::now())
+            .filter(|remaining| !remaining.is_zero())
+            .ok_or(ProcessError::ReaderDeadline)?;
+        match self.completed.recv_timeout(remaining) {
+            Ok(()) => {}
+            Err(RecvTimeoutError::Timeout) => return Err(ProcessError::ReaderDeadline),
+            Err(RecvTimeoutError::Disconnected) => return Err(ProcessError::ReaderDisconnected),
+        }
+        self.join
+            .take()
+            .ok_or(ProcessError::ReaderDisconnected)?
+            .join()
+            .map_err(|_| ProcessError::ReaderPanic)
+    }
+}
+
+fn bounded_reap_deadline() -> Result<Instant, ProcessError> {
+    Instant::now()
+        .checked_add(REAP_DEADLINE)
+        .ok_or(ProcessError::ReaderDeadline)
 }
 
 #[derive(Clone)]
@@ -499,6 +675,28 @@ fn reap_descendants(process_group: i32) -> Result<(), ProcessError> {
     }
 }
 
+#[cfg(target_os = "linux")]
+fn reap_descendants_until(process_group: i32, deadline: Instant) -> Result<(), ProcessError> {
+    loop {
+        let result = unsafe { libc::waitpid(-process_group, std::ptr::null_mut(), libc::WNOHANG) };
+        if result > 0 {
+            continue;
+        }
+        if result == -1 {
+            let error = std::io::Error::last_os_error();
+            return match error.raw_os_error() {
+                Some(libc::ECHILD) => Ok(()),
+                Some(libc::EINTR) => continue,
+                _ => Err(ProcessError::UnresolvedWaitpid(error)),
+            };
+        }
+        if Instant::now() >= deadline {
+            return Err(ProcessError::GracefulDeadline);
+        }
+        std::thread::sleep(REAP_POLL_INTERVAL);
+    }
+}
+
 struct CleanupPermit {
     active: Arc<AtomicUsize>,
 }
@@ -654,6 +852,88 @@ pub fn rejected_cleanup_reservation_count() -> usize {
     rejected_cleanup_admission_count()
 }
 
+#[cfg(test)]
+mod reader_handle_tests {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn finish_join_then_drain_observes_delayed_event_handoff() {
+        let input = Cursor::new(b"startup\nevent\n".to_vec());
+        let (startup_tx, startup_rx) = mpsc::sync_channel(1);
+        let (event_tx, event_rx) = mpsc::sync_channel(EVENT_QUEUE_CAPACITY);
+        let (arrived_tx, arrived_rx) = mpsc::sync_channel(1);
+        let (release_tx, release_rx) = mpsc::sync_channel(1);
+        let mut arrived_tx = Some(arrived_tx);
+        let mut release_rx = Some(release_rx);
+        let mut reader = ReaderHandle::spawn_inner(
+            input,
+            startup_tx,
+            event_tx,
+            Arc::new(AtomicUsize::new(0)),
+            move || {
+                if let Some(tx) = arrived_tx.take() {
+                    tx.send(()).unwrap();
+                    release_rx.take().unwrap().recv().unwrap();
+                }
+            },
+        )
+        .unwrap();
+
+        assert_eq!(startup_rx.recv().unwrap().unwrap(), b"startup\n");
+        arrived_rx.recv().unwrap();
+        assert!(matches!(event_rx.try_recv(), Err(TryRecvError::Empty)));
+        release_tx.send(()).unwrap();
+        reader
+            .finish(Instant::now() + Duration::from_secs(1))
+            .unwrap();
+        assert_eq!(event_rx.try_recv().unwrap().unwrap(), b"event\n");
+        assert!(matches!(
+            event_rx.try_recv(),
+            Err(TryRecvError::Disconnected)
+        ));
+    }
+
+    #[test]
+    fn reader_deadline_is_typed_and_handle_remains_joinable() {
+        let (completed_tx, completed) = mpsc::sync_channel(1);
+        let (release_tx, release_rx) = mpsc::sync_channel(1);
+        let join = std::thread::spawn(move || {
+            release_rx.recv().unwrap();
+            completed_tx.send(()).unwrap();
+        });
+        let mut reader = ReaderHandle {
+            join: Some(join),
+            completed,
+        };
+        assert!(matches!(
+            reader.finish(Instant::now() + Duration::from_millis(1)),
+            Err(ProcessError::ReaderDeadline)
+        ));
+        release_tx.send(()).unwrap();
+        reader
+            .finish(Instant::now() + Duration::from_secs(1))
+            .unwrap();
+    }
+
+    #[test]
+    fn reader_panic_is_typed() {
+        let (completed_tx, completed) = mpsc::sync_channel(1);
+        let join = std::thread::spawn(move || {
+            completed_tx.send(()).unwrap();
+            panic!("synthetic reader panic");
+        });
+        let mut reader = ReaderHandle {
+            join: Some(join),
+            completed,
+        };
+        assert!(matches!(
+            reader.finish(Instant::now() + Duration::from_secs(1)),
+            Err(ProcessError::ReaderPanic)
+        ));
+    }
+}
+
 #[cfg(all(test, target_os = "linux"))]
 mod cleanup_state_tests {
     use super::*;
@@ -746,6 +1026,7 @@ mod cleanup_state_tests {
             run_id: CanonicalId::new("run-a").unwrap(),
             network_id: CanonicalId::new("testnet").unwrap(),
             startup_deadline: Duration::from_secs(1),
+            startup_until: None,
             containment: ProcessContainment::NoProcessGroupOrSessionEscape,
         };
         assert!(matches!(
@@ -857,8 +1138,12 @@ fn validate_spec(spec: &ProcessSpec) -> Result<(), ProcessError> {
             .sum::<usize>()
             > MAX_TOTAL_ENV_BYTES
         || spec.stdin.len() > MAX_STDIN_BYTES
-        || spec.startup_deadline.is_zero()
-        || spec.startup_deadline > Duration::from_secs(10)
+        || (spec.startup_until.is_none()
+            && (spec.startup_deadline.is_zero() || spec.startup_deadline > Duration::from_secs(10)))
+        || spec.startup_until.is_some_and(|deadline| {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            remaining.is_zero() || remaining > Duration::from_secs(10)
+        })
     {
         return Err(ProcessError::InvalidSpec);
     }
@@ -919,6 +1204,9 @@ pub enum ProcessError {
     MissingPipe,
     StartupDeadline,
     EventDeadline,
+    ReaderDeadline,
+    ReaderDisconnected,
+    ReaderPanic,
     OversizedEvent,
     MalformedEvent,
     Io(std::io::Error),
@@ -932,6 +1220,9 @@ pub enum ProcessError {
     CleanupCapacity,
     UnsupportedContainment,
     UnresolvedWaitpid(std::io::Error),
+    GracefulDeadline,
+    UnexpectedStopResponse,
+    NonzeroExit,
 }
 impl fmt::Display for ProcessError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

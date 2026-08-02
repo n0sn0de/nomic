@@ -104,6 +104,11 @@ impl RunNonce {
     pub const fn from_fixed_bytes_for_test(bytes: [u8; 16]) -> Self {
         Self(bytes)
     }
+
+    /// Constructs a caller-supplied execution nonce.
+    pub const fn from_bytes(bytes: [u8; 16]) -> Self {
+        Self(bytes)
+    }
 }
 
 /// The semantic identity paired with execution-only naming entropy.
@@ -188,6 +193,19 @@ impl NormalizedSemanticReceipt {
             case_id: case_id.to_owned(),
             outcome,
         })
+    }
+
+    pub const fn semantic_seed(&self) -> SemanticSeed {
+        self.semantic_seed
+    }
+    pub fn scenario_id(&self) -> &str {
+        &self.scenario_id
+    }
+    pub fn case_id(&self) -> &str {
+        &self.case_id
+    }
+    pub const fn outcome(&self) -> ScenarioOutcome {
+        self.outcome
     }
 }
 

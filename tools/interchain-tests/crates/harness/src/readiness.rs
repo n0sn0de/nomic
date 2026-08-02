@@ -49,7 +49,7 @@ impl ExpectedReadiness {
 #[derive(Clone, Copy, Debug)]
 pub struct AwaitBudget {
     max_attempts: u16,
-    deadline: Duration,
+    deadline: Instant,
     backoff: Duration,
 }
 impl AwaitBudget {
@@ -64,6 +64,30 @@ impl AwaitBudget {
             || deadline > MAX_DEADLINE
             || backoff.is_zero()
             || backoff >= deadline
+        {
+            return Err(ReadinessError::permanent(
+                ReadinessErrorClass::InvalidBudget,
+                0,
+            ));
+        }
+        let deadline = Instant::now()
+            .checked_add(deadline)
+            .ok_or_else(|| ReadinessError::permanent(ReadinessErrorClass::InvalidBudget, 0))?;
+        Self::until(max_attempts, deadline, backoff)
+    }
+
+    pub fn until(
+        max_attempts: u16,
+        deadline: Instant,
+        backoff: Duration,
+    ) -> Result<Self, ReadinessError> {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if max_attempts == 0
+            || max_attempts > MAX_ATTEMPTS
+            || remaining.is_zero()
+            || remaining > MAX_DEADLINE
+            || backoff.is_zero()
+            || backoff >= remaining
         {
             return Err(ReadinessError::permanent(
                 ReadinessErrorClass::InvalidBudget,
@@ -153,7 +177,7 @@ pub fn await_ready_with_receipt(
     expected: &ExpectedReadiness,
     budget: AwaitBudget,
 ) -> Result<ReadyWithReceipt, ReadinessError> {
-    let retry_budget = RetryBudget::new(budget.max_attempts, budget.deadline, budget.backoff)
+    let retry_budget = RetryBudget::until(budget.max_attempts, budget.deadline, budget.backoff)
         .expect("readiness budget is already validated");
     let report = run(retry_budget, |attempt| {
         let number = attempt.number();
@@ -194,65 +218,24 @@ fn probe(
     deadline: Instant,
     attempt: u16,
 ) -> Result<ReadinessIdentity, ReadinessError> {
-    let mut stream =
-        TcpStream::connect_timeout(&endpoint.socket_addr(), remaining(deadline, attempt)?)
-            .map_err(|_| ReadinessError {
-                class: ReadinessErrorClass::TransportUnavailable,
-                attempts: attempt,
-                permanent: false,
-                receipt: None,
-            })?;
-    let write_timeout = remaining(deadline, attempt)?;
-    stream
-        .set_write_timeout(Some(write_timeout))
-        .map_err(|_| ReadinessError {
-            class: ReadinessErrorClass::TransportUnavailable,
+    let response = protocol_request(endpoint, &Request::Readiness, deadline).map_err(|error| {
+        let class = match error {
+            ProtocolRequestError::Deadline | ProtocolRequestError::Transport => {
+                ReadinessErrorClass::TransportUnavailable
+            }
+            ProtocolRequestError::Oversized => ReadinessErrorClass::OversizedResponse,
+            ProtocolRequestError::Malformed => ReadinessErrorClass::MalformedResponse,
+        };
+        ReadinessError {
+            class,
             attempts: attempt,
-            permanent: false,
+            permanent: matches!(
+                error,
+                ProtocolRequestError::Oversized | ProtocolRequestError::Malformed
+            ),
             receipt: None,
-        })?;
-    let mut request = serde_json::to_vec(&Request::Readiness)
-        .map_err(|_| ReadinessError::permanent(ReadinessErrorClass::MalformedResponse, attempt))?;
-    request.push(b'\n');
-    stream.write_all(&request).map_err(|_| ReadinessError {
-        class: ReadinessErrorClass::TransportUnavailable,
-        attempts: attempt,
-        permanent: false,
-        receipt: None,
+        }
     })?;
-    let read_timeout = remaining(deadline, attempt)?;
-    stream
-        .set_read_timeout(Some(read_timeout))
-        .map_err(|_| ReadinessError {
-            class: ReadinessErrorClass::TransportUnavailable,
-            attempts: attempt,
-            permanent: false,
-            receipt: None,
-        })?;
-    let mut encoded = Vec::new();
-    BufReader::new(stream)
-        .take((MAX_RESPONSE_BYTES + 1) as u64)
-        .read_until(b'\n', &mut encoded)
-        .map_err(|_| ReadinessError {
-            class: ReadinessErrorClass::TransportUnavailable,
-            attempts: attempt,
-            permanent: false,
-            receipt: None,
-        })?;
-    if encoded.len() > MAX_RESPONSE_BYTES {
-        return Err(ReadinessError::permanent(
-            ReadinessErrorClass::OversizedResponse,
-            attempt,
-        ));
-    }
-    if !encoded.ends_with(b"\n") {
-        return Err(ReadinessError::permanent(
-            ReadinessErrorClass::MalformedResponse,
-            attempt,
-        ));
-    }
-    let response: Response = serde_json::from_slice(&encoded)
-        .map_err(|_| ReadinessError::permanent(ReadinessErrorClass::MalformedResponse, attempt))?;
     let Response::Readiness { report } = response else {
         return Err(ReadinessError::permanent(
             ReadinessErrorClass::UnexpectedResponse,
@@ -294,14 +277,54 @@ fn probe(
     Ok(report)
 }
 
-fn remaining(deadline: Instant, attempt: u16) -> Result<Duration, ReadinessError> {
-    deadline
-        .checked_duration_since(Instant::now())
-        .filter(|remaining| !remaining.is_zero())
-        .ok_or(ReadinessError {
-            class: ReadinessErrorClass::DeadlineExceeded,
-            attempts: attempt,
-            permanent: false,
-            receipt: None,
-        })
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ProtocolRequestError {
+    Deadline,
+    Transport,
+    Oversized,
+    Malformed,
+}
+
+/// Sends one bounded request using the fixture's closed line protocol.
+pub fn protocol_request(
+    endpoint: DynamicEndpoint,
+    request: &Request,
+    deadline: Instant,
+) -> Result<Response, ProtocolRequestError> {
+    let remaining = || {
+        deadline
+            .checked_duration_since(Instant::now())
+            .filter(|value| !value.is_zero())
+            .ok_or(ProtocolRequestError::Deadline)
+    };
+    let mut stream = TcpStream::connect_timeout(&endpoint.socket_addr(), remaining()?)
+        .map_err(|_| ProtocolRequestError::Transport)?;
+    stream
+        .set_write_timeout(Some(remaining()?))
+        .map_err(|_| ProtocolRequestError::Transport)?;
+    let mut encoded = serde_json::to_vec(request).map_err(|_| ProtocolRequestError::Malformed)?;
+    encoded.push(b'\n');
+    stream
+        .write_all(&encoded)
+        .map_err(|_| ProtocolRequestError::Transport)?;
+    stream
+        .set_read_timeout(Some(remaining()?))
+        .map_err(|_| ProtocolRequestError::Transport)?;
+    let mut response = Vec::new();
+    BufReader::new(stream)
+        .take((MAX_RESPONSE_BYTES + 1) as u64)
+        .read_until(b'\n', &mut response)
+        .map_err(|error| match error.kind() {
+            std::io::ErrorKind::TimedOut | std::io::ErrorKind::WouldBlock => {
+                ProtocolRequestError::Deadline
+            }
+            _ => ProtocolRequestError::Transport,
+        })?;
+    if response.len() > MAX_RESPONSE_BYTES {
+        return Err(ProtocolRequestError::Oversized);
+    }
+    if !response.ends_with(b"\n") {
+        return Err(ProtocolRequestError::Malformed);
+    }
+    serde_json::from_slice(&response).map_err(|_| ProtocolRequestError::Malformed)
 }

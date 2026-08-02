@@ -2,7 +2,7 @@
 
 use nomic_harness_protocol::CanonicalId;
 use serde::Deserialize;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
 const MAX_TOPOLOGY_BYTES: usize = 8 * 1024;
@@ -53,6 +53,7 @@ impl Topology {
                 return Err(TopologyError::InvalidLink);
             }
         }
+        topology.startup_order()?;
         Ok(topology)
     }
     pub fn id(&self) -> &CanonicalId {
@@ -60,6 +61,50 @@ impl Topology {
     }
     pub fn nodes(&self) -> &[CanonicalId] {
         &self.nodes
+    }
+
+    /// Returns a deterministic order produced by a lexical Kahn walk.
+    pub fn startup_order(&self) -> Result<Vec<&CanonicalId>, TopologyError> {
+        let mut incoming = self
+            .nodes
+            .iter()
+            .map(|node| (node, 0_usize))
+            .collect::<BTreeMap<_, _>>();
+        let mut outgoing = self
+            .nodes
+            .iter()
+            .map(|node| (node, Vec::new()))
+            .collect::<BTreeMap<_, _>>();
+        for link in &self.links {
+            *incoming
+                .get_mut(&link.to)
+                .ok_or(TopologyError::InvalidLink)? += 1;
+            outgoing
+                .get_mut(&link.from)
+                .ok_or(TopologyError::InvalidLink)?
+                .push(&link.to);
+        }
+        let mut ready = incoming
+            .iter()
+            .filter_map(|(node, count)| (*count == 0).then_some(*node))
+            .collect::<BTreeSet<_>>();
+        let mut order = Vec::with_capacity(self.nodes.len());
+        while let Some(node) = ready.pop_first() {
+            order.push(node);
+            for successor in outgoing.get(node).ok_or(TopologyError::InvalidLink)? {
+                let count = incoming
+                    .get_mut(successor)
+                    .ok_or(TopologyError::InvalidLink)?;
+                *count -= 1;
+                if *count == 0 {
+                    ready.insert(successor);
+                }
+            }
+        }
+        if order.len() != self.nodes.len() {
+            return Err(TopologyError::Cycle);
+        }
+        Ok(order)
     }
 }
 
@@ -71,6 +116,7 @@ pub enum TopologyError {
     Bounds,
     DuplicateNode,
     InvalidLink,
+    Cycle,
 }
 impl fmt::Display for TopologyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
