@@ -113,6 +113,7 @@ name = "nomic-bridge-harness"
 version = "0.1.0"
 dependencies = [
  "getrandom",
+ "nomic-harness-fixture",
  "nomic-harness-oracle",
  "serde",
  "serde_json",
@@ -124,6 +125,10 @@ dependencies = [
 [[package]]
 name = "nomic-harness-fixture"
 version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "nomic-harness-oracle"

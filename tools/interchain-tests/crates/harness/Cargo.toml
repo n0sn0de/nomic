@@ -23,4 +23,5 @@ toml = "0.8.23"
 unicode-ident = "=1.0.1"
 
 [dev-dependencies]
+nomic-harness-fixture = { version = "=0.1.0", path = "../fixture" }
 nomic-harness-oracle = { version = "=0.1.0", path = "../oracle" }
