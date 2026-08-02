@@ -192,6 +192,23 @@ impl ScenarioManifest {
                 )));
             }
         }
+        let enabled_ids: BTreeSet<_> = self
+            .scenarios
+            .iter()
+            .filter(|scenario| scenario.status == ScenarioStatus::Enabled)
+            .map(|scenario| scenario.id.as_str())
+            .collect();
+        let unexpected: Vec<_> = registry
+            .bindings()
+            .map(|(scenario_id, _)| scenario_id)
+            .filter(|scenario_id| !enabled_ids.contains(scenario_id))
+            .collect();
+        if !unexpected.is_empty() {
+            return Err(ManifestError(format!(
+                "binding registry contains entries absent from enabled manifest scenarios: {}",
+                unexpected.join(", ")
+            )));
+        }
         Ok(())
     }
 }

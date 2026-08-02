@@ -214,6 +214,33 @@ fn declared_profile_rejects_swapped_bindings() {
 }
 
 #[test]
+fn declared_profile_rejects_registry_entries_absent_from_manifest() {
+    let registry = BindingRegistry::new(
+        ContractProfile::parse("h0").unwrap(),
+        [
+            (
+                "HAR-001".into(),
+                ExecutableBinding::parse("h0/v1::har_001").unwrap(),
+            ),
+            (
+                "HAR-011".into(),
+                ExecutableBinding::parse("h0/v1::har_011").unwrap(),
+            ),
+        ],
+    )
+    .unwrap();
+    let manifest = parse_manifest(&valid_contract("HAR-001", "enabled")).unwrap();
+
+    assert_eq!(
+        manifest
+            .validate_declared_profile(&registry)
+            .unwrap_err()
+            .to_string(),
+        "binding registry contains entries absent from enabled manifest scenarios: HAR-011"
+    );
+}
+
+#[test]
 fn binding_registries_are_explicit_and_h0_has_exactly_eight() {
     let registry = h0_binding_registry();
     assert_eq!(registry.profile(), &ContractProfile::parse("h0").unwrap());
